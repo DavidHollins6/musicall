@@ -40,6 +40,7 @@ io.on("connection", function (socket) {
         peerId: socket.id,
         initiator: true,
       });
+
       socket.emit("peer", {
         peerId: socket2.id,
         initiator: false,

@@ -1,5 +1,5 @@
 import type { Mapping, TriggerType } from "$lib/db/schema";
-import type { PeerConnection } from "$lib/utils/PeerConnection.svelte";
+import type { PeerConnection } from "$lib/sockets/PeerConnection.svelte";
 import type { ISoundManager } from "$lib/utils/SoundManager/ISoundManager";
 
 export type CallContext = {

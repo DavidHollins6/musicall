@@ -1,8 +1,11 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import type { PageData } from "./$types";
+    import { createSocket } from "$lib/sockets/partysockets.svelte";
     let { data } = $props<{ data: PageData }>();
 
     let callId = $state("");
+
 </script>
 
 <div class="flex items-center flex-col">

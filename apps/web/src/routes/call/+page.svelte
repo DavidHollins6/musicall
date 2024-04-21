@@ -2,7 +2,6 @@
     import CallBar from "./CallBar.svelte";
     import TwoWayVideo from "./TwoWayVideo.svelte";
     import { DrumSoundManager } from "$lib/utils/SoundManager/DrumSoundManager";
-    import { PeerConnection } from "$lib/utils/PeerConnection.svelte";
     import { setContext } from "svelte";
     import { page } from "$app/stores";
     import { WebMidi } from "webmidi";
@@ -10,6 +9,7 @@
     import createCallState from "./createCallState.svelte";
     import HandlePeerConnection from "./HandlePeerConnection.svelte";
     import HandleMidiInput from "./HandleMidiInput.svelte";
+    import { PeerConnection } from "$lib/sockets/PeerConnection.svelte";
 
     const { data } = $props<{ data: PageData }>();
 
@@ -18,7 +18,7 @@
         isMicrophoneMuted: true,
         isMidiEnabled: true,
         isVideoEnabled: true,
-        peerConnection: new PeerConnection(),
+        peerConnection: new PeerConnection($page.url.searchParams.get("roomId") as string),
         soundManager: new DrumSoundManager(data.mappings, data.triggerTypes),
         callId: $page.url.searchParams.get("roomId") as string,
         midiMappings: data.mappings,
@@ -33,4 +33,5 @@
     <HandlePeerConnection />
     <TwoWayVideo />
     <CallBar />
+    <button on:click={() => callState.peerConnection.sendData("HELLO!!!!")}>Click meee</button>
 </div>

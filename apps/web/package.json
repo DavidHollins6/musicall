@@ -55,6 +55,8 @@
         "drizzle-orm": "^0.29.4",
         "howler": "^2.2.4",
         "midimessage": "^1.0.5",
+        "partykit": "^0.0.104",
+        "partysocket": "^1.0.1",
         "postgres": "^3.4.3",
         "simple-peer": "^9.11.1",
         "socket.io": "^4.7.4",

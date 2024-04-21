@@ -6,8 +6,6 @@
     const callContext = getContext<CallContext>("call");
 
     onMount(() => {
-        callContext.peerConnection.connect(callContext.callId);
-
         callContext.peerConnection.onDataReceived = (msg) => {
             const event = JSON.parse(msg) as MessageEvent["message"];
             callContext.soundManager.handleMidiEvent(event);
