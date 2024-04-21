@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+    <script async crossorigin="anonymous">
+        var selectedTheme = localStorage.getItem("theme");
+        if (selectedTheme) {
+            document.documentElement.setAttribute("data-theme", selectedTheme);
+        }
+    </script> 
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" href="%sveltekit.assets%/favicon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        %sveltekit.head%
+    </head>
+    <body data-sveltekit-preload-data="hover" class="h-screen">
+        <div style="display: contents">%sveltekit.body%</div>
+    </body>
+
+    <style>
+        body {
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+    </style>
+</html>
