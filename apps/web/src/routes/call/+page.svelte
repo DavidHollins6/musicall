@@ -1,6 +1,6 @@
 <script lang="ts">
     import CallBar from "./CallBar.svelte";
-    import TwoWayVideo from "./TwoWayVideo.svelte";
+    import VideoGrid from "./VideoGrid.svelte";
     import { DrumSoundManager } from "$lib/utils/SoundManager/DrumSoundManager";
     import { setContext } from "svelte";
     import { page } from "$app/stores";
@@ -31,7 +31,6 @@
 <div style="height: calc(100% - 66px)" class="flex flex-col">
     <HandleMidiInput />
     <HandlePeerConnection />
-    <TwoWayVideo />
+    <VideoGrid />
     <CallBar />
-    <button on:click={() => callState.peerConnection.sendData("HELLO!!!!")}>Click meee</button>
 </div>

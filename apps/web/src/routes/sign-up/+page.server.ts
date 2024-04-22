@@ -24,9 +24,9 @@ const SignupFormSchema = z
         }
     });
 
-export const load: PageServerLoad = async ({ locals: { getSession } }) => {
-    const session = await getSession();
-    if (session) {
+export const load: PageServerLoad = async ({ locals: { getUser } }) => {
+    const user = await getUser();
+    if (user) {
         throw redirect(302, "/");
     }
 

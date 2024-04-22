@@ -1,6 +1,5 @@
 import PartySocket from "partysocket";
 import Peer, { type SignalData } from "simple-peer";
-import { createSocket } from "./partysockets.svelte";
 import { z } from "zod";
 
 const USE_TRICKLE = true;
@@ -40,58 +39,16 @@ const MessageSchema = z
     );
 
 export class PeerConnection {
-    localStream = $state<MediaStream>();
+    localStream = $state<MediaStream>(new MediaStream());
     otherStreams = $state<Record<string, MediaStream>>({});
     socket = $state<PartySocket>();
     peers = $state<Record<string, Peer.Instance>>({});
-    peer = $state<Peer.Instance>();
-    videoDeviceId = $state<string>();
-    audioDeviceId = $state<string>();
+    localVideoDeviceId = $state<string>();
+    localAudioDeviceId = $state<string>();
     checkedUserMediaPermissions = $state<boolean>(false);
     onDataReceived: ((msg: string) => void) | null = null;
 
     constructor(roomId: string) {
-        this.socket = createSocket(roomId);
-
-        this.socket.onmessage = (event: MessageEvent) => {
-            const result = MessageSchema.safeParse(JSON.parse(String(event.data)));
-
-            if (!result.success) return;
-
-            if (result.data.type === "peer") {
-                const peerId = result.data.peerId;
-                console.log("peer connected", peerId);
-
-                this.addPeer(event.data.peerId, false);
-
-                // this.peer.on("signal", (data) => {
-                //     console.log("Advertising signalling data", data, "to Peer ID:", peerId);
-
-                //     this.socket?.send(
-                //         JSON.stringify({
-                //             type: "signal",
-                //             signal: data,
-                //             peerId: peerId,
-                //         }),
-                //     );
-                // });
-
-                // this.peer.on("connect", () => {
-                //     console.log("Peer connection established");
-                //     if (this.yourStream) {
-                //         this.yourStream?.getTracks().forEach((t) => {
-                //             this.peer?.addTrack(t, this.yourStream as MediaStream);
-                //         });
-                //     }
-                // });
-            }
-
-            if (result.data.type === "signal") {
-                console.log("Received signalling data", result.data.peerId, "from Peer ID:", result.data.peerId);
-                this.peers[result.data.peerId].signal(result.data.signal);
-            }
-        };
-
         navigator.mediaDevices
             .getUserMedia({
                 video: {
@@ -103,16 +60,43 @@ export class PeerConnection {
             .then(async (stream) => {
                 const videoDeviceId = stream.getVideoTracks()[0]?.getSettings().deviceId;
                 const audioDeviceId = stream.getAudioTracks()[0]?.getSettings().deviceId;
+                this.localStream = stream;
+                console.log("got user media");
 
                 if (videoDeviceId && audioDeviceId) {
-                    this.videoDeviceId = videoDeviceId;
-                    this.audioDeviceId = audioDeviceId;
-
-                    this.setVideoInput(videoDeviceId);
-                    this.setAudioInput(audioDeviceId);
-
+                    this.localVideoDeviceId = videoDeviceId;
+                    this.localAudioDeviceId = audioDeviceId;
                     this.checkedUserMediaPermissions = true;
                 }
+
+                this.socket = new PartySocket({
+                    host: "localhost:1999", // or https://musicall.davidhollins6.partykit.dev in prod
+                    room: roomId,
+                });
+
+                this.socket.onmessage = (event: MessageEvent) => {
+                    const result = MessageSchema.safeParse(JSON.parse(String(event.data)));
+
+                    if (!result.success) return;
+
+                    if (result.data.type === "peer") {
+                        console.log(result);
+                        const peerId = result.data.peerId;
+                        console.log("peer connected", peerId);
+
+                        this.addPeer(peerId, result.data.initiator);
+                    }
+
+                    if (result.data.type === "signal") {
+                        console.log(
+                            "Received signalling data",
+                            result.data.peerId,
+                            "from Peer ID:",
+                            result.data.peerId,
+                        );
+                        this.peers[result.data.peerId].signal(result.data.signal);
+                    }
+                };
             })
             .catch(() => {
                 this.checkedUserMediaPermissions = true;
@@ -123,8 +107,9 @@ export class PeerConnection {
         console.log("making new peer");
         this.peers[id] = new Peer({
             initiator: initiator,
-            stream: this.localStream,
             config: CONFIG,
+            trickle: USE_TRICKLE,
+            stream: this.localStream,
         });
 
         this.peers[id].on("signal", (data) => {
@@ -139,7 +124,21 @@ export class PeerConnection {
             );
         });
 
+        this.peers[id].on("connect", () => {
+            console.log("connected!!!");
+            Object.keys(this.peers).forEach((k) => {
+                if (this.peers[k].streams.length === 0) {
+                    this.peers[k].addStream(this.localStream);
+                }
+            });
+        });
+
+        this.peers[id].on("end", () => {
+            console.log("Peer connection ended");
+        });
+
         this.peers[id].on("stream", (stream) => {
+            console.log("got a stream", id);
             this.otherStreams[id] = stream;
         });
 
@@ -152,6 +151,7 @@ export class PeerConnection {
     }
 
     removePeer(id: string) {
+        delete this.otherStreams[id];
         if (this.peers[id]) {
             this.peers[id].destroy();
             delete this.peers[id];
@@ -165,7 +165,7 @@ export class PeerConnection {
     }
 
     async setVideoInput(deviceId: string) {
-        this.videoDeviceId = deviceId;
+        this.localVideoDeviceId = deviceId;
         const stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 deviceId,
@@ -175,14 +175,16 @@ export class PeerConnection {
         });
 
         stream.getVideoTracks().forEach((t) => {
-            this.peer?.addTrack(t, stream);
+            Object.keys(this.peers).forEach((k) => {
+                this.peers[k].addTrack(t, stream);
+            });
         });
 
-        this.yourStream = stream;
+        this.localStream = stream;
     }
 
     async setAudioInput(deviceId: string) {
-        this.audioDeviceId = deviceId;
+        this.localVideoDeviceId = deviceId;
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: {
                 deviceId,
@@ -190,14 +192,16 @@ export class PeerConnection {
         });
 
         stream.getAudioTracks().forEach((t) => {
-            this.peer?.addTrack(t, stream);
+            Object.keys(this.peers).forEach((k) => {
+                this.peers[k].addTrack(t, stream);
+            });
         });
 
-        this.yourStream = stream;
+        this.localStream = stream;
     }
 
     async toggleCamera(enabled: boolean) {
-        const videoTrack = this.yourStream?.getTracks().find((track) => track.kind === "video");
+        const videoTrack = this.localStream?.getTracks().find((track) => track.kind === "video");
 
         if (videoTrack) {
             videoTrack.enabled = enabled;
@@ -205,7 +209,7 @@ export class PeerConnection {
     }
 
     async toggleMic(enabled: boolean) {
-        const audioTrack = this.yourStream?.getTracks().find((track) => track.kind === "audio");
+        const audioTrack = this.localStream?.getTracks().find((track) => track.kind === "audio");
 
         if (audioTrack) {
             audioTrack.enabled = enabled;

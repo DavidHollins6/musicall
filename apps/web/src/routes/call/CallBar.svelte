@@ -53,7 +53,7 @@
                             callContext.peerConnection.setVideoInput(e.currentTarget.value);
                         }}
                         class="select select-bordered select-sm w-full"
-                        value={callContext.peerConnection.videoDeviceId}
+                        value={callContext.peerConnection.localVideoDeviceId}
                     >
                         {#each videoInputDevices as device}
                             <option value={device.deviceId}>{device.label}</option>
@@ -69,7 +69,7 @@
                             callContext.peerConnection.setAudioInput(e.currentTarget.value);
                         }}
                         class="select select-bordered select-sm w-full"
-                        value={callContext.peerConnection.audioDeviceId}
+                        value={callContext.peerConnection.localAudioDeviceId}
                     >
                         {#each audioInputDevices as device}
                             <option value={device.deviceId}>{device.label}</option>

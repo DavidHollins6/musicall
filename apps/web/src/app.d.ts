@@ -1,4 +1,4 @@
-import { SupabaseClient, Session } from "@supabase/supabase-js";
+import { SupabaseClient, User, Session } from "@supabase/supabase-js";
 import { Database } from "./DatabaseDefinitions";
 import "unplugin-icons/types/svelte";
 
@@ -13,10 +13,11 @@ declare global {
         // interface Platform {}
         interface Locals {
             supabase: SupabaseClient<Database>;
+            getUser(): Promise<User | null>;
             getSession(): Promise<Session | null>;
         }
         interface PageData {
-            session: Session | null;
+            user: User | null;
         }
     }
 }

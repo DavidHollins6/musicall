@@ -2,15 +2,14 @@ import { redirect } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ url, locals: { getSession, supabase } }) => {
-    const session = await getSession();
-    if (!session) {
+export const load: PageServerLoad = async ({ url, locals: { getUser } }) => {
+    const user = await getUser();
+    if (!user) {
         throw redirect(302, "/login?redirect=" + url);
     }
 
-    const user = await supabase.auth.getUser();
     return {
-        name: user.data.user?.user_metadata.name,
+        name: user.user_metadata.name,
     };
 };
 
