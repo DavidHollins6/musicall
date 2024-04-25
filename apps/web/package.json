@@ -49,6 +49,8 @@
     "dependencies": {
         "@supabase/auth-helpers-sveltekit": "^0.12.0",
         "@supabase/supabase-js": "^2.39.8",
+        "@syncedstore/core": "^0.6.0",
+        "@syncedstore/svelte": "^0.6.0",
         "@tailwindcss/typography": "^0.5.10",
         "@types/webmidi": "^2.0.10",
         "clsx": "^2.1.0",
@@ -66,6 +68,7 @@
         "theme-change": "^2.5.0",
         "tone": "^14.7.77",
         "webmidi": "^3.1.8",
+        "y-partykit": "^0.0.28",
         "zod": "^3.22.4"
     }
 }

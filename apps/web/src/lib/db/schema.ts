@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, integer, pgSchema, uuid, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, integer, pgSchema, uuid } from "drizzle-orm/pg-core";
 
 export const instrumentTypes = pgTable("instrument_types", {
     id: serial("id").primaryKey(),
@@ -47,25 +47,9 @@ export const friends = authSchema.table("users", {
         .notNull(),
 });
 
-export const calls = pgTable("calls", {
+export const rooms = pgTable("rooms", {
     id: serial("id").primaryKey().notNull(),
-    timestamp: timestamp("timestamp").notNull(),
-    length: integer("length").notNull(),
-    notes: varchar("notes"),
-    host: uuid("host")
+    ownerId: uuid("owner_id")
         .references(() => users.id)
-        .notNull(),
-    instrumentTypeId: integer("instrument_type_id")
-        .notNull()
-        .references(() => instrumentTypes.id),
-});
-
-export const userCalls = pgTable("user_calls", {
-    id: serial("id").primaryKey().notNull(),
-    userId: uuid("user_id")
-        .references(() => users.id)
-        .notNull(),
-    callId: integer("call_id")
-        .references(() => calls.id)
         .notNull(),
 });

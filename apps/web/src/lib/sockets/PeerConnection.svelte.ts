@@ -41,14 +41,22 @@ const MessageSchema = z
 export class PeerConnection {
     localStream = $state<MediaStream>(new MediaStream());
     otherStreams = $state<Record<string, MediaStream>>({});
-    socket = $state<PartySocket>();
+    socket;
     peers = $state<Record<string, Peer.Instance>>({});
     localVideoDeviceId = $state<string>();
     localAudioDeviceId = $state<string>();
     checkedUserMediaPermissions = $state<boolean>(false);
     onDataReceived: ((msg: string) => void) | null = null;
 
-    constructor(roomId: string) {
+    constructor(socket: PartySocket) {
+        this.socket = socket;
+
+        this.socket.send(
+            JSON.stringify({
+                type: "join-room",
+            }),
+        );
+
         navigator.mediaDevices
             .getUserMedia({
                 video: {
@@ -68,11 +76,6 @@ export class PeerConnection {
                     this.localAudioDeviceId = audioDeviceId;
                     this.checkedUserMediaPermissions = true;
                 }
-
-                this.socket = new PartySocket({
-                    host: "localhost:1999", // or https://musicall.davidhollins6.partykit.dev in prod
-                    room: roomId,
-                });
 
                 this.socket.onmessage = (event: MessageEvent) => {
                     const result = MessageSchema.safeParse(JSON.parse(String(event.data)));
@@ -115,7 +118,7 @@ export class PeerConnection {
         this.peers[id].on("signal", (data) => {
             console.log("Advertising signalling data", data, "to Peer ID:", id);
 
-            this.socket?.send(
+            this.socket.send(
                 JSON.stringify({
                     type: "signal",
                     signal: data,

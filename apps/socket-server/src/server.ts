@@ -1,12 +1,15 @@
 import type * as Party from "partykit/server";
 import type { SignalData } from "simple-peer";
+import { onConnect } from "y-partykit";
 import z from "zod";
 
-const MessageSchema = z.object({
-  type: z.literal("signal"),
-  signal: z.custom<SignalData>(),
-  peerId: z.string(),
-});
+const MessageSchema = z
+  .object({
+    type: z.literal("signal"),
+    signal: z.custom<SignalData>(),
+    peerId: z.string(),
+  })
+  .or(z.object({ type: z.literal("join-room") }));
 
 export default class WebSocketServer implements Party.Server {
   constructor(readonly room: Party.Room) {}
@@ -14,6 +17,25 @@ export default class WebSocketServer implements Party.Server {
     const result = MessageSchema.safeParse(JSON.parse(message));
 
     if (!result.success) return;
+
+    if (result.data.type === "join-room") {
+      this.room.broadcast(
+        JSON.stringify({
+          type: "peer",
+          peerId: sender.id,
+          initiator: true,
+        }),
+        [sender.id]
+      );
+
+      for (const peer of this.room.getConnections()) {
+        if (peer.id !== sender.id) {
+          sender.send(
+            JSON.stringify({ type: "peer", peerId: peer.id, initiator: false })
+          );
+        }
+      }
+    }
 
     if (result.data.type === "signal") {
       const recipient = this.room.getConnection(result.data.peerId);
@@ -30,22 +52,8 @@ export default class WebSocketServer implements Party.Server {
     }
   }
 
-  async onConnect(connection: Party.Connection, ctx: Party.ConnectionContext) {
-    this.room.broadcast(
-      JSON.stringify({
-        type: "peer",
-        peerId: connection.id,
-        initiator: true,
-      }),
-      [connection.id]
-    );
-
-    for (const peer of this.room.getConnections()) {
-      if (peer.id !== connection.id) {
-        connection.send(
-          JSON.stringify({ type: "peer", peerId: peer.id, initiator: false })
-        );
-      }
-    }
+  async onConnect(connection: Party.Connection) {
+    console.log("someones joined yayy");
+    return onConnect(connection, this.room, {});
   }
 }

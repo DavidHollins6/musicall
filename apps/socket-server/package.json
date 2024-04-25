@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/simple-peer": "^9.11.8",
     "partykit": "^0.0.104",
     "simple-peer": "^9.11.1",
+    "y-partykit": "^0.0.28",
     "zod": "^3.22.4"
   }
 }

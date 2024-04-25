@@ -63,12 +63,24 @@ importers:
 
   apps/socket-server:
     dependencies:
+      '@syncedstore/core':
+        specifier: ^0.6.0
+        version: 0.6.0(yjs@13.6.14)
+      '@syncedstore/svelte':
+        specifier: ^0.6.0
+        version: 0.6.0(@reactivedata/reactive@0.2.2)(@syncedstore/core@0.6.0(yjs@13.6.14))(svelte@5.0.0-next.110)
+      '@types/simple-peer':
+        specifier: ^9.11.8
+        version: 9.11.8
       partykit:
         specifier: ^0.0.104
         version: 0.0.104
       simple-peer:
         specifier: ^9.11.1
         version: 9.11.1
+      y-partykit:
+        specifier: ^0.0.28
+        version: 0.0.28
       zod:
         specifier: ^3.22.4
         version: 3.22.5
@@ -81,6 +93,12 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.39.8
         version: 2.42.5
+      '@syncedstore/core':
+        specifier: ^0.6.0
+        version: 0.6.0(yjs@13.6.14)
+      '@syncedstore/svelte':
+        specifier: ^0.6.0
+        version: 0.6.0(@reactivedata/reactive@0.2.2)(@syncedstore/core@0.6.0(yjs@13.6.14))(svelte@5.0.0-next.110)
       '@tailwindcss/typography':
         specifier: ^0.5.10
         version: 0.5.12(tailwindcss@3.4.3(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.4.5)))
@@ -92,7 +110,7 @@ importers:
         version: 2.1.0
       drizzle-orm:
         specifier: ^0.29.4
-        version: 0.29.5(@cloudflare/workers-types@4.20240320.1)(postgres@3.4.4)
+        version: 0.29.5(@cloudflare/workers-types@4.20240320.1)(postgres@3.4.4)(react@18.2.0)
       howler:
         specifier: ^2.2.4
         version: 2.2.4
@@ -132,6 +150,9 @@ importers:
       webmidi:
         specifier: ^3.1.8
         version: 3.1.9
+      y-partykit:
+        specifier: ^0.0.28
+        version: 0.0.28
       zod:
         specifier: ^3.22.4
         version: 3.22.5
@@ -810,6 +831,9 @@ packages:
   '@polka/url@1.0.0-next.25':
     resolution: {integrity: sha512-j7P6Rgr3mmtdkeDGTe0E/aYyWEWVtc5yFXtHCRHs28/jptDEWfaVOc5T7cblqy1XKPPfCxJc/8DwQ5YgLOZOVQ==}
 
+  '@reactivedata/reactive@0.2.2':
+    resolution: {integrity: sha512-KnINM/Sng25QAv6sHkJO9q/XyslLegCF5jTsTSVu+AouY3uZDVf4Am99xNCqsfqFZFvnTBBDvCsHNdvTVGvPEA==}
+
   '@rollup/rollup-android-arm-eabi@4.16.0':
     resolution: {integrity: sha512-4fDVBAfWYlw2CtYgHEWarAYSozTx5OYLsSM/cdGW7H51FwI10DaGnjKgdqWyWXY/VjugelzriCiKf1UdM20Bxg==}
     cpu: [arm]
@@ -957,6 +981,23 @@ packages:
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0-next.0
       vite: ^5.0.0
+
+  '@syncedstore/core@0.6.0':
+    resolution: {integrity: sha512-6TtjEoYJsceYi8u1oRecXwbbLmjHaU0S7HvVfOaEdDfphZLGm/faVuA2fpazqc28F0yIFGvYzvPEBUJn9vqRNw==}
+    peerDependencies:
+      yjs: ^13.5.13
+
+  '@syncedstore/svelte@0.6.0':
+    resolution: {integrity: sha512-MZcA1v4Qcwkix4P3/aax8azXFV1bqwyNnUZOT3XFCgpGgbRTq0NqNfKVDbDFRerpkZdrYqyWYxpRus2KtqPSjQ==}
+    peerDependencies:
+      '@reactivedata/reactive': '*'
+      '@syncedstore/core': '*'
+      svelte: '*'
+
+  '@syncedstore/yjs-reactive-bindings@0.6.0':
+    resolution: {integrity: sha512-VF78h0J4iOt79YU9d6j5E6bFKu7WXYuiI2ue9ZnA+T4SNVn8viRvg0AHm3NqHzudZZUgYT3dpnbv1/ZmU7yPZQ==}
+    peerDependencies:
+      yjs: ^13.5.13
 
   '@tailwindcss/typography@0.5.12':
     resolution: {integrity: sha512-CNwpBpconcP7ppxmuq3qvaCxiRWnbhANpY/ruH4L5qs2GCiVDJXde/pjj2HWPV1+Q4G9+V/etrwUYopdcjAlyg==}
@@ -2451,6 +2492,9 @@ packages:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
 
+  isomorphic.js@0.2.5:
+    resolution: {integrity: sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==}
+
   jackspeak@2.3.6:
     resolution: {integrity: sha512-N3yCS/NegsOBokc8GAdM8UcmfsKiSS8cipheD/nivzr700H+nsMOxJjQnvwOcRYVuFkdH0wGUvW2WbXGmrZGbQ==}
     engines: {node: '>=14'}
@@ -2465,6 +2509,9 @@ packages:
 
   jose@4.15.5:
     resolution: {integrity: sha512-jc7BFxgKPKi94uOvEmzlSWFFe2+vASyXaKUpdQKatWAESU2MWjDfFf0fdfc83CDKcA5QecabZeNLyfhe3yKNkg==}
+
+  js-tokens@4.0.0:
+    resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
   js-tokens@9.0.0:
     resolution: {integrity: sha512-WriZw1luRMlmV3LGJaR6QOJjWwgLUTf89OwT2lUOyjX2dJGBwgmIkbcz+7WFZjrZM635JOIR517++e/67CP9dQ==}
@@ -2531,6 +2578,11 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
+  lib0@0.2.93:
+    resolution: {integrity: sha512-M5IKsiFJYulS+8Eal8f+zAqf5ckm1vffW0fFDxfgxJ+uiVopvDdd3PxJmz0GsVi3YNO7QCFSq0nAsiDmNhLj9Q==}
+    engines: {node: '>=16'}
+    hasBin: true
+
   lilconfig@2.1.0:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
     engines: {node: '>=10'}
@@ -2556,6 +2608,9 @@ packages:
   lodash.castarray@4.4.0:
     resolution: {integrity: sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q==}
 
+  lodash.debounce@4.0.8:
+    resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
+
   lodash.isplainobject@4.0.6:
     resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
 
@@ -2570,6 +2625,10 @@ packages:
 
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+
+  loose-envify@1.4.0:
+    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+    hasBin: true
 
   loupe@2.3.7:
     resolution: {integrity: sha512-zSMINGVYkdpYSOBmLi0D1Uo7JU9nVdQKrHxC8eYlV+9YKK9WePqAlL7lSlorG/U2Fw1w0hTBmaa/jrQ3UbPHtA==}
@@ -3204,6 +3263,10 @@ packages:
 
   react-is@18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
+
+  react@18.2.0:
+    resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
+    engines: {node: '>=0.10.0'}
 
   read-cache@1.0.0:
     resolution: {integrity: sha512-Owdv/Ft7IjOgm/i0xvNDZ1LrRANRfew4b2prF3OWMQLxLfu3bS8FVhCsrSCMK4lR56Y9ya+AThoTpDCTxCmpRA==}
@@ -4055,6 +4118,15 @@ packages:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
 
+  y-partykit@0.0.28:
+    resolution: {integrity: sha512-CuYUE6HyQ1T4f/GTv+HDwbl9wX5LIiyJIn8ozxK/OiAQcVLPSdjcCpNE1AOFRd2YoIp1Z18bvk8KuF6mrB067w==}
+
+  y-protocols@1.0.6:
+    resolution: {integrity: sha512-vHRF2L6iT3rwj1jub/K5tYcTT/mEYDUppgNPXwp8fmLpui9f7Yeq3OEtTLVF012j39QnV+KEQpNqoN7CWU7Y9Q==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      yjs: ^13.0.0
+
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
 
@@ -4066,6 +4138,10 @@ packages:
     resolution: {integrity: sha512-pIXzoImaqmfOrL7teGUBt/T7ZDnyeGBWyXQBvOVhLkWLN37GXv8NMLK406UY6dS51JfcQHsmcW5cJ441bHg6Lg==}
     engines: {node: '>= 14'}
     hasBin: true
+
+  yjs@13.6.14:
+    resolution: {integrity: sha512-D+7KcUr0j+vBCUSKXXEWfA+bG4UQBviAwP3gYBhkstkgwy5+8diOPMx0iqLIOxNo/HxaREUimZRxqHGAHCL2BQ==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
 
   yn@3.1.1:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
@@ -4474,6 +4550,8 @@ snapshots:
 
   '@polka/url@1.0.0-next.25': {}
 
+  '@reactivedata/reactive@0.2.2': {}
+
   '@rollup/rollup-android-arm-eabi@4.16.0':
     optional: true
 
@@ -4624,6 +4702,22 @@ snapshots:
       vitefu: 0.2.5(vite@5.2.10(@types/node@20.12.7))
     transitivePeerDependencies:
       - supports-color
+
+  '@syncedstore/core@0.6.0(yjs@13.6.14)':
+    dependencies:
+      '@reactivedata/reactive': 0.2.2
+      '@syncedstore/yjs-reactive-bindings': 0.6.0(yjs@13.6.14)
+      yjs: 13.6.14
+
+  '@syncedstore/svelte@0.6.0(@reactivedata/reactive@0.2.2)(@syncedstore/core@0.6.0(yjs@13.6.14))(svelte@5.0.0-next.110)':
+    dependencies:
+      '@reactivedata/reactive': 0.2.2
+      '@syncedstore/core': 0.6.0(yjs@13.6.14)
+      svelte: 5.0.0-next.110
+
+  '@syncedstore/yjs-reactive-bindings@0.6.0(yjs@13.6.14)':
+    dependencies:
+      yjs: 13.6.14
 
   '@tailwindcss/typography@0.5.12(tailwindcss@3.4.3(ts-node@10.9.2(@types/node@20.12.7)(typescript@5.4.5)))':
     dependencies:
@@ -5588,10 +5682,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.29.5(@cloudflare/workers-types@4.20240320.1)(postgres@3.4.4):
+  drizzle-orm@0.29.5(@cloudflare/workers-types@4.20240320.1)(postgres@3.4.4)(react@18.2.0):
     optionalDependencies:
       '@cloudflare/workers-types': 4.20240320.1
       postgres: 3.4.4
+      react: 18.2.0
 
   duplexer2@0.1.4:
     dependencies:
@@ -6434,6 +6529,8 @@ snapshots:
 
   isobject@3.0.1: {}
 
+  isomorphic.js@0.2.5: {}
+
   jackspeak@2.3.6:
     dependencies:
       '@isaacs/cliui': 8.0.2
@@ -6446,6 +6543,8 @@ snapshots:
   jiti@1.21.0: {}
 
   jose@4.15.5: {}
+
+  js-tokens@4.0.0: {}
 
   js-tokens@9.0.0: {}
 
@@ -6509,6 +6608,10 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
+  lib0@0.2.93:
+    dependencies:
+      isomorphic.js: 0.2.5
+
   lilconfig@2.1.0: {}
 
   lilconfig@3.1.1: {}
@@ -6528,6 +6631,8 @@ snapshots:
 
   lodash.castarray@4.4.0: {}
 
+  lodash.debounce@4.0.8: {}
+
   lodash.isplainobject@4.0.6: {}
 
   lodash.memoize@3.0.4: {}
@@ -6537,6 +6642,10 @@ snapshots:
   lodash.throttle@4.1.1: {}
 
   lodash@4.17.21: {}
+
+  loose-envify@1.4.0:
+    dependencies:
+      js-tokens: 4.0.0
 
   loupe@2.3.7:
     dependencies:
@@ -7135,6 +7244,10 @@ snapshots:
       unpipe: 1.0.0
 
   react-is@18.2.0: {}
+
+  react@18.2.0:
+    dependencies:
+      loose-envify: 1.4.0
 
   read-cache@1.0.0:
     dependencies:
@@ -8078,11 +8191,28 @@ snapshots:
 
   xtend@4.0.2: {}
 
+  y-partykit@0.0.28:
+    dependencies:
+      lib0: 0.2.93
+      lodash.debounce: 4.0.8
+      react: 18.2.0
+      y-protocols: 1.0.6(yjs@13.6.14)
+      yjs: 13.6.14
+
+  y-protocols@1.0.6(yjs@13.6.14):
+    dependencies:
+      lib0: 0.2.93
+      yjs: 13.6.14
+
   yallist@4.0.0: {}
 
   yaml@1.10.2: {}
 
   yaml@2.4.1: {}
+
+  yjs@13.6.14:
+    dependencies:
+      lib0: 0.2.93
 
   yn@3.1.1: {}
 
