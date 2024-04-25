@@ -1,30 +1,62 @@
 <script lang="ts">
-    import type { ActionData } from "./$types";
+    import { superForm } from "sveltekit-superforms";
+    import { clsx } from "clsx";
 
-    let { form }: { form: ActionData } = $props();
+    let { data: loadData, form } = $props();
+
+    const { form: loginForm } = superForm(loadData.form);
+
+    const emailErrors = form?.form.errors.email;
+    const passwordErrors = form?.form.errors.password;
 </script>
 
 <div class="w-full flex" style="height: calc(100vh - 66px)">
     <div class="w-full h-full flex justify-center md:m-0 mt-8 md:items-center">
         <form method="post" class="flex flex-col md:w-2/5 w-full md:m-0 m-8 gap-4 prose">
-            <!-- TODO: Add logo -->
             <h1>Login</h1>
             <label>
                 <div class="label">
                     <span class="label-text">Email</span>
                 </div>
-                <div class={`input input-bordered flex items-center ${form?.emailMissing ? "input-error" : ""}`}>
-                    <input name="email" type="text" class="grow" value={form?.email} />
+                <div class={clsx("input", "input-bordered", "flex", "items-center", emailErrors && "input-error")}>
+                    <input
+                        name="email"
+                        type="text"
+                        class="grow"
+                        bind:value={$loginForm.email}
+                        aria-invalid={!!emailErrors}
+                        aria-describedby="email-error"
+                    />
                 </div>
+                {#if emailErrors}
+                    {#each emailErrors as error}
+                        <div class="label">
+                            <span id="email-error" class="label-text-alt text-error">{error}</span>
+                        </div>
+                    {/each}
+                {/if}
             </label>
 
             <label>
                 <div class="label">
                     <span class="label-text">Password</span>
                 </div>
-                <div class={`input input-bordered flex items-center ${form?.passwordMissing ? "input-error" : ""}`}>
-                    <input name="password" type="password" class="grow" />
+                <div class={clsx("input", "input-bordered", "flex", "items-center", passwordErrors && "input-error")}>
+                    <input
+                        name="password"
+                        type="password"
+                        class="grow"
+                        aria-invalid={!!passwordErrors}
+                        aria-describedby="password-error"
+                    />
                 </div>
+                {#if passwordErrors}
+                    {#each passwordErrors as error}
+                        <div class="label">
+                            <span id="password-error" class="label-text-alt text-error">{error}</span>
+                        </div>
+                    {/each}
+                {/if}
             </label>
             {#if form?.invalidCredentials}<p class="text-error">Invalid credentials</p>{/if}
             <div class="flex flex-col gap-2">
@@ -39,22 +71,3 @@
         </form>
     </div>
 </div>
-
-<style>
-    input:autofill {
-        background: unset; /* or any other */
-    }
-
-    .blur {
-        filter: blur(8px);
-        -webkit-filter: blur(8px);
-
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
-
-    .hero {
-        background-image: url($lib/assets/images/drummer.jpg);
-    }
-</style>

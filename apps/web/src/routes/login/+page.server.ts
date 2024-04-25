@@ -1,5 +1,13 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import { superValidate } from "sveltekit-superforms";
+import { valibot } from "sveltekit-superforms/adapters";
+import * as v from "valibot";
+
+const schema = v.object({
+    email: v.string("Your email must be a string.", [v.email("Please enter a valid email address")]),
+    password: v.string("Your password must be a string.", [v.minLength(1, "Please enter your password.")]),
+});
 
 export const load: PageServerLoad = async ({ locals: { getUser } }) => {
     const user = await getUser();
@@ -7,42 +15,28 @@ export const load: PageServerLoad = async ({ locals: { getUser } }) => {
         throw redirect(302, "/");
     }
 
-    return {};
+    const form = await superValidate(valibot(schema));
+
+    return { form };
 };
 
 export const actions = {
     default: async ({ request, url, locals: { supabase } }) => {
         const queryParams = new URLSearchParams(url.search);
-        const formData = await request.formData();
-        const email = formData.get("email");
-        console.log(email);
 
-        if (!email) {
-            return fail(400, {
-                email,
-                emailMissing: true,
-            });
-        }
+        const form = await superValidate(request, valibot(schema));
 
-        const password = formData.get("password");
-
-        if (!password) {
-            return fail(400, {
-                email,
-                passwordMissing: true,
-            });
+        if (!form.valid) {
+            return fail(400, { form, invalidCredentials: false });
         }
 
         const { error } = await supabase.auth.signInWithPassword({
-            email: email.toString(),
-            password: password.toString(),
+            email: form.data.email,
+            password: form.data.password,
         });
 
         if (error) {
-            return fail(400, {
-                invalidCredentials: true,
-                email,
-            });
+            return fail(400, { form, invalidCredentials: true });
         }
 
         if (queryParams.has("redirect")) {

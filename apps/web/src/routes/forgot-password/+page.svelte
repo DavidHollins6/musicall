@@ -1,7 +1,11 @@
 <script lang="ts">
-    import type { ActionData } from "./$types";
+    import { superForm } from "sveltekit-superforms";
 
-    let { form }: { form: ActionData } = $props();
+    let { data: loadData, form } = $props();
+
+    const { form: forgottenPasswordForm } = superForm(loadData.form);
+
+    const emailErrors = form?.form?.errors.email;
 </script>
 
 <div class="w-full flex items-center justify-center" style="height: calc(100vh - 66px)">
@@ -13,14 +17,24 @@
                 <div class="label pl-0">
                     <span class="label-text">Email</span>
                 </div>
-                <div
-                    class={`input input-bordered flex items-center ${form?.emailMissing || form?.invalidEmail ? "input-error" : ""}`}
-                >
-                    <input name="email" type="text" class="grow" />
+                <div class={`input input-bordered flex items-center ${emailErrors ? "input-error" : ""}`}>
+                    <input
+                        name="email"
+                        type="text"
+                        class="grow"
+                        bind:value={$forgottenPasswordForm.email}
+                        aria-invalid={!!emailErrors}
+                        aria-describedby="email-error"
+                    />
                 </div>
             </label>
-            {#if form?.emailMissing}<p class="text-error">Please provide an email</p>{/if}
-            {#if form?.invalidEmail}<p class="text-error">Email is invalid</p>{/if}
+            {#if emailErrors}
+                {#each emailErrors as error}
+                    <div class="label">
+                        <span id="email-error" class="label-text-alt text-error">{error}</span>
+                    </div>
+                {/each}
+            {/if}
             <button class="btn btn-primary mt-4">Send link to email</button>
         </form>
     </div>
