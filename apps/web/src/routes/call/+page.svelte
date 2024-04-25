@@ -1,6 +1,5 @@
 <script lang="ts">
     import CallBar from "$lib/components/CallBar/CallBar.svelte";
-    import VideoGrid from "./VideoGrid.svelte";
     import { DrumSoundManager } from "$lib/soundManager/DrumSoundManager";
     import { page } from "$app/stores";
     import { WebMidi } from "webmidi";
@@ -8,6 +7,7 @@
     import { PeerConnection } from "$lib/sockets/PeerConnection.svelte";
     import { createCallStore } from "$lib/store/local/call.svelte";
     import { getSocketStore } from "$lib/store/local/socket.svelte";
+    import VideoGrid from "$lib/components/Video/VideoGrid.svelte";
 
     const { data } = $props();
 
