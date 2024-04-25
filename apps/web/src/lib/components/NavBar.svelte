@@ -1,5 +1,5 @@
 <script lang="ts">
-    const { loggedIn } = $props<{ loggedIn: boolean }>();
+    const { loggedIn }: { loggedIn: boolean } = $props();
     import SunIcon from "~icons/mdi/white-balance-sunny";
     import MoonIcon from "~icons/mdi/weather-night";
 </script>

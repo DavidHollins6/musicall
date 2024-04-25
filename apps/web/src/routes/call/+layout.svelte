@@ -1,23 +1,24 @@
 <script lang="ts">
-    import { onMount, setContext } from "svelte";
+    import { onMount } from "svelte";
     import { WebMidi } from "webmidi";
     import { page } from "$app/stores";
-    import createSocketState from "./createSocketState.svelte";
     import PartySocket from "partysocket";
-    import { provider } from "$lib/utils/CallSyncedStore";
+    import { provider } from "$lib/store/synced/call";
+    import { createSocketStore } from "$lib/store/local/socket.svelte";
+
+    const { children } = $props();
 
     let loadedWebMidi = $state(false);
     const roomId = $page.url.searchParams.get("roomId");
 
     onMount(() => {
-        let socketState = createSocketState({
+        createSocketStore({
             socket: new PartySocket({
                 host: "localhost:1999", // or https://musicall.davidhollins6.partykit.dev in prod
                 room: roomId as string,
             }),
         });
 
-        setContext("socket", socketState);
         provider.connect();
     });
 
@@ -32,5 +33,5 @@
 </script>
 
 {#if loadedWebMidi && roomId !== null}
-    <slot />
+    {@render children()}
 {/if}

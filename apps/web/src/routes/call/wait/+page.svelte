@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { svelteStore } from "$lib/utils/CallSyncedStore";
+    import { svelteStore } from "$lib/store/synced/call";
 </script>
 
 {#each $svelteStore.todos as todo}

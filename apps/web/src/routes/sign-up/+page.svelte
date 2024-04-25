@@ -5,7 +5,7 @@
     import { debounce } from "$lib/utils/debounce";
     import PasswordInput from "$lib/components/PasswordInput.svelte";
 
-    let { form } = $props<{ form: ActionData }>();
+    let { form }: { form: ActionData } = $props();
     const nameError = form?.issues?.find((issue) => issue.path.includes("name"));
     const emailError = form?.issues?.find((issue) => issue.path.includes("email"));
     const passwordError = form?.issues?.find((issue) => issue.path.includes("password"));

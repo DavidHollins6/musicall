@@ -4,10 +4,13 @@
     import EyeClosedIcon from "~icons/mdi/eye-closed";
     import { z } from "zod";
 
-    let { passwordError, confirmPasswordError } = $props<{
+    let {
+        passwordError,
+        confirmPasswordError,
+    }: {
         passwordError: { message: string } | undefined;
         confirmPasswordError: { message: string } | undefined;
-    }>();
+    } = $props();
 
     let passwordErrors = $state<Array<string>>(["length", "number", "upper", "special"]);
     let passwordStrength = $state<number>(0);
@@ -46,7 +49,7 @@
                 type={showPassword ? "text" : "password"}
                 class="grow"
                 autocomplete="new-password"
-                on:input={(e) => {
+                oninput={(e) => {
                     checkPassword(e.currentTarget.value);
                 }}
             />
@@ -54,7 +57,7 @@
     </label>
     <button
         class="btn btn-neutral btn-square absolute right-0 md:-right-16 bottom-0"
-        on:click={(e) => {
+        onclick={(e) => {
             e.preventDefault();
             showPassword = !showPassword;
         }}

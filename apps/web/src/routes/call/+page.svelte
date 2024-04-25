@@ -1,39 +1,31 @@
 <script lang="ts">
-    import CallBar from "./CallBar.svelte";
+    import CallBar from "$lib/components/CallBar/CallBar.svelte";
     import VideoGrid from "./VideoGrid.svelte";
-    import { DrumSoundManager } from "$lib/utils/SoundManager/DrumSoundManager";
-    import { getContext, setContext } from "svelte";
+    import { DrumSoundManager } from "$lib/soundManager/DrumSoundManager";
     import { page } from "$app/stores";
     import { WebMidi } from "webmidi";
-    import type { PageData } from "./$types";
-    import createCallState from "./createCallState.svelte";
-    import HandlePeerConnection from "./HandlePeerConnection.svelte";
-    import HandleMidiInput from "./HandleMidiInput.svelte";
+    import HandleMidiInput from "../../lib/components/HandleMidiInput.svelte";
     import { PeerConnection } from "$lib/sockets/PeerConnection.svelte";
-    import type { SocketContext } from "./createSocketState.svelte";
+    import { createCallStore } from "$lib/store/local/call.svelte";
+    import { getSocketStore } from "$lib/store/local/socket.svelte";
 
-    const { data } = $props<{ data: PageData }>();
+    const { data } = $props();
 
-    const socketContext = getContext<SocketContext>("socket");
+    const socketStore = getSocketStore();
+    let soundManager = $state(new DrumSoundManager(data.mappings, data.triggerTypes));
 
-    let callState = createCallState({
+    createCallStore({
         selectedMidiInputId: WebMidi.inputs[0]?.id ?? null,
         isMicrophoneMuted: true,
         isMidiEnabled: true,
         isVideoEnabled: true,
-        peerConnection: new PeerConnection(socketContext.socket),
-        soundManager: new DrumSoundManager(data.mappings, data.triggerTypes),
+        peerConnection: new PeerConnection(socketStore.socket),
         callId: $page.url.searchParams.get("roomId") as string,
-        midiMappings: data.mappings,
-        midiTriggerTypes: data.triggerTypes,
     });
-
-    setContext("call", callState);
 </script>
 
 <div style="height: calc(100% - 66px)" class="flex flex-col">
-    <HandleMidiInput />
-    <HandlePeerConnection />
+    <HandleMidiInput {soundManager} />
     <VideoGrid />
-    <CallBar />
+    <CallBar {soundManager} midiMappings={data.mappings} midiTriggerTypes={data.triggerTypes} />
 </div>

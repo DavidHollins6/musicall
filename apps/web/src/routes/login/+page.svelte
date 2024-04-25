@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { ActionData } from "./$types";
 
-    let { form } = $props<{ form: ActionData }>();
+    let { form }: { form: ActionData } = $props();
 </script>
 
 <div class="w-full flex" style="height: calc(100vh - 66px)">

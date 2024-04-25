@@ -2,7 +2,7 @@
     import PasswordInput from "$lib/components/PasswordInput.svelte";
     import type { ActionData } from "./$types";
 
-    let { form } = $props<{ form: ActionData }>();
+    let { form }: { form: ActionData } = $props();
 </script>
 
 <div class="w-full flex items-center justify-center" style="height: calc(100vh - 66px)">

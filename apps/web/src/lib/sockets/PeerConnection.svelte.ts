@@ -107,7 +107,6 @@ export class PeerConnection {
     }
 
     addPeer(id: string, initiator: boolean) {
-        console.log("making new peer");
         this.peers[id] = new Peer({
             initiator: initiator,
             config: CONFIG,

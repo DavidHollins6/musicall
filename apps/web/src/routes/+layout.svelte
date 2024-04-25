@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
     import { themeChange } from "theme-change";
 
-    let { data } = $props();
+    let { data, children } = $props();
 
     onMount(() => {
         themeChange(false);
@@ -13,7 +13,7 @@
 
 <NavBar loggedIn={!!data.user} />
 
-<slot />
+{@render children()}
 
 <style>
     :global([data-theme="light"] .btn-primary) {
