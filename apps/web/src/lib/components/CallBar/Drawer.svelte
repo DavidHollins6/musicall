@@ -20,7 +20,7 @@
     let videoInputDevices = $state<MediaDeviceInfo[]>([]);
 
     onMount(async () => {
-        if (!callStore.peerConnection.checkedUserMediaPermissions) {
+        if (!callStore.webRTCHandler.checkedUserMediaPermissions) {
             await navigator.mediaDevices.getUserMedia({
                 video: {
                     width: { min: 640, ideal: 1920, max: 1920 },
@@ -50,10 +50,10 @@
                 </div>
                 <select
                     onchange={(e) => {
-                        callStore.peerConnection.setVideoInput(e.currentTarget.value);
+                        callStore.webRTCHandler.setVideoInput(e.currentTarget.value);
                     }}
                     class="select select-bordered select-sm w-full"
-                    value={callStore.peerConnection.localVideoDeviceId}
+                    value={callStore.webRTCHandler.localVideoDeviceId}
                 >
                     {#each videoInputDevices as device}
                         <option value={device.deviceId}>{device.label}</option>
@@ -66,10 +66,10 @@
                 </div>
                 <select
                     onchange={(e) => {
-                        callStore.peerConnection.setAudioInput(e.currentTarget.value);
+                        callStore.webRTCHandler.setAudioInput(e.currentTarget.value);
                     }}
                     class="select select-bordered select-sm w-full"
-                    value={callStore.peerConnection.localAudioDeviceId}
+                    value={callStore.webRTCHandler.localAudioDeviceId}
                 >
                     {#each audioInputDevices as device}
                         <option value={device.deviceId}>{device.label}</option>

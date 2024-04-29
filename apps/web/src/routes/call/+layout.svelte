@@ -3,7 +3,7 @@
     import { WebMidi } from "webmidi";
     import { page } from "$app/stores";
     import PartySocket from "partysocket";
-    import { provider } from "$lib/store/synced/call";
+    // import { provider } from "$lib/store/synced/call";
     import { createSocketStore } from "$lib/store/local/socket.svelte";
 
     const { children } = $props();
@@ -18,8 +18,6 @@
                 room: roomId as string,
             }),
         });
-
-        provider.connect();
     });
 
     onMount(() => {

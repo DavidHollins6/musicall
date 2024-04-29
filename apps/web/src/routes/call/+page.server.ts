@@ -17,5 +17,6 @@ export const load: PageServerLoad = async ({ url, locals: { getUser } }) => {
     return {
         mappings: mappingsRows,
         triggerTypes: triggerTypeRows,
+        userId: user.id,
     };
 };

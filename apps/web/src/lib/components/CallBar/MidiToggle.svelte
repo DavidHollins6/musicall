@@ -10,7 +10,7 @@
     on:click={() => {
         callStore.isMidiEnabled = !callStore.isMidiEnabled;
     }}
-    class={`btn btn-square text-2xl ${callStore.isMidiEnabled ? "btn-success" : "btn-warning"}`}
+    class={`btn text-2xl ${callStore.isMidiEnabled ? "btn-success" : "btn-warning"}`}
 >
     {#if callStore.isMidiEnabled}
         <MusicNoteIcon />
