@@ -70,17 +70,4 @@
     input:autofill {
         background: unset;
     }
-
-    .blur {
-        filter: blur(8px);
-        -webkit-filter: blur(8px);
-
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
-
-    .hero {
-        background-image: url($lib/assets/images/drummer.jpg);
-    }
 </style>
