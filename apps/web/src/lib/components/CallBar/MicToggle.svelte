@@ -1,5 +1,5 @@
 <script lang="ts">
-    import MicRoundedIcon from "~icons/mdi/microphone";
+    import MicOnIcon from "~icons/mdi/microphone";
     import MicOffIcon from "~icons/mdi/microphone-off";
 
     import { getCallStore } from "$lib/store/local/call.svelte";
@@ -9,14 +9,20 @@
 
 <button
     on:click={() => {
-        callStore.peerConnection.toggleMic(!callStore.isMicrophoneMuted);
-        callStore.isMicrophoneMuted = !callStore.isMicrophoneMuted;
+        callStore.webRTCHandler.toggleMic(!callStore.isMicrophoneEnabled);
+        callStore.isMicrophoneEnabled = !callStore.isMicrophoneEnabled;
+
+        callStore.webRTCHandler.sendData({
+            type: "call",
+            data: { video: callStore.isVideoEnabled, microphone: callStore.isMicrophoneEnabled },
+            from: callStore.webRTCHandler.socket.id,
+        });
     }}
-    class={`btn btn-square text-2xl ${callStore.isMicrophoneMuted ? "btn-warning" : "btn-success"}`}
+    class={`btn text-2xl ${callStore.isMicrophoneEnabled ? "btn-success" : "btn-warning"}`}
 >
-    {#if callStore.isMicrophoneMuted}
-        <MicOffIcon />
+    {#if callStore.isMicrophoneEnabled}
+        <MicOnIcon />
     {:else}
-        <MicRoundedIcon />
+        <MicOffIcon />
     {/if}
 </button>

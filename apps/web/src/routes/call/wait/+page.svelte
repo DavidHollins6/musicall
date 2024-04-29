@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { svelteStore } from "$lib/store/synced/call";
+    // import { svelteStore } from "$lib/store/synced/call";
 </script>
 
-{#each $svelteStore.todos as todo}
+<!-- {#each $svelteStore.todos as todo}
     {todo.title}
 {/each}
 
@@ -15,4 +15,4 @@
     }}
 >
     hi button
-</button>
+</button> -->

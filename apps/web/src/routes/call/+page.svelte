@@ -4,7 +4,7 @@
     import { page } from "$app/stores";
     import { WebMidi } from "webmidi";
     import HandleMidiInput from "../../lib/components/HandleMidiInput.svelte";
-    import { PeerConnection } from "$lib/sockets/PeerConnection.svelte";
+    import { WebRTCHandler } from "$lib/sockets/WebRTCHandler.svelte";
     import { createCallStore } from "$lib/store/local/call.svelte";
     import { getSocketStore } from "$lib/store/local/socket.svelte";
     import VideoGrid from "$lib/components/Video/VideoGrid.svelte";
@@ -14,12 +14,14 @@
     const socketStore = getSocketStore();
     let soundManager = $state(new DrumSoundManager(data.mappings, data.triggerTypes));
 
+    console.log("userid", data.userId);
+
     createCallStore({
         selectedMidiInputId: WebMidi.inputs[0]?.id ?? null,
-        isMicrophoneMuted: true,
+        isMicrophoneEnabled: false,
         isMidiEnabled: true,
         isVideoEnabled: true,
-        peerConnection: new PeerConnection(socketStore.socket),
+        webRTCHandler: new WebRTCHandler(socketStore.socket, data.userId),
         callId: $page.url.searchParams.get("roomId") as string,
     });
 </script>

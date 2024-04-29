@@ -1,7 +1,6 @@
 <script lang="ts">
     import type { ISoundManager } from "$lib/soundManager/ISoundManager";
     import { getCallStore } from "$lib/store/local/call.svelte";
-    import { type MessageEvent } from "webmidi";
     import { WebMidi } from "webmidi";
 
     let { soundManager }: { soundManager: ISoundManager } = $props();
@@ -16,15 +15,16 @@
                 input.removeListener("midimessage");
                 input.addListener("midimessage", (e) => {
                     if (callStore.isMidiEnabled) {
-                        callStore.peerConnection.sendData(JSON.stringify(e.message));
+                        callStore.webRTCHandler.sendData({
+                            type: "midi",
+                            event: e.message,
+                            from: callStore.webRTCHandler.socket.id,
+                        });
                     }
                 });
             }
         }
 
-        callStore.peerConnection.onDataReceived = (msg) => {
-            const event = JSON.parse(msg) as MessageEvent["message"];
-            soundManager.handleMidiEvent(event);
-        };
+        callStore.webRTCHandler.onMidiMessageReceived = soundManager.handleMidiEvent;
     });
 </script>

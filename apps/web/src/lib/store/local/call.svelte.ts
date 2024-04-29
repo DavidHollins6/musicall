@@ -1,4 +1,4 @@
-import type { PeerConnection } from "$lib/sockets/PeerConnection.svelte";
+import type { WebRTCHandler } from "$lib/sockets/WebRTCHandler.svelte";
 import { getContext, setContext } from "svelte";
 
 const STORE_NAME = "call";
@@ -6,18 +6,18 @@ const STORE_NAME = "call";
 export type CallContext = {
     selectedMidiInputId: string | null;
     isVideoEnabled: boolean;
-    isMicrophoneMuted: boolean;
+    isMicrophoneEnabled: boolean;
     isMidiEnabled: boolean;
-    peerConnection: PeerConnection;
+    webRTCHandler: WebRTCHandler;
     callId: string;
 };
 
 export function createCallStore(initial: CallContext) {
     let selectedMidiInputId = $state<string | null>(initial.selectedMidiInputId);
     let isVideoEnabled = $state<boolean>(initial.isVideoEnabled);
-    let isMicrophoneMuted = $state<boolean>(initial.isMicrophoneMuted);
+    let isMicrophoneEnabled = $state<boolean>(initial.isMicrophoneEnabled);
     let isMidiEnabled = $state<boolean>(initial.isMidiEnabled);
-    let peerConnection = $state(initial.peerConnection);
+    let webRTCHandler = $state(initial.webRTCHandler);
 
     const callId = initial.callId;
 
@@ -37,11 +37,11 @@ export function createCallStore(initial: CallContext) {
             isVideoEnabled = value;
         },
 
-        get isMicrophoneMuted() {
-            return isMicrophoneMuted;
+        get isMicrophoneEnabled() {
+            return isMicrophoneEnabled;
         },
-        set isMicrophoneMuted(value) {
-            isMicrophoneMuted = value;
+        set isMicrophoneEnabled(value) {
+            isMicrophoneEnabled = value;
         },
 
         get isMidiEnabled() {
@@ -51,11 +51,11 @@ export function createCallStore(initial: CallContext) {
             isMidiEnabled = value;
         },
 
-        get peerConnection() {
-            return peerConnection;
+        get webRTCHandler() {
+            return webRTCHandler;
         },
-        set peerConnection(value) {
-            peerConnection = value;
+        set webRTCHandler(value) {
+            webRTCHandler = value;
         },
     });
 }

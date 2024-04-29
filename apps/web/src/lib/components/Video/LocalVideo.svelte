@@ -1,15 +1,20 @@
 <script lang="ts">
     import { getCallStore } from "$lib/store/local/call.svelte";
+    import { faker } from "@faker-js/faker";
+    import Video from "./Video.svelte";
 
-    let videoRef: HTMLVideoElement | undefined = $state();
+    const { containerClass }: { containerClass: string } = $props();
+
     const callStore = getCallStore();
 
-    $effect(() => {
-        if (videoRef && callStore.peerConnection.localStream) {
-            videoRef.srcObject = callStore.peerConnection.localStream;
-        }
-    });
+    const userAvatar = faker.image.avatar();
 </script>
 
-<!-- svelte-ignore a11y-media-has-caption -->
-<video bind:this={videoRef} autoPlay playsInline></video>
+<Video
+    stream={callStore.webRTCHandler.localStream}
+    avatarUrl={userAvatar}
+    {containerClass}
+    cameraEnabled={callStore.isVideoEnabled}
+    microphoneEnabled={callStore.isMicrophoneEnabled}
+    connected={true}
+/>
