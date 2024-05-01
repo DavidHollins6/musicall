@@ -8,7 +8,15 @@ const MessageSchema = z
     signal: z.custom<SignalData>(),
     peerId: z.string(),
   })
-  .or(z.object({ type: z.literal("join-room"), userId: z.string() }));
+  .or(z.object({ type: z.literal("join-room"), userId: z.string() }))
+  .or(
+    z.object({
+      type: z.literal("chat"),
+      message: z.string(),
+      from: z.string(),
+      timestamp: z.number(),
+    })
+  );
 
 export default class WebSocketServer implements Party.Server {
   constructor(readonly room: Party.Room) {}
@@ -57,9 +65,9 @@ export default class WebSocketServer implements Party.Server {
         connections.filter((c) => c.id !== peerId).map((c) => c.id)
       );
     }
-  }
 
-  async onConnect(connection: Party.Connection) {
-    // return onConnect(connection, this.room, {});
+    if (result.data.type === "chat") {
+      this.room.broadcast(JSON.stringify(result.data));
+    }
   }
 }

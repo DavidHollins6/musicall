@@ -39,6 +39,14 @@ const MessageSchema = z
             initiator: z.boolean(),
             userId: z.string(),
         }),
+    )
+    .or(
+        z.object({
+            type: z.literal("chat"),
+            message: z.string(),
+            from: z.string(),
+            timestamp: z.number(),
+        }),
     );
 
 export class WebRTCHandler {
@@ -102,6 +110,11 @@ export class WebRTCHandler {
 
                     if (result.data.type === "signal") {
                         this.peers[result.data.peerId].peerConnection.signal(result.data.signal);
+                    }
+
+                    if (result.data.type === "chat") {
+                        if (this.onChatMessageReceived)
+                            this.onChatMessageReceived(result.data.message, result.data.from, result.data.timestamp);
                     }
                 };
 
@@ -185,14 +198,6 @@ export class WebRTCHandler {
                         this.peers[parsedData.data.from].connected = true;
                         this.peers[parsedData.data.from].cameraEnabled = parsedData.data.data.video;
                         this.peers[parsedData.data.from].microphoneEnabled = parsedData.data.data.microphone;
-                        break;
-                    case "chat":
-                        if (this.onChatMessageReceived)
-                            this.onChatMessageReceived(
-                                parsedData.data.message,
-                                parsedData.data.from,
-                                parsedData.data.timestamp,
-                            );
                         break;
                 }
             }

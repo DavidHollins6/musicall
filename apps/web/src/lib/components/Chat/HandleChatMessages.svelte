@@ -7,7 +7,7 @@
         callStore.webRTCHandler.onChatMessageReceived = (message, from, timestamp) => {
             callStore.chatMessages.push({ message, from, timestamp });
 
-            if (!callStore.isChatOpen) {
+            if (!callStore.isSidePanelOpen && callStore.sidePanel !== "chat") {
                 callStore.unreadMessages++;
             }
         };
