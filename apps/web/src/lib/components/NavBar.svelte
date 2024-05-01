@@ -4,7 +4,7 @@
     import MoonIcon from "~icons/mdi/weather-night";
 </script>
 
-<div class="navbar z-40">
+<div class="navbar z-40 border-b-neutral-content border-solid border-b">
     <div class="flex-1">
         <a href="/" class="btn btn-ghost text-xl">Musicall</a>
     </div>

@@ -39,79 +39,12 @@
 <div class="drawer">
     <input id="my-drawer" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content">
-        <label for="my-drawer" class="btn btn-square btn-secondary drawer-button text-2xl"><MenuIcon /></label>
+        <label for="my-drawer" class="btn btn-square shadow-md btn-info drawer-button text-2xl"><MenuIcon /></label>
     </div>
     <div class="drawer-side">
         <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         <div class="menu p-4 w-80 min-h-full bg-base-200 text-base-content flex flex-col">
-            <label class="form-control w-full max-w-xs">
-                <div class="label">
-                    <span class="label-text">Video</span>
-                </div>
-                <select
-                    onchange={(e) => {
-                        callStore.webRTCHandler.setVideoInput(e.currentTarget.value);
-                    }}
-                    class="select select-bordered select-sm w-full"
-                    value={callStore.webRTCHandler.localVideoDeviceId}
-                >
-                    {#each videoInputDevices as device}
-                        <option value={device.deviceId}>{device.label}</option>
-                    {/each}
-                </select>
-            </label>
-            <label class="form-control w-full max-w-xs">
-                <div class="label">
-                    <span class="label-text">Audio</span>
-                </div>
-                <select
-                    onchange={(e) => {
-                        callStore.webRTCHandler.setAudioInput(e.currentTarget.value);
-                    }}
-                    class="select select-bordered select-sm w-full"
-                    value={callStore.webRTCHandler.localAudioDeviceId}
-                >
-                    {#each audioInputDevices as device}
-                        <option value={device.deviceId}>{device.label}</option>
-                    {/each}
-                </select>
-            </label>
-            <label class="form-control w-full max-w-xs">
-                <div class="label">
-                    <span class="label-text">Midi Device</span>
-                </div>
-                <select
-                    onchange={(e) => {
-                        callStore.selectedMidiInputId = e.currentTarget.value;
-                    }}
-                    class="select select-bordered select-sm w-full"
-                >
-                    {#each WebMidi.inputs as midiInput}
-                        <option value={midiInput.id}>{midiInput.name}</option>
-                    {/each}
-                </select>
-            </label>
-            <label class="form-control w-full max-w-xs">
-                <div class="label">
-                    <span class="label-text">Instrument</span>
-                </div>
-                <select
-                    onchange={(e) => {
-                        switch (e.currentTarget.value) {
-                            case "drums":
-                                soundManager = new DrumSoundManager(midiMappings, midiTriggerTypes);
-                                break;
-                            case "keyboard":
-                                soundManager = new KeyboardSoundManager();
-                                break;
-                        }
-                    }}
-                    class="select select-bordered select-sm w-full"
-                >
-                    <option value="drums">Drums</option>
-                    <option value="keyboard">Keyboard</option>
-                </select>
-            </label>
+            
         </div>
     </div>
 </div>

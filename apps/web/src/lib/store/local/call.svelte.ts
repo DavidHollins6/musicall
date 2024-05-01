@@ -10,6 +10,10 @@ export type CallContext = {
     isMidiEnabled: boolean;
     webRTCHandler: WebRTCHandler;
     callId: string;
+    chatMessages: Array<{ message: string; from: string; timestamp: number }>;
+    unreadMessages: number;
+    isSidePanelOpen: boolean;
+    sidePanel: "chat" | "participants";
 };
 
 export function createCallStore(initial: CallContext) {
@@ -18,6 +22,10 @@ export function createCallStore(initial: CallContext) {
     let isMicrophoneEnabled = $state<boolean>(initial.isMicrophoneEnabled);
     let isMidiEnabled = $state<boolean>(initial.isMidiEnabled);
     let webRTCHandler = $state(initial.webRTCHandler);
+    let chatMessages = $state(initial.chatMessages);
+    let unreadMessages = $state(initial.unreadMessages);
+    let isSidePanelOpen = $state(initial.isSidePanelOpen);
+    let sidePanel = $state(initial.sidePanel);
 
     const callId = initial.callId;
 
@@ -56,6 +64,34 @@ export function createCallStore(initial: CallContext) {
         },
         set webRTCHandler(value) {
             webRTCHandler = value;
+        },
+
+        get isSidePanelOpen() {
+            return isSidePanelOpen;
+        },
+        set isSidePanelOpen(value) {
+            isSidePanelOpen = value;
+        },
+
+        get chatMessages() {
+            return chatMessages;
+        },
+        set chatMessages(value) {
+            chatMessages = value;
+        },
+
+        get unreadMessages() {
+            return unreadMessages;
+        },
+        set unreadMessages(value) {
+            unreadMessages = value;
+        },
+
+        get sidePanel() {
+            return sidePanel;
+        },
+        set sidePanel(value) {
+            sidePanel = value;
         },
     });
 }

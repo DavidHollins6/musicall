@@ -17,7 +17,7 @@
             from: callStore.webRTCHandler.socket.id,
         });
     }}
-    class={`btn text-2xl ${callStore.isVideoEnabled ? "btn-success" : "btn-warning"}`}
+    class={`btn text-2xl shadow-md  ${callStore.isVideoEnabled ? "btn-success" : "btn-outline"}`}
 >
     {#if callStore.isVideoEnabled}
         <CameraIcon />

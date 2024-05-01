@@ -4,6 +4,7 @@ import { type MessageEvent as MidiMessageEvent } from "webmidi";
 export type DataMessage =
     | { type: "midi"; event: MidiMessageEvent["message"]; from: string }
     | { type: "call"; data: { microphone: boolean; video: boolean }; from: string }
-    | { type: "initial-sync"; data: { microphone: boolean; video: boolean }; from: string };
+    | { type: "initial-sync"; data: { microphone: boolean; video: boolean }; from: string }
+    | { type: "chat"; message: string; from: string; timestamp: number };
 
 export const DataMessageSchema = z.custom<DataMessage>();

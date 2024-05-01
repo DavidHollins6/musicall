@@ -7,14 +7,13 @@
     import { WebRTCHandler } from "$lib/sockets/WebRTCHandler.svelte";
     import { createCallStore } from "$lib/store/local/call.svelte";
     import { getSocketStore } from "$lib/store/local/socket.svelte";
-    import VideoGrid from "$lib/components/Video/VideoGrid.svelte";
+    import CallPanel from "$lib/components/CallPanel/CallPanel.svelte";
+    import HandleChatMessages from "$lib/components/Chat/HandleChatMessages.svelte";
 
     const { data } = $props();
 
     const socketStore = getSocketStore();
     let soundManager = $state(new DrumSoundManager(data.mappings, data.triggerTypes));
-
-    console.log("userid", data.userId);
 
     createCallStore({
         selectedMidiInputId: WebMidi.inputs[0]?.id ?? null,
@@ -23,11 +22,21 @@
         isVideoEnabled: true,
         webRTCHandler: new WebRTCHandler(socketStore.socket, data.userId),
         callId: $page.url.searchParams.get("roomId") as string,
+        isSidePanelOpen: false,
+        chatMessages: [],
+        unreadMessages: 4,
+        sidePanel: "participants",
     });
 </script>
 
-<div style="height: calc(100% - 66px)" class="flex flex-col">
+<div
+    style="height: calc(100vh - 67px - 81px); max-height: calc(100vh - 66px - 81px)"
+    class="flex flex-col justify-between relative"
+>
     <HandleMidiInput {soundManager} />
-    <VideoGrid />
-    <CallBar {soundManager} midiMappings={data.mappings} midiTriggerTypes={data.triggerTypes} />
+    <HandleChatMessages />
+    <CallPanel />
+    <div>
+        <CallBar {soundManager} midiMappings={data.mappings} midiTriggerTypes={data.triggerTypes} />
+    </div>
 </div>
