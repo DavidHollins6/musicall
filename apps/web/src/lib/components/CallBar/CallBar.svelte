@@ -16,10 +16,8 @@
 </script>
 
 <div class="w-full justify-between flex p-4 4 border-t-neutral-content border-solid border-t">
-    <!-- <Drawer {soundManager} {midiMappings} {midiTriggerTypes} /> -->
-    <div></div>
     <div class="flex gap-4">
-        <SettingsPopover />
+        <SettingsPopover {soundManager} {midiMappings} {midiTriggerTypes} />
         <MidiToggle />
         <MicToggle />
         <CameraToggle />
