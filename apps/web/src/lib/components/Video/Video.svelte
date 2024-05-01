@@ -28,27 +28,30 @@
 
 <!-- svelte-ignore a11y-media-has-caption -->
 <div class={`p-1 ${containerClass}`}>
-    <div class="rounded-lg bg-secondary-content h-full relative">
+    <div class="rounded-lg bg-secondary-content h-full relative shadow-lg">
         {#if cameraEnabled && connected}
             <!-- svelte-ignore invalid-self-closing-tag -->
             <video bind:this={videoRef} autoPlay playsInline class="max-h-full w-full h-full rounded" />
         {:else}
             <div class="flex justify-center items-center h-full">
-                <div class="bg-neutral p-12 rounded-full">
-                    <div
-                        style={`background-image: url(${avatarUrl})`}
-                        class="bg-center bg-no-repeat bg-cover w-32 h-32 rounded"
-                    ></div>
-                </div>
+                <div
+                    style={`background-image: url(${avatarUrl})`}
+                    class="bg-center bg-no-repeat bg-cover w-32 h-32 rounded-full shadow-lg"
+                ></div>
                 {#if !connected}
                     <div class="absolute right-6 bottom-6">...connecting</div>
                 {/if}
             </div>
         {/if}
         {#if !microphoneEnabled && connected}
-            <div class="absolute right-6 bottom-6 glass rounded p-4">
+            <div class="absolute right-6 bottom-6 backdrop-opacity-10 backdrop-invert bg-black/60 rounded-lg p-4">
                 <MicOffIcon class="text-error text-4xl" />
             </div>
         {/if}
+        <div
+            class="absolute left-6 bottom-6 backdrop-opacity-10 backdrop-invert bg-black/60 p-2 text-white rounded-lg text-sm"
+        >
+            Person's Name
+        </div>
     </div>
 </div>

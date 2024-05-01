@@ -18,7 +18,7 @@
             from: callStore.webRTCHandler.socket.id,
         });
     }}
-    class={`btn text-2xl ${callStore.isMicrophoneEnabled ? "btn-success" : "btn-warning"}`}
+    class={`btn text-2xl shadow-md ${callStore.isMicrophoneEnabled ? "btn-success" : "btn-outline"}`}
 >
     {#if callStore.isMicrophoneEnabled}
         <MicOnIcon />

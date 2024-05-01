@@ -26,6 +26,7 @@
         "@types/simple-peer": "^9.11.8",
         "@typescript-eslint/eslint-plugin": "^6.0.0",
         "@typescript-eslint/parser": "^6.0.0",
+        "@zerodevx/svelte-toast": "^0.9.5",
         "autoprefixer": "^10.4.16",
         "daisyui": "^4.7.2",
         "drizzle-kit": "^0.20.14",

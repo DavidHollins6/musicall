@@ -61,6 +61,7 @@ export class WebRTCHandler {
     localAudioDeviceId = $state<string>();
     checkedUserMediaPermissions = $state<boolean>(false);
     onMidiMessageReceived: ((event: MidiMessageEvent["message"], from: string) => void) | null = null;
+    onChatMessageReceived: ((event: string, from: string, timestamp: number) => void) | null = null;
 
     constructor(socket: PartySocket, userId: string) {
         this.socket = socket;
@@ -184,6 +185,15 @@ export class WebRTCHandler {
                         this.peers[parsedData.data.from].connected = true;
                         this.peers[parsedData.data.from].cameraEnabled = parsedData.data.data.video;
                         this.peers[parsedData.data.from].microphoneEnabled = parsedData.data.data.microphone;
+                        break;
+                    case "chat":
+                        if (this.onChatMessageReceived)
+                            this.onChatMessageReceived(
+                                parsedData.data.message,
+                                parsedData.data.from,
+                                parsedData.data.timestamp,
+                            );
+                        break;
                 }
             }
         });

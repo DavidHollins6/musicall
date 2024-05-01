@@ -19,7 +19,7 @@
     };
 </script>
 
-<div class="p-20" style="height: calc(100% - 80px)">
+<div class="max-h-full h-full">
     <div class="h-full flex flex-wrap justify-center">
         <LocalVideo containerClass={itemStyles[numberOfItems]} />
         {#each Object.keys(callStore.webRTCHandler.peers) as peerId}
