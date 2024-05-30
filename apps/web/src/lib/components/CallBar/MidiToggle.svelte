@@ -8,11 +8,11 @@
 
 <button
     on:click={() => {
-        callStore.isMidiEnabled = !callStore.isMidiEnabled;
+        callStore.inputs.midi.enabled = !callStore.inputs.midi.enabled;
     }}
-    class={`btn text-2xl shadow-md ${callStore.isMidiEnabled ? "btn-success" : "btn-outline"}`}
+    class={`btn text-2xl shadow-md ${callStore.inputs.midi.enabled ? "btn-success" : "btn-outline"}`}
 >
-    {#if callStore.isMidiEnabled}
+    {#if callStore.inputs.midi.enabled}
         <MusicNoteIcon />
     {:else}
         <MusicNoteOffIcon />

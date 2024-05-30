@@ -2,14 +2,16 @@
     import SendIcon from "~icons/mdi/send-variant-outline";
     import { getCallStore } from "$lib/store/local/call.svelte";
     import ChatMessage from "./ChatMessage.svelte";
+    import { getChatStore } from "$lib/store/local/chat.svelte";
 
     let message = $state("");
     const callStore = getCallStore();
+    const chatStore = getChatStore();
 </script>
 
 <div class="h-full flex flex-col border-l-neutral-content border-solid border-l">
     <div class="grow overflow-y-auto p-2 flex flex-col gap-4">
-        {#each callStore.chatMessages as message}
+        {#each chatStore.chatMessages as message}
             <ChatMessage message={message.message} isMyMessage={message.from === callStore.webRTCHandler.socket.id} />
         {/each}
     </div>
@@ -26,7 +28,7 @@
                     timestamp: Date.now(),
                 });
 
-                callStore.chatMessages.push({
+                chatStore.chatMessages.push({
                     from: callStore.webRTCHandler.socket.id,
                     message,
                     timestamp: Date.now(),

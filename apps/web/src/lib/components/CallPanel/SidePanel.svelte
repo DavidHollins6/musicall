@@ -1,9 +1,11 @@
 <script lang="ts">
-    import { getCallStore } from "$lib/store/local/call.svelte";
+    import { getChatStore } from "$lib/store/local/chat.svelte";
+    import { getUIStore } from "$lib/store/local/ui.svelte";
     import ChatWindow from "../Chat/ChatWindow.svelte";
     import ParticipantsWindow from "../Participants/ParticipantsWindow.svelte";
 
-    const callStore = getCallStore();
+    const uiStore = getUIStore();
+    const chatStore = getChatStore();
 </script>
 
 <div class="w-full h-full flex flex-col overflow-hidden">
@@ -12,29 +14,29 @@
             <button
                 role="tab"
                 onclick={() => {
-                    callStore.sidePanel = "chat";
-                    callStore.unreadMessages = 0;
+                    uiStore.sidePanel = "chat";
+                    chatStore.unreadMessages = 0;
                 }}
-                class={`tab ${callStore.sidePanel === "chat" ? "tab-active" : ""}`}
+                class={`tab ${uiStore.sidePanel === "chat" ? "tab-active" : ""}`}
             >
                 Chat
-                {#if callStore.unreadMessages}
-                    <div class="badge badge-info ml-2">{callStore.unreadMessages}</div>
+                {#if chatStore.unreadMessages}
+                    <div class="badge badge-info ml-2">{chatStore.unreadMessages}</div>
                 {/if}</button
             >
             <button
                 role="tab"
                 onclick={() => {
-                    callStore.sidePanel = "participants";
+                    uiStore.sidePanel = "participants";
                 }}
-                class={`tab ${callStore.sidePanel === "participants" ? "tab-active" : ""}`}>Participants</button
+                class={`tab ${uiStore.sidePanel === "participants" ? "tab-active" : ""}`}>Participants</button
             >
         </div>
     </div>
 
-    {#if callStore.sidePanel === "chat"}
+    {#if uiStore.sidePanel === "chat"}
         <ChatWindow />
-    {:else}
+    {:else if uiStore.sidePanel === "participants"}
         <ParticipantsWindow />
     {/if}
 </div>

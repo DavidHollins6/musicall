@@ -32,7 +32,7 @@
     </div>
 
     <div class="flex justify-self-end">
-        {#if isYou ? callStore.isMicrophoneEnabled : peer.microphoneEnabled}
+        {#if isYou ? callStore.inputs.microphone.enabled : peer.microphoneEnabled}
             <MicOnIcon />
         {:else}
             <MicOffIcon />

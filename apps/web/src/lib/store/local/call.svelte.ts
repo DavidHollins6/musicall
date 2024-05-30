@@ -1,62 +1,58 @@
-import type { WebRTCHandler } from "$lib/sockets/WebRTCHandler.svelte";
+import type { WebRTCHandler } from "$lib/sockets/WebRTCHandler";
+import Peer from "simple-peer";
 import { getContext, setContext } from "svelte";
 
 const STORE_NAME = "call";
 
-export type CallContext = {
-    selectedMidiInputId: string | null;
-    isVideoEnabled: boolean;
-    isMicrophoneEnabled: boolean;
-    isMidiEnabled: boolean;
-    webRTCHandler: WebRTCHandler;
-    callId: string;
-    chatMessages: Array<{ message: string; from: string; timestamp: number }>;
-    unreadMessages: number;
-    isSidePanelOpen: boolean;
-    sidePanel: "chat" | "participants";
+type Inputs = {
+    midi: {
+        id: string | null;
+        enabled: boolean;
+    };
+    video: {
+        id: string | null;
+        enabled: boolean;
+    };
+    microphone: {
+        id: string | null;
+        enabled: boolean;
+    };
 };
 
-export function createCallStore(initial: CallContext) {
-    let selectedMidiInputId = $state<string | null>(initial.selectedMidiInputId);
-    let isVideoEnabled = $state<boolean>(initial.isVideoEnabled);
-    let isMicrophoneEnabled = $state<boolean>(initial.isMicrophoneEnabled);
-    let isMidiEnabled = $state<boolean>(initial.isMidiEnabled);
+type PeerConnection = {
+    peerConnection: Peer.Instance;
+    userId: string;
+    connected: boolean;
+    stream?: MediaStream;
+    inputs: {
+        midi: boolean;
+        video: boolean;
+        microphone: boolean;
+    };
+};
+
+export type Context = {
+    inputs: Inputs;
+    webRTCHandler: WebRTCHandler;
+    callId: string;
+    localStream: MediaStream | null;
+    peers: Record<string, PeerConnection>;
+};
+
+export function createCallStore(initial: Context) {
+    let inputs = $state<Inputs>(initial.inputs);
     let webRTCHandler = $state(initial.webRTCHandler);
-    let chatMessages = $state(initial.chatMessages);
-    let unreadMessages = $state(initial.unreadMessages);
-    let isSidePanelOpen = $state(initial.isSidePanelOpen);
-    let sidePanel = $state(initial.sidePanel);
+    let localStream = $state(initial.localStream);
 
     const callId = initial.callId;
 
     setContext(STORE_NAME, {
         callId,
-        get selectedMidiInputId() {
-            return selectedMidiInputId;
+        get inputs() {
+            return inputs;
         },
-        set selectedMidiInputId(value) {
-            selectedMidiInputId = value;
-        },
-
-        get isVideoEnabled() {
-            return isVideoEnabled;
-        },
-        set isVideoEnabled(value) {
-            isVideoEnabled = value;
-        },
-
-        get isMicrophoneEnabled() {
-            return isMicrophoneEnabled;
-        },
-        set isMicrophoneEnabled(value) {
-            isMicrophoneEnabled = value;
-        },
-
-        get isMidiEnabled() {
-            return isMidiEnabled;
-        },
-        set isMidiEnabled(value) {
-            isMidiEnabled = value;
+        set inputs(value) {
+            inputs = value;
         },
 
         get webRTCHandler() {
@@ -66,36 +62,15 @@ export function createCallStore(initial: CallContext) {
             webRTCHandler = value;
         },
 
-        get isSidePanelOpen() {
-            return isSidePanelOpen;
+        get localStream() {
+            return localStream;
         },
-        set isSidePanelOpen(value) {
-            isSidePanelOpen = value;
-        },
-
-        get chatMessages() {
-            return chatMessages;
-        },
-        set chatMessages(value) {
-            chatMessages = value;
-        },
-
-        get unreadMessages() {
-            return unreadMessages;
-        },
-        set unreadMessages(value) {
-            unreadMessages = value;
-        },
-
-        get sidePanel() {
-            return sidePanel;
-        },
-        set sidePanel(value) {
-            sidePanel = value;
+        set localStream(value) {
+            localStream = value;
         },
     });
 }
 
 export function getCallStore() {
-    return getContext<CallContext>(STORE_NAME);
+    return getContext<Context>(STORE_NAME);
 }

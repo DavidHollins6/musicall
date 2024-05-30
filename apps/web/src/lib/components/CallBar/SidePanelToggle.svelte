@@ -1,26 +1,30 @@
 <script lang="ts">
-    import { getCallStore } from "$lib/store/local/call.svelte";
+    import { getChatStore } from "$lib/store/local/chat.svelte";
+    import { getUIStore } from "$lib/store/local/ui.svelte";
     import MenuIcon from "~icons/mdi/menu";
     import MenuCloseIcon from "~icons/mdi/menu-close";
 
-    const callStore = getCallStore();
+    const uiStore = getUIStore();
+    const chatStore = getChatStore();
 </script>
 
 <button
-    on:click={async () => {
-        callStore.isSidePanelOpen = !callStore.isSidePanelOpen;
-        if (callStore.sidePanel === "chat") {
-            callStore.unreadMessages = 0;
+    on:click={() => {
+        if (uiStore.sidePanel) {
+            uiStore.sidePanel = "chat";
+            chatStore.unreadMessages = 0;
+        } else {
+            uiStore.sidePanel = null;
         }
     }}
-    class={`btn text-2xl relative ${callStore.isSidePanelOpen ? "btn-info" : "btn-outline"}`}
+    class={`btn text-2xl relative ${uiStore.sidePanel ? "btn-info" : "btn-outline"}`}
 >
-    {#if callStore.isSidePanelOpen}
+    {#if uiStore.sidePanel}
         <MenuCloseIcon />
     {:else}
         <MenuIcon />
     {/if}
-    {#if callStore.unreadMessages}
-        <div class="badge badge-info absolute -top-2 -right-2">{callStore.unreadMessages}</div>
+    {#if chatStore.unreadMessages}
+        <div class="badge badge-info absolute -top-2 -right-2">{chatStore.unreadMessages}</div>
     {/if}
 </button>

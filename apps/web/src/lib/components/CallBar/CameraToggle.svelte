@@ -8,18 +8,34 @@
 
 <button
     on:click={async () => {
-        await callStore.webRTCHandler.toggleCamera(!callStore.isVideoEnabled);
-        callStore.isVideoEnabled = !callStore.isVideoEnabled;
+        if (callStore.localStream) {
+            const newValue = !callStore.inputs.video.enabled;
 
-        callStore.webRTCHandler.sendData({
-            type: "call",
-            data: { video: callStore.isVideoEnabled, microphone: callStore.isMicrophoneEnabled },
-            from: callStore.webRTCHandler.socket.id,
-        });
+            callStore.inputs.video.enabled = newValue;
+
+            const videoTrack = callStore.localStream.getTracks().find((track) => track.kind === "video");
+
+            if (videoTrack) {
+                videoTrack.enabled = newValue;
+            }
+
+            Object.keys(callStore.peers).forEach((p) => {
+                const peer = callStore.peers[p];
+                peer.peerConnection.send(
+                    JSON.stringify({
+                        type: "call",
+                        data: { video: newValue },
+                        from: callStore.webRTCHandler.socket.id,
+                    }),
+                );
+            });
+
+            callStore.webRTCHandler.sendData({});
+        }
     }}
-    class={`btn text-2xl shadow-md  ${callStore.isVideoEnabled ? "btn-success" : "btn-outline"}`}
+    class={`btn text-2xl shadow-md  ${callStore.inputs.video.enabled ? "btn-success" : "btn-outline"}`}
 >
-    {#if callStore.isVideoEnabled}
+    {#if callStore.inputs.video.enabled}
         <CameraIcon />
     {:else}
         <CameraOffIcon />

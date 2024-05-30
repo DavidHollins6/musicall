@@ -1,16 +1,16 @@
 <script lang="ts">
     import VideoGrid from "$lib/components/Video/VideoGrid.svelte";
-    import { getCallStore } from "$lib/store/local/call.svelte";
+    import { getUIStore } from "$lib/store/local/ui.svelte";
     import SidePanel from "./SidePanel.svelte";
 
-    const callStore = getCallStore();
+    const uiStore = getUIStore();
 </script>
 
 <div class={`h-full min-h-full flex`}>
-    <div class={`h-full relative ${callStore.isSidePanelOpen ? "w-3/4" : "w-full"} width-transition p-20`}>
+    <div class={`h-full relative ${uiStore.sidePanel ? "w-3/4" : "w-full"} width-transition p-20`}>
         <VideoGrid />
     </div>
-    <div class={`h-full width-transition ${callStore.isSidePanelOpen ? "w-1/4" : "w-0"}`}>
+    <div class={`h-full width-transition ${uiStore.sidePanel ? "w-1/4" : "w-0"}`}>
         <SidePanel />
     </div>
 </div>

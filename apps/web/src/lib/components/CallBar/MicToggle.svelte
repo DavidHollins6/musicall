@@ -9,18 +9,27 @@
 
 <button
     on:click={() => {
-        callStore.webRTCHandler.toggleMic(!callStore.isMicrophoneEnabled);
-        callStore.isMicrophoneEnabled = !callStore.isMicrophoneEnabled;
+        if (callStore.localStream) {
+            const newValue = !callStore.inputs.microphone.enabled;
 
-        callStore.webRTCHandler.sendData({
-            type: "call",
-            data: { video: callStore.isVideoEnabled, microphone: callStore.isMicrophoneEnabled },
-            from: callStore.webRTCHandler.socket.id,
-        });
+            callStore.inputs.microphone.enabled = newValue;
+
+            const audioTrack = callStore.localStream.getTracks().find((track) => track.kind === "audio");
+
+            if (audioTrack) {
+                audioTrack.enabled = newValue;
+            }
+
+            callStore.webRTCHandler.sendData({
+                type: "call",
+                data: { microphone: newValue },
+                from: callStore.webRTCHandler.socket.id,
+            });
+        }
     }}
-    class={`btn text-2xl shadow-md ${callStore.isMicrophoneEnabled ? "btn-success" : "btn-outline"}`}
+    class={`btn text-2xl shadow-md ${callStore.inputs.microphone.enabled ? "btn-success" : "btn-outline"}`}
 >
-    {#if callStore.isMicrophoneEnabled}
+    {#if callStore.inputs.microphone.enabled}
         <MicOnIcon />
     {:else}
         <MicOffIcon />
