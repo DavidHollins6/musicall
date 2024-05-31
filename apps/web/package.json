@@ -57,6 +57,7 @@
         "@syncedstore/svelte": "^0.6.0",
         "@tailwindcss/typography": "^0.5.10",
         "@types/webmidi": "^2.0.10",
+        "@xstate/svelte": "^3.0.3",
         "clsx": "^2.1.0",
         "drizzle-orm": "^0.29.4",
         "howler": "^2.2.4",
@@ -73,6 +74,7 @@
         "tone": "^14.7.77",
         "valibot": "^0.30.0",
         "webmidi": "^3.1.8",
+        "xstate": "^5.13.0",
         "y-partykit": "^0.0.28",
         "zod": "^3.22.5"
     }

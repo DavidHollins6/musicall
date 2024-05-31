@@ -105,6 +105,9 @@ importers:
       '@types/webmidi':
         specifier: ^2.0.10
         version: 2.0.10
+      '@xstate/svelte':
+        specifier: ^3.0.3
+        version: 3.0.3(svelte@5.0.0-next.110)(xstate@5.13.0)
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
@@ -153,6 +156,9 @@ importers:
       webmidi:
         specifier: ^3.1.8
         version: 3.1.9
+      xstate:
+        specifier: ^5.13.0
+        version: 5.13.0
       y-partykit:
         specifier: ^0.0.28
         version: 0.0.28
@@ -1254,6 +1260,15 @@ packages:
 
   '@vitest/utils@1.5.0':
     resolution: {integrity: sha512-BDU0GNL8MWkRkSRdNFvCUCAVOeHaUlVJ9Tx0TYBZyXaaOTmGtUFObzchCivIBrIwKzvZA7A9sCejVhXM2aY98A==}
+
+  '@xstate/svelte@3.0.3':
+    resolution: {integrity: sha512-PS/aFLRyrA+ESt+DsmRqpe7n6Zukcqvl+BEVLpWpGqRMHbymBbPR2RR3RnGF4MlM7YkFbme60obJtS6BYILUrQ==}
+    peerDependencies:
+      svelte: ^3.24.1 || ^4
+      xstate: ^5.11.0
+    peerDependenciesMeta:
+      xstate:
+        optional: true
 
   '@zerodevx/svelte-toast@0.9.5':
     resolution: {integrity: sha512-JLeB/oRdJfT+dz9A5bgd3Z7TuQnBQbeUtXrGIrNWMGqWbabpepBF2KxtWVhL2qtxpRqhae2f6NAOzH7xs4jUSw==}
@@ -4290,6 +4305,9 @@ packages:
     resolution: {integrity: sha512-QKxVRxiRACQcVuQEYFsI1hhkrMlrXHPegbbd1yn9UHOmRxY+si12nQYzri3vbzt8VdTTRviqcKxcyllFas5z2A==}
     engines: {node: '>=0.4.0'}
 
+  xstate@5.13.0:
+    resolution: {integrity: sha512-Z0om784N5u8sAzUvQJBa32jiTCIGGF/2ZsmKkerQEqeeUktAeOMK20FIHFUMywC4GcAkNksSvaeX7lwoRNXPEQ==}
+
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
@@ -5192,6 +5210,12 @@ snapshots:
       estree-walker: 3.0.3
       loupe: 2.3.7
       pretty-format: 29.7.0
+
+  '@xstate/svelte@3.0.3(svelte@5.0.0-next.110)(xstate@5.13.0)':
+    dependencies:
+      svelte: 5.0.0-next.110
+    optionalDependencies:
+      xstate: 5.13.0
 
   '@zerodevx/svelte-toast@0.9.5(svelte@5.0.0-next.110)':
     dependencies:
@@ -8555,6 +8579,8 @@ snapshots:
   ws@8.16.0: {}
 
   xmlhttprequest-ssl@2.0.0: {}
+
+  xstate@5.13.0: {}
 
   xtend@4.0.2: {}
 
