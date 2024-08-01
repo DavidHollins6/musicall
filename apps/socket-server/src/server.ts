@@ -7,6 +7,7 @@ const MessageSchema = z
     type: z.literal("signal"),
     signal: z.custom<SignalData>(),
     peerId: z.string(),
+    userId: z.string(),
   })
   .or(z.object({ type: z.literal("join-room"), userId: z.string() }))
   .or(
@@ -61,6 +62,7 @@ export default class WebSocketServer implements Party.Server {
           type: "signal",
           signal: result.data.signal,
           peerId: sender.id,
+          userId: result.data.userId,
         }),
         connections.filter((c) => c.id !== peerId).map((c) => c.id)
       );
