@@ -1,0 +1,17 @@
+{
+  "name": "@musicall/api",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc"
+  },
+  "exports": {
+    "./room": "./src/room.ts"
+  },
+  "devDependencies": {
+    "@musicall/typescript-config": "workspace:*",
+    "typescript": "latest"
+  },
+  "dependencies": {
+    "@musicall/storage": "workspace:*"
+  }
+}

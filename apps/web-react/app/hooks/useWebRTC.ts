@@ -118,8 +118,14 @@ export const useWebRTC = ({ room, userId }: Props) => {
                     }),
                 );
             })
-            .catch(() => {
-                console.error("there was an error here for some reason");
+            .catch((e) => {
+                console.error("there was an error here for some reason", e);
+                socket.send(
+                    JSON.stringify({
+                        type: "join-room",
+                        userId,
+                    }),
+                );
             });
     }, []);
 

@@ -1,10 +1,7 @@
 import type * as Party from "partykit/server";
 import type { SignalData } from "simple-peer";
+import { allowUserIntoRoom, getRoom } from "@musicall/api/room";
 import z from "zod";
-import { db } from "./database/db";
-import { rooms } from "./database/schema";
-import { eq } from "drizzle-orm";
-import { redis } from "./cache/redis";
 
 const MessageSchema = z
   .object({
@@ -39,9 +36,16 @@ export default class WebSocketServer implements Party.Server {
     if (!result.success) return;
 
     if (result.data.type === "allow-into-room") {
-      await redis.set(`allow-${this.room.id}-${result.data.userId}`, "", {
-        EX: 30 * 60,
-      });
+      await allowUserIntoRoom(result.data.userId, this.room.id);
+      const userId = result.data.userId;
+      const userConnection = this.waiterUserIdsMap.find(
+        (w) => w.userId === userId
+      );
+
+      if (userConnection) {
+        const connection = this.room.getConnection(userConnection.connectionId);
+        connection?.send(JSON.stringify({ type: "allow-into-room" }));
+      }
     }
 
     if (result.data.type === "join-waiting-room") {
@@ -62,9 +66,15 @@ export default class WebSocketServer implements Party.Server {
     }
 
     if (result.data.type === "join-room") {
-      console.log("room owner Id", this.roomOwnerId);
       if (this.roomOwnerId && this.roomOwnerId === result.data.userId) {
-        console.log("NEED TO SET THE OWNER IN STORAGE");
+        console.log("THE OWNER HAS JOINED");
+        sender.send(
+          JSON.stringify({
+            type: "waiting-room-updated",
+            waiters: this.waiterUserIdsMap.map((w) => w.userId),
+          })
+        );
+
         this.owner = sender;
       }
 
@@ -119,15 +129,10 @@ export default class WebSocketServer implements Party.Server {
   }
 
   async onStart() {
-    const roomsResult = await db
-      .select()
-      .from(rooms)
-      .where(eq(rooms.id, this.room.id));
+    const room = await getRoom(this.room.id);
 
-    console.log("room starting!!!", roomsResult[0].ownerId);
-
-    if (roomsResult.length === 1) {
-      this.roomOwnerId = roomsResult[0].ownerId;
+    if (room) {
+      this.roomOwnerId = room.ownerId;
     }
   }
 

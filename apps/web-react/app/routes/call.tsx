@@ -9,19 +9,21 @@ import { requireAuthSession } from "../modules/auth/session.server";
 import { db } from "../database/db.server";
 import { rooms } from "../database/schema";
 import { and, eq } from "drizzle-orm";
-import { redis } from "~/database/redis.server";
+import { getRoomAllowList } from "@musicall/api/room";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
 
+    console.log("loading call", userId);
+
     const url = new URL(request.url);
     const roomId = url.searchParams.get("roomId");
+
+    console.log("loading room", roomId);
 
     if (!roomId) {
         return redirect("/");
     }
-
-    console.log(redis.KEYS);
 
     const room = await db
         .select()
@@ -29,6 +31,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
         .where(and(eq(rooms.ownerId, userId), eq(rooms.id, roomId)));
 
     if (room.length === 0) {
+        const allowList = await getRoomAllowList(roomId);
+
+        if (allowList.includes(userId)) {
+            return json({ userId, roomId });
+        }
         return redirect(`/wait?roomId=${roomId}`);
     }
 

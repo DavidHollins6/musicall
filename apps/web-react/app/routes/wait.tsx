@@ -7,6 +7,7 @@ import { rooms } from "~/database/schema";
 import { and, eq } from "drizzle-orm";
 import { db } from "~/database/db.server";
 import { useLoaderData } from "@remix-run/react";
+import { getRoomAllowList } from "@musicall/api/room";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
@@ -27,11 +28,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect(`/call?roomId=${roomId}`);
     }
 
-    return json({ userId, roomId });
+    const allowList = await getRoomAllowList(roomId);
+    const allowedIntoRoom = allowList.includes(userId);
+
+    return json({ userId, roomId, allowedIntoRoom });
 }
 
 export default function Call() {
-    const { roomId, userId } = useLoaderData<typeof loader>();
+    const { roomId, userId, allowedIntoRoom } = useLoaderData<typeof loader>();
 
-    return <ClientOnly>{() => <WaitPage roomId={roomId} userId={userId} />}</ClientOnly>;
+    return (
+        <ClientOnly>{() => <WaitPage roomId={roomId} userId={userId} allowedIntoRoom={allowedIntoRoom} />}</ClientOnly>
+    );
 }

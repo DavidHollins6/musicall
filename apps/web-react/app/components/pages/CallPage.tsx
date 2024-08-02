@@ -15,6 +15,8 @@ export default function CallPage({ userId, roomId }: Props) {
     const webMidiEnabled = useMidi();
     const { waitingList } = usePeers();
 
+    console.log(waitingList);
+
     return (
         <Flex direction="column" maxHeight="100vh">
             <VideoGrid />

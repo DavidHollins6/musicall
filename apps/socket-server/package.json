@@ -1,7 +1,6 @@
 {
   "name": "socket-server",
   "version": "1.0.0",
-  "description": "",
   "scripts": {
     "dev": "npx partykit dev"
   },
@@ -17,6 +16,8 @@
     "redis": "^4.7.0",
     "simple-peer": "^9.11.1",
     "y-partykit": "^0.0.28",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "@musicall/api": "workspace:*",
+    "@musicall/typescript-config": "workspace:*"
   }
 }
