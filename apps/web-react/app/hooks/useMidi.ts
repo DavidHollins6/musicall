@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { WebMidi } from "webmidi";
 import { useDevice } from "~/store/deviceContext";
-import { usePeers, usePeersDispatcher } from "~/store/peersContext";
+import { usePeersDispatcher } from "~/store/peersContext";
 
 export const useMidi = () => {
     const [webMidiEnabled, setWebMidiEnabled] = useState(false);
     const { midi } = useDevice();
-    const { peers } = usePeers();
     const peersDispatch = usePeersDispatcher();
 
     useEffect(() => {
-        WebMidi.enable().then(() => {
-            setWebMidiEnabled(true);
-        });
+        WebMidi.enable()
+            .then(() => {
+                setWebMidiEnabled(true);
+            })
+            .catch(console.error);
     }, []);
 
     useEffect(() => {

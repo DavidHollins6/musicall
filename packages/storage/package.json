@@ -1,0 +1,23 @@
+{
+  "name": "@musicall/storage",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc"
+  },
+  "exports": {
+    "./db": "./src/db.ts",
+    "./schema": "./src/schema.ts",
+    "./types": "./src/types.ts",
+    "./cache": "./src/cache.ts"
+  },
+  "devDependencies": {
+    "@musicall/typescript-config": "workspace:*",
+    "typescript": "latest"
+  },
+  "dependencies": {
+    "@redis/client": "^1.6.0",
+    "drizzle-orm": "^0.29.4",
+    "postgres": "^3.4.3",
+    "redis": "^4.7.0"
+  }
+}

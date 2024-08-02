@@ -14,6 +14,7 @@ type PeerData = {
 type State = {
     peers: Record<string, PeerData>;
     localStream?: MediaStream;
+    waitingList: Array<string>;
 };
 
 type Action =
@@ -21,10 +22,11 @@ type Action =
     | { type: "removePeer"; peerId: string }
     | { type: "setLocalStream"; localStream: MediaStream }
     | { type: "sendData"; message: string }
+    | { type: "setWaitingList"; waitingList: Array<string> }
     | { type: "setPeerStream"; peerId: string; stream: MediaStream };
 
 const PeersContext = React.createContext<{ state: State; dispatch: React.Dispatch<Action> }>({
-    state: { peers: {} },
+    state: { peers: {}, waitingList: [] },
     dispatch: () => undefined,
 });
 
@@ -76,6 +78,9 @@ function peersReducer(state: State, action: Action) {
             });
             return state;
         }
+        case "setWaitingList": {
+            return { ...state, waitingList: action.waitingList };
+        }
         default: {
             throw new Error(`Unhandled action type`);
         }
@@ -83,7 +88,7 @@ function peersReducer(state: State, action: Action) {
 }
 
 function PeersProvider({ children }: { children: React.ReactNode }) {
-    const [state, dispatch] = React.useReducer(peersReducer, { peers: {} });
+    const [state, dispatch] = React.useReducer(peersReducer, { peers: {}, waitingList: [] });
     // NOTE: you *might* need to memoize this value
     // Learn more in http://kcd.im/optimize-context
     const value = { state, dispatch };

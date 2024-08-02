@@ -1,65 +1,55 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-import { Server } from "http";
 import express from "express";
-import { Server as IoServer } from "socket.io";
+import bodyParser from "body-parser";
+import { roomHandlers } from "./handlers/room";
+import { createCache } from "@musicall/storage/cache";
+import { createDb } from "@musicall/storage/db";
 
 const app = express();
-const server = new Server(app);
-const io = new IoServer(server, {
-  cors: {
-    origin: process.env.APP_ENDPOINT,
-    methods: ["GET", "POST"],
-  },
+const port = 3000;
+
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is not defined");
+}
+
+if (!process.env.REDIS_URL) {
+  throw new Error("REDIS_URL is not defined");
+}
+
+if (!process.env.REDIS_PASSWORD) {
+  throw new Error("REDIS_PASSWORD is not defined");
+}
+
+const db = createDb(process.env.DATABASE_URL);
+const redis = createCache(process.env.REDIS_URL, process.env.REDIS_PASSWORD);
+
+app.use(express.json());
+app.use(bodyParser.json({ type: "application/*+json" }));
+
+roomHandlers(app, db, redis);
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
-const DEFAULT_PEER_COUNT = 5;
-app.use(express.static(__dirname));
-
-app.get("/health-check", (req, res) => {
-  res.send(process.env);
+app.get("/redis-health", async (_, res) => {
+  res.status(200).send(await redis.keys("*"));
 });
 
-io.on("connection", function (socket) {
-  console.log("Connection with ID:", socket.id);
-  socket.on("join-room", async function ({ roomId }) {
-    socket.join(roomId);
-
-    const sockets = await io.in(roomId).fetchSockets();
-    const peersInRoomExceptSender = sockets.filter((s) => s.id !== socket.id);
-
-    console.log("advertising peers");
-    peersInRoomExceptSender.forEach(function (socket2) {
-      console.log(
-        "Advertising peer %s to %s in room %s",
-        socket.id,
-        socket2.id,
-        roomId
-      );
-      socket2.emit("peer", {
-        peerId: socket.id,
-        initiator: true,
-      });
-
-      socket.emit("peer", {
-        peerId: socket2.id,
-        initiator: false,
-      });
-    });
-
-    socket.on("signal", function (data) {
-      var socket2 = io.sockets.sockets.get(data.peerId);
-      if (!socket2) {
-        return;
-      }
-      console.log("Proxying signal from peer %s to %s", socket.id, socket2.id);
-
-      socket2.emit("signal", {
-        signal: data.signal,
-        peerId: socket.id,
-      });
-    });
-  });
+app.get("/redis-set", async (_, res) => {
+  await redis.set("TEST", "TEST", { EX: 200 });
+  res.status(200).send();
 });
 
-server.listen(process.env.PORT || "3000");
+app.get("/redis-clear", async (_, res) => {
+  await redis.flushAll();
+  res.status(200).send();
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
+
+console.log(app.routes);
