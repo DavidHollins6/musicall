@@ -38,18 +38,8 @@ export const users = pgTable("users", {
 
 export type User = typeof users.$inferSelect;
 
-export const friends = pgTable("friends", {
-    id: uuid("id").primaryKey().notNull(),
-    userId: uuid("user_id")
-        .references(() => users.id)
-        .notNull(),
-    friendId: uuid("friend_id")
-        .references(() => users.id)
-        .notNull(),
-});
-
 export const rooms = pgTable("rooms", {
-    id: serial("id").primaryKey().notNull(),
+    id: uuid("id").primaryKey().notNull(),
     ownerId: uuid("owner_id")
         .references(() => users.id)
         .notNull(),

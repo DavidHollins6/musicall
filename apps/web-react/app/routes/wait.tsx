@@ -1,15 +1,12 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { PeersProvider } from "../store/peersContext";
-import { DeviceProvider } from "../store/deviceContext";
-import CallPage from "..//components/pages/CallPage";
 import { ClientOnly } from "remix-utils/client-only";
 import { requireAuthSession } from "../modules/auth/session.server";
-import { db } from "../database/db.server";
-import { rooms } from "../database/schema";
+import { WaitPage } from "../components/pages/WaitPage";
+import { rooms } from "~/database/schema";
 import { and, eq } from "drizzle-orm";
-import { redis } from "~/database/redis.server";
+import { db } from "~/database/db.server";
+import { useLoaderData } from "@remix-run/react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
@@ -21,15 +18,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect("/");
     }
 
-    console.log(redis.KEYS);
-
     const room = await db
         .select()
         .from(rooms)
         .where(and(eq(rooms.ownerId, userId), eq(rooms.id, roomId)));
 
-    if (room.length === 0) {
-        return redirect(`/wait?roomId=${roomId}`);
+    if (room.length === 1) {
+        return redirect(`/call?roomId=${roomId}`);
     }
 
     return json({ userId, roomId });
@@ -38,15 +33,5 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function Call() {
     const { roomId, userId } = useLoaderData<typeof loader>();
 
-    return (
-        <ClientOnly>
-            {() => (
-                <PeersProvider>
-                    <DeviceProvider>
-                        <CallPage roomId={roomId} userId={userId} />
-                    </DeviceProvider>
-                </PeersProvider>
-            )}
-        </ClientOnly>
-    );
+    return <ClientOnly>{() => <WaitPage roomId={roomId} userId={userId} />}</ClientOnly>;
 }

@@ -1,5 +1,6 @@
 {
-    "name": "musicall",
-    "main": "src/server.ts",
-    "compatibilityDate": "2023-10-12"
-  }
+  "name": "musicall",
+  "main": "src/server.ts",
+  "compatibilityDate": "2023-10-12",
+  "compatibilityFlags": ["nodejs_compat"]
+}

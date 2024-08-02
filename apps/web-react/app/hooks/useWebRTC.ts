@@ -47,6 +47,12 @@ const MessageSchema = z
             initiator: z.boolean(),
             userId: z.string(),
         }),
+    )
+    .or(
+        z.object({
+            type: z.literal("waiting-room-updated"),
+            waiters: z.string().array(),
+        }),
     );
 
 export const useWebRTC = ({ room, userId }: Props) => {
@@ -75,6 +81,11 @@ export const useWebRTC = ({ room, userId }: Props) => {
             if (result.data.type === "signal") {
                 console.log("got a signal, ", result);
                 peers[result.data.peerId].peerConnection.signal(result.data.signal);
+            }
+
+            if (result.data.type === "waiting-room-updated") {
+                console.log("someone joined the waiting room!", result.data);
+                peersDispatch({ type: "setWaitingList", waitingList: result.data.waiters });
             }
         },
     });
@@ -205,4 +216,6 @@ export const useWebRTC = ({ room, userId }: Props) => {
             peerId,
         });
     };
+
+    return { socket };
 };

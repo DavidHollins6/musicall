@@ -9,6 +9,9 @@ import { getUserByEmail, createUserAccount } from "../modules/user/service.serve
 import { isFormProcessing } from "../utils/form";
 import { assertIsPost } from "../utils/http.server";
 import { ContinueWithEmailForm } from "../modules/auth/components/ContinueWithEmailForm";
+import { db } from "~/database/db.server";
+import { rooms } from "~/database/schema";
+import { v4 as uuidv4 } from "uuid";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const authSession = await getAuthSession(request);
@@ -45,8 +48,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const existingUser = await getUserByEmail(email);
 
-    console.log(existingUser);
-
     if (existingUser.length > 0) {
         return json({ errors: { email: "user-already-exist", password: null } }, { status: 400 });
     }
@@ -56,6 +57,8 @@ export async function action({ request }: ActionFunctionArgs) {
     if (!authSession) {
         return json({ errors: { email: "unable-to-create-account", password: null } }, { status: 500 });
     }
+
+    db.insert(rooms).values({ id: uuidv4(), ownerId: authSession.userId });
 
     return createAuthSession({
         request,

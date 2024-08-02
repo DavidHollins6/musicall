@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS "mappings" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "rooms" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY NOT NULL,
 	"owner_id" uuid NOT NULL
 );
 --> statement-breakpoint

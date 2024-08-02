@@ -8,7 +8,8 @@
         "dev": "remix vite:dev",
         "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
         "start": "remix-serve ./build/server/index.js",
-        "typecheck": "tsc"
+        "typecheck": "tsc",
+        "migrate": "drizzle-kit generate:pg"
     },
     "dependencies": {
         "@radix-ui/colors": "^3.0.0",
@@ -28,9 +29,11 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-zorm": "^0.9.0",
+        "redis": "^4.7.0",
         "remix-utils": "^7.6.0",
         "simple-peer": "^9.11.1",
         "tone": "^14.7.77",
+        "uuid": "^10.0.0",
         "webmidi": "^3.1.8",
         "zod": "^3.23.8"
     },
@@ -39,6 +42,7 @@
         "@remix-run/dev": "^2.9.2",
         "@types/react": "^18.2.20",
         "@types/react-dom": "^18.2.7",
+        "@types/uuid": "^10.0.0",
         "@typescript-eslint/eslint-plugin": "^6.7.4",
         "@typescript-eslint/parser": "^6.7.4",
         "eslint": "^8.38.0",
