@@ -17,6 +17,10 @@
         <button on:click={() => send({ type: "ADD_MESSAGE", message: "hello lol" })}> Send Message lol </button>
     {/if}
 
+    {#each $snapshot.context.chatMessages as message}
+        {message}
+    {/each}
+
     <div class="mt-24 p-12 border rounded-xl bg-base-100 shadow-lg">
         <a href="/call/id" class="btn btn-primary p-8">Join your room</a>
     </div>

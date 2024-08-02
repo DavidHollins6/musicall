@@ -3,6 +3,7 @@ import Peer, { type SignalData } from "simple-peer";
 import { type MessageEvent as MidiMessageEvent } from "webmidi";
 import { z } from "zod";
 import { DataMessageSchema, type DataMessage } from "./DataMessageSchema";
+import { getChatMachine } from "$lib/machines/chatMachine";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -113,8 +114,14 @@ export class WebRTCHandler {
                     }
 
                     if (result.data.type === "chat") {
-                        if (this.onChatMessageReceived)
+                        if (this.onChatMessageReceived) {
+                            const chatMachine = getChatMachine();
+                            chatMachine.send({
+                                type: "addMessage",
+                                message: result.data.message,
+                            });
                             this.onChatMessageReceived(result.data.message, result.data.from, result.data.timestamp);
+                        }
                     }
                 };
 
