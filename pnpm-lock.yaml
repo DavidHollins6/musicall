@@ -38,9 +38,18 @@ importers:
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
+      drizzle-orm:
+        specifier: ^0.29.4
+        version: 0.29.5(@cloudflare/workers-types@4.20240718.0)(@types/react@18.3.3)(postgres@3.4.4)(react@18.2.0)
       express:
         specifier: ^4.18.2
         version: 4.19.2
+      postgres:
+        specifier: ^3.4.3
+        version: 3.4.4
+      redis:
+        specifier: ^4.7.0
+        version: 4.7.0
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@4.19.2)
