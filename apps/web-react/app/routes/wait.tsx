@@ -3,11 +3,8 @@ import { json, redirect } from "@remix-run/node";
 import { ClientOnly } from "remix-utils/client-only";
 import { requireAuthSession } from "../modules/auth/session.server";
 import { WaitPage } from "../components/pages/WaitPage";
-import { rooms } from "~/database/schema";
-import { and, eq } from "drizzle-orm";
-import { db } from "~/database/db.server";
 import { useLoaderData } from "@remix-run/react";
-import { getRoomAllowList } from "@musicall/api/room";
+import { getOwnedRooms, getRoomAllowList } from "@musicall/api/room";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
@@ -19,12 +16,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect("/");
     }
 
-    const room = await db
-        .select()
-        .from(rooms)
-        .where(and(eq(rooms.ownerId, userId), eq(rooms.id, roomId)));
+    const ownedRooms = await getOwnedRooms(userId);
+    const ownsThisRoom = ownedRooms.findIndex((r) => r.id === roomId) >= 0;
 
-    if (room.length === 1) {
+    if (ownsThisRoom) {
         return redirect(`/call?roomId=${roomId}`);
     }
 

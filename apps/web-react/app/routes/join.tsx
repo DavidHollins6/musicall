@@ -5,13 +5,14 @@ import { parseFormAny, useZorm } from "react-zorm";
 import { z } from "zod";
 
 import { createAuthSession, getAuthSession } from "../modules/auth/session.server";
-import { getUserByEmail, createUserAccount } from "../modules/user/service.server";
+import { getUserByEmail } from "@musicall/api/user";
+import { createUserAccount } from "../modules/user/service.server";
+
 import { isFormProcessing } from "../utils/form";
 import { assertIsPost } from "../utils/http.server";
 import { ContinueWithEmailForm } from "../modules/auth/components/ContinueWithEmailForm";
-import { db } from "~/database/db.server";
-import { rooms } from "~/database/schema";
-import { v4 as uuidv4 } from "uuid";
+import { generateUuid } from "usemods";
+import { createRoom } from "@musicall/api/room";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const authSession = await getAuthSession(request);
@@ -48,7 +49,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const existingUser = await getUserByEmail(email);
 
-    if (existingUser.length > 0) {
+    if (existingUser) {
         return json({ errors: { email: "user-already-exist", password: null } }, { status: 400 });
     }
 
@@ -58,7 +59,7 @@ export async function action({ request }: ActionFunctionArgs) {
         return json({ errors: { email: "unable-to-create-account", password: null } }, { status: 500 });
     }
 
-    db.insert(rooms).values({ id: uuidv4(), ownerId: authSession.userId });
+    createRoom(authSession.userId, generateUuid());
 
     return createAuthSession({
         request,

@@ -38,18 +38,9 @@ importers:
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
-      drizzle-orm:
-        specifier: ^0.29.4
-        version: 0.29.5(@cloudflare/workers-types@4.20240718.0)(@types/react@18.3.3)(postgres@3.4.4)(react@18.2.0)
       express:
         specifier: ^4.18.2
         version: 4.19.2
-      postgres:
-        specifier: ^3.4.3
-        version: 3.4.4
-      redis:
-        specifier: ^4.7.0
-        version: 4.7.0
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@4.19.2)
@@ -81,21 +72,12 @@ importers:
       '@types/simple-peer':
         specifier: ^9.11.8
         version: 9.11.8
-      drizzle-orm:
-        specifier: ^0.29.4
-        version: 0.29.5(@cloudflare/workers-types@4.20240718.0)(@types/react@18.3.3)(postgres@3.4.4)(react@18.2.0)
       msgpackr:
         specifier: ^1.10.1
         version: 1.10.1
       partykit:
         specifier: ^0.0.104
         version: 0.0.104
-      postgres:
-        specifier: ^3.4.3
-        version: 3.4.4
-      redis:
-        specifier: ^4.7.0
-        version: 4.7.0
       simple-peer:
         specifier: ^9.11.1
         version: 9.11.1
@@ -307,15 +289,6 @@ importers:
       '@types/simple-peer':
         specifier: ^9.11.8
         version: 9.11.8
-      drizzle-kit:
-        specifier: ^0.20.14
-        version: 0.20.17
-      drizzle-orm:
-        specifier: ^0.29.4
-        version: 0.29.5(@cloudflare/workers-types@4.20240718.0)(@types/react@18.3.3)(postgres@3.4.4)(react@18.2.0)
-      eventemitter3:
-        specifier: ^5.0.1
-        version: 5.0.1
       isbot:
         specifier: ^4.1.0
         version: 4.4.0
@@ -349,9 +322,9 @@ importers:
       tone:
         specifier: ^14.7.77
         version: 14.7.77
-      uuid:
-        specifier: ^10.0.0
-        version: 10.0.0
+      usemods:
+        specifier: ^1.6.1
+        version: 1.6.1
       webmidi:
         specifier: ^3.1.8
         version: 3.1.9
@@ -3787,9 +3760,6 @@ packages:
     resolution: {integrity: sha512-8q3LsZjRezbFZ2PN+uP+Q7pnHUMmAOziU2vA2OwoFaKIXxlxl38IylhSSgUorWu/rf4er67w0ikBqjBFk/pomA==}
     engines: {node: '>=10.13.0'}
 
-  eventemitter3@5.0.1:
-    resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
-
   events@2.1.0:
     resolution: {integrity: sha512-3Zmiobend8P9DjmKAty0Era4jV8oJ0yGYe2nJJAxgymF9+N8F2m0hhZiMoWtcfepExzNKZumFU3ksdQbInGWCg==}
     engines: {node: '>=0.4.x'}
@@ -6772,6 +6742,9 @@ packages:
     resolution: {integrity: sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==}
     engines: {node: '>=0.10.0'}
 
+  usemods@1.6.1:
+    resolution: {integrity: sha512-Wll7kG39y+jCtlGk/mZzDeuMFOoNWwch2mK3sqCURwQO7BnwqCpkTWWHdGLw1LaBYvh+eHxO//ntwO7pyst0aQ==}
+
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
@@ -6784,10 +6757,6 @@ packages:
   utils-merge@1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
-
-  uuid@10.0.0:
-    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
-    hasBin: true
 
   uvu@0.5.6:
     resolution: {integrity: sha512-+g8ENReyr8YsOc6fv/NVJs2vFdHBnBNdfE49rshrTzDWOlUx4Gq7KOS2GD8eqhy2j+Ejq29+SbKH8yjkAqXqoA==}
@@ -10907,8 +10876,6 @@ snapshots:
 
   event-target-shim@6.0.2: {}
 
-  eventemitter3@5.0.1: {}
-
   events@2.1.0: {}
 
   evp_bytestokey@1.0.3:
@@ -14292,6 +14259,8 @@ snapshots:
 
   use@3.1.1: {}
 
+  usemods@1.6.1: {}
+
   util-deprecate@1.0.2: {}
 
   util@0.10.4:
@@ -14307,8 +14276,6 @@ snapshots:
       which-typed-array: 1.1.15
 
   utils-merge@1.0.1: {}
-
-  uuid@10.0.0: {}
 
   uvu@0.5.6:
     dependencies:

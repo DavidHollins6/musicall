@@ -5,6 +5,7 @@
     "build": "tsc"
   },
   "exports": {
+    "./user": "./src/user.ts",
     "./room": "./src/room.ts"
   },
   "devDependencies": {

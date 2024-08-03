@@ -6,10 +6,7 @@ import { DeviceProvider } from "../store/deviceContext";
 import CallPage from "..//components/pages/CallPage";
 import { ClientOnly } from "remix-utils/client-only";
 import { requireAuthSession } from "../modules/auth/session.server";
-import { db } from "../database/db.server";
-import { rooms } from "../database/schema";
-import { and, eq } from "drizzle-orm";
-import { getRoomAllowList } from "@musicall/api/room";
+import { getOwnedRooms, getRoomAllowList } from "@musicall/api/room";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
@@ -25,17 +22,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect("/");
     }
 
-    const room = await db
-        .select()
-        .from(rooms)
-        .where(and(eq(rooms.ownerId, userId), eq(rooms.id, roomId)));
+    const rooms = await getOwnedRooms(userId);
+    const ownsThisRoom = rooms.findIndex((r) => r.id === roomId) >= 0;
+    const allowList = await getRoomAllowList(roomId);
+    const isInAllowList = allowList.includes(userId);
 
-    if (room.length === 0) {
-        const allowList = await getRoomAllowList(roomId);
-
-        if (allowList.includes(userId)) {
-            return json({ userId, roomId });
-        }
+    if (!ownsThisRoom && !isInAllowList) {
         return redirect(`/wait?roomId=${roomId}`);
     }
 
