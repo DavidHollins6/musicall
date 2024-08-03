@@ -53,6 +53,14 @@ const MessageSchema = z
             type: z.literal("waiting-room-updated"),
             waiters: z.string().array(),
         }),
+    )
+    .or(
+        z.object({
+            type: z.literal("chat"),
+            message: z.string(),
+            from: z.string(),
+            timestamp: z.number(),
+        }),
     );
 
 export const useWebRTC = ({ room, userId }: Props) => {
@@ -86,6 +94,10 @@ export const useWebRTC = ({ room, userId }: Props) => {
             if (result.data.type === "waiting-room-updated") {
                 console.log("someone joined the waiting room!", result.data);
                 peersDispatch({ type: "setWaitingList", waitingList: result.data.waiters });
+            }
+
+            if (result.data.type === "chat") {
+                peersDispatch({ type: "addChatMessage", message: result.data });
             }
         },
     });
