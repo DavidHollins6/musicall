@@ -11,10 +11,17 @@ type PeerData = {
     connected: boolean;
 };
 
+type ChatMessage = {
+    from: string;
+    message: string;
+    timestamp: number;
+};
+
 type State = {
     peers: Record<string, PeerData>;
     localStream?: MediaStream;
     waitingList: Array<string>;
+    chatMessages: Array<ChatMessage>;
 };
 
 type Action =
@@ -23,10 +30,11 @@ type Action =
     | { type: "setLocalStream"; localStream: MediaStream }
     | { type: "sendData"; message: string }
     | { type: "setWaitingList"; waitingList: Array<string> }
+    | { type: "addChatMessage"; message: ChatMessage }
     | { type: "setPeerStream"; peerId: string; stream: MediaStream };
 
 const PeersContext = React.createContext<{ state: State; dispatch: React.Dispatch<Action> }>({
-    state: { peers: {}, waitingList: [] },
+    state: { peers: {}, waitingList: [], chatMessages: [] },
     dispatch: () => undefined,
 });
 
@@ -81,6 +89,9 @@ function peersReducer(state: State, action: Action) {
         case "setWaitingList": {
             return { ...state, waitingList: action.waitingList };
         }
+        case "addChatMessage": {
+            return { ...state, chatMessages: [...state.chatMessages, action.message] };
+        }
         default: {
             throw new Error(`Unhandled action type`);
         }
@@ -88,7 +99,7 @@ function peersReducer(state: State, action: Action) {
 }
 
 function PeersProvider({ children }: { children: React.ReactNode }) {
-    const [state, dispatch] = React.useReducer(peersReducer, { peers: {}, waitingList: [] });
+    const [state, dispatch] = React.useReducer(peersReducer, { peers: {}, waitingList: [], chatMessages: [] });
     // NOTE: you *might* need to memoize this value
     // Learn more in http://kcd.im/optimize-context
     const value = { state, dispatch };
