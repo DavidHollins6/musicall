@@ -1,7 +1,7 @@
 import type { Express, Request } from "express";
 import { rooms } from "@musicall/storage/schema";
 import { RedisCache } from "@musicall/storage/cache";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 export const roomHandlers = (
@@ -40,4 +40,30 @@ export const roomHandlers = (
 
     res.status(200).send(userIds);
   });
+
+  app.get("/room/owned/:id", async (req, res) => {
+    const result = await db
+      .select()
+      .from(rooms)
+      .where(eq(rooms.ownerId, req.params.id));
+
+    if (result.length > 0) {
+      res.send(result);
+      return;
+    }
+
+    res.status(404).send();
+  });
+
+  app.post(
+    "/room/create/:id",
+    async (req: Request<{ id: string }, unknown, { ownerId: string }>, res) => {
+      const { ownerId } = req.body;
+      const { id } = req.params;
+
+      const result = await db.insert(rooms).values({ id, ownerId }).returning();
+
+      res.status(200).send(result);
+    }
+  );
 };

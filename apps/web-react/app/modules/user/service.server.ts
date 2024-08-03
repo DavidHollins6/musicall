@@ -1,15 +1,9 @@
-import { users } from "../../database/schema";
-import { db } from "../../database/db.server";
+import { createUser as createUserApi } from "@musicall/api/user";
 import type { AuthSession } from "../auth/types";
 import { createEmailAuthAccount, signInWithEmail, deleteAuthAccount } from "../auth/service.server";
-import { eq } from "drizzle-orm";
-
-export async function getUserByEmail(email: string) {
-    return await db.select().from(users).where(eq(users.email, email));
-}
 
 async function createUser({ email, userId }: Pick<AuthSession, "userId" | "email">) {
-    return await db.insert(users).values({ email, id: userId }).returning();
+    return await createUserApi(userId, email);
 }
 
 export async function tryCreateUser({ email, userId }: Pick<AuthSession, "userId" | "email">) {
