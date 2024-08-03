@@ -95,6 +95,7 @@ export default function LoginPage() {
                         <Blockquote color="blue" cite="–Happy user">
                             This is a great application
                         </Blockquote>
+                        <input name="redirectTo" id="redirectTo" type="hidden" value={redirectTo} />
                     </Stack>
                 </Card>
             </Flex>

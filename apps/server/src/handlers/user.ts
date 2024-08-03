@@ -35,14 +35,14 @@ export const userHandlers = (app: Express, db: PostgresJsDatabase) => {
   app.post(
     "/user/create/:id",
     async (
-      req: Request<{ id: string }, unknown, { email: string; userId: string }>,
+      req: Request<{ id: string }, unknown, { email: string; name: string }>,
       res
     ) => {
-      const { email } = req.body;
+      const { email, name } = req.body;
 
       const result = await db
         .insert(users)
-        .values({ email, id: req.params.id })
+        .values({ email, id: req.params.id, name })
         .returning();
 
       res.status(200).send(result);
