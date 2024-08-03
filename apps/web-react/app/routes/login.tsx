@@ -8,7 +8,7 @@ import { createAuthSession, getAuthSession } from "../modules/auth/session.serve
 import { signInWithEmail } from "../modules/auth/service.server";
 import { isFormProcessing } from "../utils/form";
 import { assertIsPost } from "../utils/http.server";
-import { Blockquote, Button, Card, Divider, Flex, Group, Image, Input, Stack, Text } from "@mantine/core";
+import { Blockquote, Button, Card, Divider, Flex, Group, Input, Stack } from "@mantine/core";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const authSession = await getAuthSession(request);
