@@ -10,9 +10,9 @@ import { createUserAccount } from "../modules/user/service.server";
 
 import { isFormProcessing } from "../utils/form";
 import { assertIsPost } from "../utils/http.server";
-import { ContinueWithEmailForm } from "../modules/auth/components/ContinueWithEmailForm";
-import { generateUuid } from "usemods";
+import { checkPasswordStrength, generateUuid } from "usemods";
 import { createRoom } from "@musicall/api/room";
+import { Button, Card, Divider, Flex, Input, Stack } from "@mantine/core";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const authSession = await getAuthSession(request);
@@ -22,14 +22,38 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return json({ title: "Register" });
 }
 
-const JoinFormSchema = z.object({
-    email: z
-        .string()
-        .email("invalid-email")
-        .transform((email) => email.toLowerCase()),
-    password: z.string().min(8, "password-too-short"),
-    redirectTo: z.string().optional(),
-});
+const JoinFormSchema = z
+    .object({
+        email: z
+            .string()
+            .email("Invalid Email")
+            .transform((email) => email.toLowerCase()),
+        password: z.string().min(8, "Password is too short"),
+        name: z.string().min(1, "Please provide a name"),
+        confirmPassword: z.string(),
+        redirectTo: z.string().optional(),
+    })
+    .superRefine(({ confirmPassword, password }, ctx) => {
+        const strength = checkPasswordStrength(password, { length: 8, number: 1, special: 1, uppercase: 1 }) as {
+            label: string;
+            score: number;
+        };
+
+        if (strength.score < 4) {
+            ctx.addIssue({
+                code: "custom",
+                message: strength.label,
+                path: ["password"],
+            });
+        }
+        if (confirmPassword !== password) {
+            ctx.addIssue({
+                code: "custom",
+                message: "The passwords did not match",
+                path: ["confirmPassword"],
+            });
+        }
+    });
 
 export async function action({ request }: ActionFunctionArgs) {
     assertIsPost(request);
@@ -45,7 +69,7 @@ export async function action({ request }: ActionFunctionArgs) {
         );
     }
 
-    const { email, password, redirectTo } = result.data;
+    const { email, password, redirectTo, name } = result.data;
 
     const existingUser = await getUserByEmail(email);
 
@@ -53,7 +77,7 @@ export async function action({ request }: ActionFunctionArgs) {
         return json({ errors: { email: "user-already-exist", password: null } }, { status: 400 });
     }
 
-    const authSession = await createUserAccount(email, password);
+    const authSession = await createUserAccount(email, password, name);
 
     if (!authSession) {
         return json({ errors: { email: "unable-to-create-account", password: null } }, { status: 500 });
@@ -75,97 +99,47 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 export default function Join() {
-    const zo = useZorm("NewQuestionWizardScreen", JoinFormSchema);
+    const zo = useZorm("join", JoinFormSchema);
     const [searchParams] = useSearchParams();
     const redirectTo = searchParams.get("redirectTo") ?? undefined;
     const navigation = useNavigation();
     const disabled = isFormProcessing(navigation.state);
 
     return (
-        <div className="flex min-h-full flex-col justify-center">
-            <div className="mx-auto w-full max-w-md px-8">
-                <Form ref={zo.ref} method="post" className="space-y-6" replace>
-                    <div>
-                        <label htmlFor={zo.fields.email()} className="block text-sm font-medium text-gray-700">
-                            Email
-                        </label>
-                        <div className="mt-1">
-                            <input
-                                data-test-id="email"
-                                required
-                                name={zo.fields.email()}
-                                type="email"
-                                autoComplete="email"
-                                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-                                disabled={disabled}
-                            />
-                            {zo.errors.email()?.message && (
-                                <div className="pt-1 text-red-700" id="email-error">
-                                    {zo.errors.email()?.message}
-                                </div>
-                            )}
-                        </div>
-                    </div>
+        <Form ref={zo.ref} method="post" replace>
+            <Flex w="100vw" h="100vh" justify="center" align="center">
+                <Card w="30%" withBorder shadow="sm" padding="lg">
+                    <h1>Sign up</h1>
+                    <Stack>
+                        <Input.Wrapper required label="Email" error={zo.errors.email()?.message}>
+                            <Input name={zo.fields.email()} />
+                        </Input.Wrapper>
+                        <Input.Wrapper
+                            description="Must contain at least 1 special character, uppercase character, and number"
+                            label="Password"
+                            required
+                            error={zo.errors.password()?.message}
+                        >
+                            <Input type="password" name={zo.fields.password()} />
+                        </Input.Wrapper>
+                        <Input.Wrapper required label="Confirm Password" error={zo.errors.confirmPassword()?.message}>
+                            <Input type="password" name={zo.fields.confirmPassword()} />
+                        </Input.Wrapper>
+                        <Input.Wrapper required label="Name" error={zo.errors.name()?.message}>
+                            <Input name={zo.fields.name()} />
+                        </Input.Wrapper>
+                        <Button disabled={disabled} type="submit">
+                            Sign up
+                        </Button>
+                        <Link to="/login">Already have an account?</Link>
+                        <Card.Section>
+                            <Divider />
+                        </Card.Section>
 
-                    <div>
-                        <label htmlFor={zo.fields.password()} className="block text-sm font-medium text-gray-700">
-                            Password
-                        </label>
-                        <div className="mt-1">
-                            <input
-                                data-test-id="password"
-                                name={zo.fields.password()}
-                                type="password"
-                                autoComplete="new-password"
-                                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-                                disabled={disabled}
-                            />
-                            {zo.errors.password()?.message && (
-                                <div className="pt-1 text-red-700" id="password-error">
-                                    {zo.errors.password()?.message}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <input type="hidden" name={zo.fields.redirectTo()} value={redirectTo} />
-                    <button
-                        data-test-id="create-account"
-                        type="submit"
-                        className="w-full rounded bg-blue-500  px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
-                        disabled={disabled}
-                    >
-                        Create Account
-                    </button>
-                    <div className="flex items-center justify-center">
-                        <div className="text-center text-sm text-gray-500">
-                            Already have an account?{" "}
-                            <Link
-                                className="text-blue-500 underline"
-                                to={{
-                                    pathname: "/login",
-                                    search: searchParams.toString(),
-                                }}
-                            >
-                                Login
-                            </Link>
-                        </div>
-                    </div>
-                </Form>
-                <div className="mt-6">
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="bg-white px-2 text-gray-500">Continue With Email</span>
-                        </div>
-                    </div>
-                    <div className="mt-6">
-                        <ContinueWithEmailForm />
-                    </div>
-                </div>
-            </div>
-        </div>
+                        <input name="redirectTo" id="redirectTo" type="hidden" value={redirectTo} />
+                    </Stack>
+                </Card>
+            </Flex>
+        </Form>
     );
 }

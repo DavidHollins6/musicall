@@ -1,7 +1,7 @@
 import { type LinksFunction, type LoaderFunctionArgs, json } from "@remix-run/node";
 
 import styles from "../styles/global.css?url";
-import { requireAuthSession } from "~/modules/auth/session.server";
+import { requireAuthSession } from "../modules/auth/session.server";
 import { getOwnedRooms } from "@musicall/api/room";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import { Button, Space } from "@mantine/core";

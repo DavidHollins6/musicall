@@ -24,12 +24,14 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
 
 export const createUser = async (
   userId: string,
-  email: string
+  email: string,
+  name: string
 ): Promise<User | null> => {
   const response = await fetch(`http://localhost:3000/user/create/${userId}`, {
     method: "POST",
     body: JSON.stringify({
       email,
+      name,
     }),
     headers: { "Content-Type": "application/json" },
   });

@@ -280,6 +280,9 @@ importers:
       '@musicall/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@musicall/storage':
+        specifier: workspace:*
+        version: link:../../packages/storage
       '@remix-run/node':
         specifier: ^2.9.2
         version: 2.9.2(typescript@5.4.5)
