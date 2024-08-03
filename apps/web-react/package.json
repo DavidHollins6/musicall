@@ -11,9 +11,9 @@
         "typecheck": "tsc"
     },
     "dependencies": {
+        "@mantine/core": "^7.11.2",
+        "@mantine/hooks": "^7.11.2",
         "@musicall/api": "workspace:*",
-        "@radix-ui/colors": "^3.0.0",
-        "@radix-ui/themes": "^3.0.5",
         "@remix-run/node": "^2.9.2",
         "@remix-run/react": "^2.9.2",
         "@remix-run/serve": "^2.9.2",
@@ -22,6 +22,9 @@
         "isbot": "^4.1.0",
         "midimessage": "^1.0.5",
         "partysocket": "^1.0.1",
+        "postcss": "^8.4.32",
+        "postcss-preset-mantine": "^1.17.0",
+        "postcss-simple-vars": "^7.0.1",
         "postgres": "^3.4.3",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

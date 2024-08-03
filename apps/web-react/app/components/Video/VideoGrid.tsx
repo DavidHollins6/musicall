@@ -1,7 +1,6 @@
 import { usePeers } from "../../store/peersContext";
 import { RemoteVideo } from "./RemoteVideo";
 import { LocalVideo } from "./LocalVideo";
-import { Box, Grid } from "@radix-ui/themes";
 
 export const VideoGrid = () => {
     const { peers } = usePeers();

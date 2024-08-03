@@ -3,7 +3,7 @@ import { json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { PeersProvider } from "../store/peersContext";
 import { DeviceProvider } from "../store/deviceContext";
-import CallPage from "..//components/pages/CallPage";
+import CallPage from "../components/pages/CallPage";
 import { ClientOnly } from "remix-utils/client-only";
 import { requireAuthSession } from "../modules/auth/session.server";
 import { getOwnedRooms, getRoomAllowList } from "@musicall/api/room";

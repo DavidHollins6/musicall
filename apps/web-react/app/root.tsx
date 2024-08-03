@@ -1,8 +1,7 @@
-import { Theme } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import "./styles/global.css";
-import "./styles/colors.css";
+import "@mantine/core/styles.css";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 
 export function Layout({ children }: { children: React.ReactNode }) {
     return (
@@ -12,9 +11,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <Meta />
                 <Links />
+                <ColorSchemeScript />
             </head>
             <body>
-                {children}
+                <MantineProvider>{children}</MantineProvider>
                 <ScrollRestoration />
                 <Scripts />
             </body>
@@ -23,9 +23,5 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-    return (
-        <Theme accentColor="indigo">
-            <Outlet />
-        </Theme>
-    );
+    return <Outlet />;
 }
