@@ -8,7 +8,7 @@ import { createAuthSession, getAuthSession } from "../modules/auth/session.serve
 import { signInWithEmail } from "../modules/auth/service.server";
 import { isFormProcessing } from "../utils/form";
 import { assertIsPost } from "../utils/http.server";
-import { Button } from "@mantine/core";
+import { Blockquote, Button, Card, Divider, Flex, Group, Image, Input, Stack, Text } from "@mantine/core";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const authSession = await getAuthSession(request);
@@ -70,7 +70,36 @@ export default function LoginPage() {
     const navigation = useNavigation();
     const disabled = isFormProcessing(navigation.state);
 
-    return <Button>Hello</Button>;
+    return (
+        <Form ref={zo.ref} method="post" replace>
+            <Flex w="100vw" h="100vh" justify="center" align="center">
+                <Card w="30%" withBorder shadow="sm" padding="lg">
+                    <h1>Login</h1>
+                    <Stack>
+                        <Input.Wrapper label="Email" error={zo.errors.email()?.message}>
+                            <Input name={zo.fields.email()} />
+                        </Input.Wrapper>
+                        <Input.Wrapper label="Password" error={zo.errors.password()?.message}>
+                            <Input type="password" name={zo.fields.password()} />
+                        </Input.Wrapper>
+                        <Button disabled={disabled} type="submit">
+                            Login
+                        </Button>
+                        <Group justify="space-between">
+                            <Link to="/join">Create account</Link>
+                            <Link to="/forgot-password">Forgot password?</Link>
+                        </Group>
+                        <Card.Section>
+                            <Divider />
+                        </Card.Section>
+                        <Blockquote color="blue" cite="–Happy user">
+                            This is a great application
+                        </Blockquote>
+                    </Stack>
+                </Card>
+            </Flex>
+        </Form>
+    );
 }
 
 {

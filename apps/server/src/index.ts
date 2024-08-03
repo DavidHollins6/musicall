@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import bodyParser from "body-parser";
 import { roomHandlers } from "./handlers/room";
 import { createCache } from "@musicall/storage/cache";
 import { createDb } from "@musicall/storage/db";
@@ -26,7 +25,6 @@ const db = createDb(process.env.DATABASE_URL);
 const redis = createCache(process.env.REDIS_URL, process.env.REDIS_PASSWORD);
 
 app.use(express.json());
-app.use(bodyParser.json({ type: "application/*+json" }));
 
 roomHandlers(app, db, redis);
 
@@ -51,5 +49,3 @@ app.get("/redis-clear", async (_, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
-
-console.log(app.routes);
