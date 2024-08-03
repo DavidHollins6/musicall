@@ -1,7 +1,6 @@
 import { useWebRTC } from "../../hooks/useWebRTC";
 import { VideoGrid } from "../../components/Video/VideoGrid";
 import { ControlBar } from "../ControlBar";
-import { Flex } from "@radix-ui/themes";
 import { useMidi } from "../../hooks/useMidi";
 import { usePeers } from "~/store/peersContext";
 import { useState } from "react";
@@ -18,7 +17,7 @@ export default function CallPage({ userId, roomId }: Props) {
     const [message, setMessage] = useState("");
 
     return (
-        <Flex direction="column" maxHeight="100vh">
+        <div>
             <VideoGrid />
             {webMidiEnabled ? <ControlBar /> : null}
             {chatMessages.map((m) => (
@@ -49,6 +48,6 @@ export default function CallPage({ userId, roomId }: Props) {
                     </button>
                 </>
             ))}
-        </Flex>
+        </div>
     );
 }
