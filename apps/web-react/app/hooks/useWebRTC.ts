@@ -1,10 +1,11 @@
-import { useEffect } from "react";
 import { usePartySocket } from "partysocket/react";
 import Peer, { type SignalData } from "simple-peer";
 import z from "zod";
 import { usePeers, usePeersDispatcher } from "../store/peersContext";
 import { useDevice, useDeviceDispatcher } from "../store/deviceContext";
 import { useMessageHandler } from "./useMessageHandler";
+import { useCamera } from "./useCamera";
+import { useEffect } from "react";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -70,6 +71,33 @@ export const useWebRTC = ({ room, userId }: Props) => {
     const deviceDispatch = useDeviceDispatcher();
     const messageHandler = useMessageHandler();
     const { voice, video } = useDevice();
+    const { getStream } = useCamera();
+
+    useEffect(() => {
+        getStream().then((localStream) => {
+            if (!localStream) {
+                return;
+            }
+
+            localStream.getAudioTracks().forEach((track) => (track.enabled = voice.enabled));
+            localStream.getVideoTracks().forEach((track) => (track.enabled = video.enabled));
+            peersDispatch({ type: "setLocalStream", localStream });
+            const videoDeviceId = localStream.getVideoTracks()[0]?.getSettings().deviceId;
+            const audioDeviceId = localStream.getAudioTracks()[0]?.getSettings().deviceId;
+
+            if (videoDeviceId && audioDeviceId) {
+                deviceDispatch({ type: "setVideoDeviceId", id: videoDeviceId });
+                deviceDispatch({ type: "setAudioDeviceId", id: audioDeviceId });
+            }
+
+            socket.send(
+                JSON.stringify({
+                    type: "join-room",
+                    userId,
+                }),
+            );
+        });
+    }, []);
 
     const socket = usePartySocket({
         room: room,
@@ -101,45 +129,6 @@ export const useWebRTC = ({ room, userId }: Props) => {
             }
         },
     });
-
-    useEffect(() => {
-        navigator.mediaDevices
-            .getUserMedia({
-                video: {
-                    width: { min: 640, ideal: 1920, max: 1920 },
-                    height: { min: 480, ideal: 1080, max: 1080 },
-                },
-                audio: true,
-            })
-            .then(async (stream) => {
-                stream.getAudioTracks().forEach((track) => (track.enabled = voice.enabled));
-                stream.getVideoTracks().forEach((track) => (track.enabled = video.enabled));
-                peersDispatch({ type: "setLocalStream", localStream: stream });
-                const videoDeviceId = stream.getVideoTracks()[0]?.getSettings().deviceId;
-                const audioDeviceId = stream.getAudioTracks()[0]?.getSettings().deviceId;
-
-                if (videoDeviceId && audioDeviceId) {
-                    deviceDispatch({ type: "setVideoDeviceId", id: videoDeviceId });
-                    deviceDispatch({ type: "setAudioDeviceId", id: audioDeviceId });
-                }
-
-                socket.send(
-                    JSON.stringify({
-                        type: "join-room",
-                        userId,
-                    }),
-                );
-            })
-            .catch((e) => {
-                console.error("there was an error here for some reason", e);
-                socket.send(
-                    JSON.stringify({
-                        type: "join-room",
-                        userId,
-                    }),
-                );
-            });
-    }, []);
 
     const addPeer = (peerId: string, initiator: boolean, peerUserId: string) => {
         const peerConnection = new Peer({

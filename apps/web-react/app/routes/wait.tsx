@@ -4,7 +4,8 @@ import { ClientOnly } from "remix-utils/client-only";
 import { requireAuthSession } from "../modules/auth/session.server";
 import { WaitPage } from "../components/pages/WaitPage";
 import { useLoaderData } from "@remix-run/react";
-import { getOwnedRooms, getRoomAllowList } from "@musicall/api/room";
+import { getOwnedRooms, getRoom, getRoomAllowList } from "@musicall/api/room";
+import { getUser } from "@musicall/api/user";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
@@ -23,16 +24,29 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect(`/call?roomId=${roomId}`);
     }
 
+    const room = await getRoom(roomId);
+    if (!room) {
+        return redirect("/");
+    }
+
+    console.log(room);
+    const roomOwner = await getUser(room.ownerId);
+
+    if (!roomOwner) {
+        return redirect("/");
+    }
     const allowList = await getRoomAllowList(roomId);
     const allowedIntoRoom = allowList.includes(userId);
 
-    return json({ userId, roomId, allowedIntoRoom });
+    return json({ userId, roomId, allowedIntoRoom, roomOwner });
 }
 
-export default function Call() {
-    const { roomId, userId, allowedIntoRoom } = useLoaderData<typeof loader>();
+export default function Wait() {
+    const { roomId, userId, allowedIntoRoom, roomOwner } = useLoaderData<typeof loader>();
 
     return (
-        <ClientOnly>{() => <WaitPage roomId={roomId} userId={userId} allowedIntoRoom={allowedIntoRoom} />}</ClientOnly>
+        <ClientOnly>
+            {() => <WaitPage roomOwner={roomOwner} roomId={roomId} userId={userId} allowedIntoRoom={allowedIntoRoom} />}
+        </ClientOnly>
     );
 }

@@ -14,5 +14,12 @@ export const Video: React.FC<Props> = ({ stream }) => {
         }
     }, [stream]);
 
-    return <video style={{ maxWidth: "100%" }} ref={videoRef} autoPlay playsInline />;
+    return (
+        <video
+            style={{ position: "absolute", left: 0, top: 0, height: "100%", width: "100%" }}
+            ref={videoRef}
+            autoPlay
+            playsInline
+        />
+    );
 };
