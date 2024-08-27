@@ -66,7 +66,6 @@ export default class WebSocketServer implements Party.Server {
     }
 
     if (result.data.type === "join-room") {
-      console.log(this.roomOwnerId, result.data.userId);
       if (this.roomOwnerId && this.roomOwnerId === result.data.userId) {
         console.log("THE OWNER HAS JOINED");
         sender.send(

@@ -10,8 +10,6 @@ export const userHandlers = (app: Express, db: PostgresJsDatabase) => {
       .from(users)
       .where(eq(users.id, req.params.id));
 
-    console.log(result);
-
     if (result.length === 1) {
       res.send(result[0]);
       return;
