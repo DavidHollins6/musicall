@@ -1,7 +1,5 @@
 import { useWebRTC } from "../../hooks/useWebRTC";
 import { VideoGrid } from "../../components/Video/VideoGrid";
-import { ControlBar } from "../ControlBar";
-import { useMidi } from "../../hooks/useMidi";
 import { usePeers } from "~/store/peersContext";
 import { useState } from "react";
 
@@ -12,20 +10,19 @@ type Props = {
 
 export default function CallPage({ userId, roomId }: Props) {
     const { socket } = useWebRTC({ room: roomId, userId });
-    const webMidiEnabled = useMidi();
+    // const webMidiEnabled = useMidi();
     const { chatMessages, waitingList } = usePeers();
     const [message, setMessage] = useState("");
+    console.log(waitingList);
 
     return (
         <div>
             <VideoGrid />
-            {webMidiEnabled ? <ControlBar /> : null}
             {chatMessages.map((m) => (
                 <div key={m.timestamp}>
                     {m.message} - {m.from}
                 </div>
             ))}
-
             <input type="text" onChange={(e) => setMessage(e.target.value)} />
             <button
                 onClick={() =>
