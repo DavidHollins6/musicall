@@ -1,5 +1,5 @@
 import { useWebRTC } from "../../hooks/useWebRTC";
-import { VideoGrid } from "../../components/Video/VideoGrid";
+import { VideoGrid } from "../Video/VideoGrid";
 import { usePeers } from "~/store/peersContext";
 import { useState } from "react";
 
