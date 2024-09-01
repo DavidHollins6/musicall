@@ -1,44 +1,9 @@
 import type * as Party from "partykit/server";
-import type { SignalData } from "simple-peer";
 import { allowUserIntoRoom, getRoom } from "@musicall/api/room";
-import z from "zod";
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
 import { getUser } from "@musicall/api/user";
-
-const MessageSchema = z
-    .object({
-        type: z.literal("signal"),
-        signal: z.custom<SignalData>(),
-        peerId: z.string(),
-        userId: z.string(),
-    })
-    .or(
-        z.object({
-            type: z.literal("join-room"),
-            userId: z.string(),
-            voice: z.boolean(),
-            video: z.boolean(),
-            midi: z.boolean(),
-        }),
-    )
-    .or(z.object({ type: z.literal("allow-into-room"), userId: z.string() }))
-    .or(z.object({ type: z.literal("join-waiting-room"), userId: z.string() }))
-    .or(
-        z.object({
-            type: z.literal("chat"),
-            message: z.string(),
-            from: z.custom<User>(),
-            timestamp: z.number(),
-        }),
-    )
-    .or(
-        z.object({
-            type: z.literal("update-device-status"),
-            voice: z.boolean(),
-            video: z.boolean(),
-            midi: z.boolean(),
-        }),
-    );
+import { createClientMessage } from "@musicall/types/clientMessage";
+import { ServerMessageSchema } from "@musicall/types/serverMessage";
 
 type Participant = {
     connection: Party.Connection;
@@ -57,7 +22,7 @@ export default class WebSocketServer implements Party.Server {
 
     constructor(readonly room: Party.Room) {}
     async onMessage(message: string, sender: Party.Connection) {
-        const result = MessageSchema.safeParse(JSON.parse(message));
+        const result = ServerMessageSchema.safeParse(JSON.parse(message));
 
         if (!result.success) return;
 
@@ -69,7 +34,8 @@ export default class WebSocketServer implements Party.Server {
 
                 if (userConnection) {
                     const connection = this.room.getConnection(userConnection.connectionId);
-                    connection?.send(JSON.stringify({ type: "allow-into-room" }));
+                    const message = createClientMessage({ type: "allow-into-room" });
+                    connection?.send(message);
                 }
 
                 this.waiters = this.waiters.filter((w) => w.id !== userConnection?.connectionId);
@@ -77,14 +43,11 @@ export default class WebSocketServer implements Party.Server {
                     (w) => w.connectionId !== userConnection?.connectionId,
                 );
 
-                console.log("WAITERS: ", this.waiterUserIdsMap, this.waiters);
-
-                this.owner?.send(
-                    JSON.stringify({
-                        type: "waiting-room-updated",
-                        waiters: this.waiterUserIdsMap.map((w) => w.userId),
-                    }),
-                );
+                const message = createClientMessage({
+                    type: "waiting-room-updated",
+                    waiters: this.waiterUserIdsMap.map((w) => w.userId),
+                });
+                this.owner?.send(message);
                 break;
             }
 
@@ -97,26 +60,29 @@ export default class WebSocketServer implements Party.Server {
                     connectionId: sender.id,
                 });
 
-                this.owner?.send(
-                    JSON.stringify({
-                        type: "waiting-room-updated",
-                        waiters: this.waiterUserIdsMap.map((w) => w.userId),
-                    }),
-                );
+                const message = createClientMessage({
+                    type: "waiting-room-updated",
+                    waiters: this.waiterUserIdsMap.map((w) => w.userId),
+                });
+
+                this.owner?.send(message);
                 break;
             }
 
             case "join-room": {
                 const user = await getUser(result.data.userId);
 
+                if (!user) {
+                    break;
+                }
+
                 if (this.roomOwnerId && this.roomOwnerId === result.data.userId) {
-                    console.log("THE OWNER HAS JOINED");
-                    sender.send(
-                        JSON.stringify({
-                            type: "waiting-room-updated",
-                            waiters: this.waiterUserIdsMap.map((w) => w.userId),
-                        }),
-                    );
+                    const message = createClientMessage({
+                        type: "waiting-room-updated",
+                        waiters: this.waiterUserIdsMap.map((w) => w.userId),
+                    });
+
+                    sender.send(message);
 
                     this.owner = sender;
                 }
@@ -128,33 +94,30 @@ export default class WebSocketServer implements Party.Server {
 
                 // Send myself to all of the other peers
                 this.participants.forEach((participant) => {
-                    participant.connection.send(
-                        JSON.stringify({
-                            type: "peer",
-                            peerId: sender.id,
-                            initiator: true,
-                            user: user,
-                            voice,
-                            video,
-                            midi,
-                        }),
-                    );
+                    const message = createClientMessage({
+                        type: "peer",
+                        peerId: sender.id,
+                        initiator: true,
+                        user: user,
+                        voice,
+                        video,
+                        midi,
+                    });
+                    participant.connection.send(message);
                 });
 
                 this.participants.forEach((participant) => {
                     if (participant.connection.id !== sender.id) {
-                        console.log("send their peer id to me: ", sender.id, participant.connection.id);
-                        sender.send(
-                            JSON.stringify({
-                                type: "peer",
-                                peerId: participant.connection.id,
-                                initiator: false,
-                                user: participant.user,
-                                voice: participant.voice,
-                                video: participant.video,
-                                midi: participant.midi,
-                            }),
-                        );
+                        const message = createClientMessage({
+                            type: "peer",
+                            peerId: participant.connection.id,
+                            initiator: false,
+                            user: participant.user,
+                            voice: participant.voice,
+                            video: participant.video,
+                            midi: participant.midi,
+                        });
+                        sender.send(message);
                     }
                 });
 
@@ -172,13 +135,15 @@ export default class WebSocketServer implements Party.Server {
                 const connections = Array.from(this.room.getConnections());
                 const peerId = result.data.peerId;
 
+                const message = createClientMessage({
+                    type: "signal",
+                    signal: result.data.signal,
+                    peerId: sender.id,
+                    userId: result.data.userId,
+                });
+
                 this.room.broadcast(
-                    JSON.stringify({
-                        type: "signal",
-                        signal: result.data.signal,
-                        peerId: sender.id,
-                        userId: result.data.userId,
-                    }),
+                    message,
                     connections.filter((c) => c.id !== peerId).map((c) => c.id),
                 );
                 break;
@@ -186,7 +151,8 @@ export default class WebSocketServer implements Party.Server {
 
             case "chat": {
                 console.log("got a chat!!!", result.data);
-                this.room.broadcast(JSON.stringify(result.data));
+                const message = createClientMessage(result.data);
+                this.room.broadcast(message);
                 break;
             }
 
@@ -206,15 +172,14 @@ export default class WebSocketServer implements Party.Server {
 
                 this.participants.forEach((p) => {
                     if (p.connection.id !== sender.id) {
-                        p.connection.send(
-                            JSON.stringify({
-                                type: "update-device-status",
-                                peerId: sender.id,
-                                voice: newVoice,
-                                video: newVideo,
-                                midi: newMidi,
-                            }),
-                        );
+                        const message = createClientMessage({
+                            type: "update-device-status",
+                            peerId: sender.id,
+                            voice: newVoice,
+                            video: newVideo,
+                            midi: newMidi,
+                        });
+                        p.connection.send(message);
                     }
                 });
                 break;
@@ -238,12 +203,12 @@ export default class WebSocketServer implements Party.Server {
 
             this.waiters = this.waiters.filter((w) => w.id !== waiterUser.connectionId);
 
-            this.owner?.send(
-                JSON.stringify({
-                    type: "waiting-room-updated",
-                    waiters: this.waiterUserIdsMap.map((w) => w.userId),
-                }),
-            );
+            const message = createClientMessage({
+                type: "waiting-room-updated",
+                waiters: this.waiterUserIdsMap.map((w) => w.userId),
+            });
+
+            this.owner?.send(message);
         }
 
         this.participants = this.participants.filter((p) => p.connection.id !== connection.id);

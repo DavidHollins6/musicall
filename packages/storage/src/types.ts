@@ -1,10 +1,4 @@
-import {
-  instrumentTypes,
-  mappings,
-  rooms,
-  triggerTypes,
-  users,
-} from "@musicall/storage/schema";
+import { instrumentTypes, mappings, rooms, triggerTypes, users } from "./schema";
 
 export type User = typeof users.$inferSelect;
 

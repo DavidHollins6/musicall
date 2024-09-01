@@ -16,6 +16,7 @@
         "@mantine/notifications": "^7.12.1",
         "@musicall/api": "workspace:*",
         "@musicall/storage": "workspace:*",
+        "@musicall/types": "workspace:*",
         "@remix-run/node": "^2.9.2",
         "@remix-run/react": "^2.9.2",
         "@remix-run/serve": "^2.9.2",

@@ -2,7 +2,7 @@ import { usePeers } from "../../store/peersContext";
 import { RemoteVideo } from "./RemoteVideo";
 import { LocalVideo } from "./LocalVideo";
 import { Card, SimpleGrid, Image, Text } from "@mantine/core";
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
 const cols = {
     1: 1,
     2: 2,

@@ -1,20 +1,22 @@
 {
-  "name": "socket-server",
-  "version": "1.0.0",
-  "scripts": {
-    "dev": "npx partykit dev"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@types/simple-peer": "^9.11.8",
-    "msgpackr": "^1.10.1",
-    "partykit": "^0.0.104",
-    "simple-peer": "^9.11.1",
-    "y-partykit": "^0.0.28",
-    "zod": "^3.22.4",
-    "@musicall/api": "workspace:*",
-    "@musicall/typescript-config": "workspace:*"
-  }
+    "name": "socket-server",
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "npx partykit dev"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@types/simple-peer": "^9.11.8",
+        "msgpackr": "^1.10.1",
+        "partykit": "^0.0.104",
+        "simple-peer": "^9.11.1",
+        "y-partykit": "^0.0.28",
+        "zod": "^3.22.4",
+        "@musicall/api": "workspace:*",
+        "@musicall/types": "workspace:*",
+        "@musicall/storage": "workspace:*",
+        "@musicall/typescript-config": "workspace:*"
+    }
 }

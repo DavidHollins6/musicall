@@ -3,7 +3,7 @@ import { VideoGrid } from "../Video/VideoGrid";
 import { Box, Flex, rem, useMantineTheme } from "@mantine/core";
 import { ControlBar } from "../ControlBar";
 import { useDeviceListener } from "../../hooks/useDeviceListener";
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
 
 type Props = {
     user: User;
