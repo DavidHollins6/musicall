@@ -3,8 +3,8 @@
     "scripts": {
         "dev": "tsc --watch"
     },
-    "main": "./index.tsx",
-    "types": "./index.tsx",
+    "main": "./index.ts",
+    "types": "./index.ts",
     "exports": {
         "./clientMessage": "./src/clientMessage.ts",
         "./serverMessage": "./src/serverMessage.ts"
