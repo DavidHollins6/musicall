@@ -7,9 +7,16 @@ import CallPage from "../components/pages/CallPage";
 import { ClientOnly } from "remix-utils/client-only";
 import { requireAuthSession } from "../modules/auth/session.server";
 import { getOwnedRooms, getRoomAllowList } from "@musicall/api/room";
+import { getUser } from "@musicall/api/user";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
+
+    const user = await getUser(userId);
+
+    if (!user) {
+        return redirect("/");
+    }
 
     console.log("loading call", userId);
 
@@ -31,18 +38,18 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect(`/wait?roomId=${roomId}`);
     }
 
-    return json({ userId, roomId });
+    return json({ user, roomId, isOwner: ownsThisRoom });
 }
 
 export default function Call() {
-    const { roomId, userId } = useLoaderData<typeof loader>();
+    const { roomId, user, isOwner } = useLoaderData<typeof loader>();
 
     return (
         <ClientOnly>
             {() => (
                 <PeersProvider>
                     <DeviceProvider>
-                        <CallPage roomId={roomId} userId={userId} />
+                        <CallPage roomId={roomId} user={user} isOwner={isOwner} />
                     </DeviceProvider>
                 </PeersProvider>
             )}

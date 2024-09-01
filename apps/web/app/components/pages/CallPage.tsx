@@ -1,50 +1,31 @@
 import { useWebRTC } from "../../hooks/useWebRTC";
 import { VideoGrid } from "../Video/VideoGrid";
-import { usePeers } from "~/store/peersContext";
-import { useState } from "react";
+import { Box, Flex, rem, useMantineTheme } from "@mantine/core";
+import { ControlBar } from "../ControlBar";
+import { useDeviceListener } from "../../hooks/useDeviceListener";
+import { User } from "@musicall/storage/types";
 
 type Props = {
-    userId: string;
+    user: User;
     roomId: string;
+    isOwner: boolean;
 };
 
-export default function CallPage({ userId, roomId }: Props) {
-    const { socket } = useWebRTC({ room: roomId, userId });
-    // const webMidiEnabled = useMidi();
-    const { chatMessages, waitingList } = usePeers();
-    const [message, setMessage] = useState("");
-    console.log(waitingList);
+export default function CallPage({ user, roomId, isOwner }: Props) {
+    const { socket } = useWebRTC({ room: roomId, userId: user.id });
+    useDeviceListener();
+    const theme = useMantineTheme();
 
     return (
-        <div>
-            <VideoGrid />
-            {chatMessages.map((m) => (
-                <div key={m.timestamp}>
-                    {m.message} - {m.from}
-                </div>
-            ))}
-            <input type="text" onChange={(e) => setMessage(e.target.value)} />
-            <button
-                onClick={() =>
-                    socket?.send(JSON.stringify({ type: "chat", from: userId, message, timestamp: Date.now() }))
-                }
+        <Flex direction="column" w="100%" h="100%">
+            <VideoGrid user={user} />
+            <Box
+                style={{ borderTop: `2px solid ${theme.colors.gray[2]}`, boxShadow: theme.shadows.lg }}
+                px={16}
+                h={rem("64px")}
             >
-                Send
-            </button>
-            <hr />
-            {waitingList.map((w) => (
-                <>
-                    <p key={w}>{w}</p>
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            socket.send(JSON.stringify({ type: "allow-into-room", userId: w }));
-                        }}
-                    >
-                        Allow
-                    </button>
-                </>
-            ))}
-        </div>
+                <ControlBar user={user} isOwner={isOwner} socket={socket} />
+            </Box>
+        </Flex>
     );
 }

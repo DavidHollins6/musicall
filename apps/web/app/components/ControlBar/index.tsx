@@ -1,73 +1,132 @@
-import React, { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
-import { useDevice, useDeviceDispatcher } from "~/store/deviceContext";
-import { usePeers } from "~/store/peersContext";
-import { Input, WebMidi } from "webmidi";
+import React from "react";
+import { ActionIcon, Drawer, Group, Indicator } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import {
+    IconMicrophone,
+    IconMicrophoneOff,
+    IconVideo,
+    IconVideoOff,
+    IconMusic,
+    IconMusicOff,
+    IconMessageCircle,
+    IconUserPlus,
+} from "@tabler/icons-react";
+import { ChatDrawerSection } from "./ChatDrawerSection";
+import { useDevice, useDeviceDispatcher } from "../../store/deviceContext";
+import { SettingsPopover } from "./SettingsPopover";
+import { WaitingListDrawer } from "./WaitingListDrawer";
+import PartySocket from "partysocket";
+import { usePeers } from "../../store/peersContext";
+import { User } from "@musicall/storage/types";
 
-export const ControlBar: React.FC = () => {
-    const [inputs, setInputs] = useState<Input[]>([]);
-    const [selectedMidiInput, setSelectedMidiInput] = useState<string>("");
-    const { voice, video, midi } = useDevice();
-    const deviceDispatcher = useDeviceDispatcher();
-    const { localStream } = usePeers();
-
-    useEffect(() => {
-        setInputs(WebMidi.inputs);
-        if (WebMidi.inputs.length > 0) {
-            const firstMidiInput = WebMidi.inputs[0];
-            deviceDispatcher({ type: "setMidiDeviceId", id: firstMidiInput.id });
-            setSelectedMidiInput(firstMidiInput.id);
-        }
-    }, []);
+export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user: User }> = ({
+    isOwner,
+    socket,
+    user,
+}: {
+    isOwner: boolean;
+    socket: PartySocket;
+    user: User;
+}) => {
+    const [chatOpened, { open: openChatDrawer, close: closeChatDrawer }] = useDisclosure(false);
+    const [waitingListopened, { open: openWaitingListDrawer, close: closeWaitingListDrawer }] = useDisclosure(false);
+    const { video, midi, voice } = useDevice();
+    const { waitingList } = usePeers();
+    const dispatch = useDeviceDispatcher();
 
     return (
-        <div>hi</div>
-        // <Box className="control-bar">
-        //     <Flex p="4" gap="4">
-        //         <IconButton
-        //             size="3"
-        //             onClick={() => {
-        //                 if (localStream) {
-        //                     localStream.getAudioTracks().forEach((track) => (track.enabled = !voice.enabled));
-        //                 }
-        //                 deviceDispatcher({ type: "toggleVoice" });
-        //             }}
-        //             variant={voice.enabled ? "solid" : "outline"}
-        //         >
-        //             <Icon style={{ fontSize: "32px" }} icon={voice.enabled ? "mdi:microphone" : "mdi:microphone-off"} />
-        //         </IconButton>
-        //         <IconButton
-        //             size="3"
-        //             onClick={() => {
-        //                 if (localStream) {
-        //                     localStream.getVideoTracks().forEach((track) => (track.enabled = !video.enabled));
-        //                 }
-        //                 deviceDispatcher({ type: "toggleVideo" });
-        //             }}
-        //             variant={video.enabled ? "solid" : "outline"}
-        //         >
-        //             <Icon style={{ fontSize: "32px" }} icon={video.enabled ? "mdi:camera" : "mdi:camera-off"} />
-        //         </IconButton>
-        //         <IconButton
-        //             size="3"
-        //             onClick={() => {
-        //                 deviceDispatcher({ type: "toggleMidi" });
-        //             }}
-        //             variant={midi.enabled ? "solid" : "outline"}
-        //         >
-        //             <Icon style={{ fontSize: "32px" }} icon={midi.enabled ? "mdi:music" : "mdi:music-off"} />
-        //         </IconButton>
-        //         <Select.Root size="3" value={selectedMidiInput} onValueChange={setSelectedMidiInput}>
-        //             <Select.Trigger variant="soft" />
-        //             <Select.Content>
-        //                 {inputs.map((input) => (
-        //                     <Select.Item key={input.id} value={input.id}>
-        //                         {input.name}
-        //                     </Select.Item>
-        //                 ))}
-        //             </Select.Content>
-        //         </Select.Root>
-        //     </Flex>
-        // </Box>
+        <>
+            <Drawer
+                styles={{ body: { height: "calc(100% - 60px)" } }}
+                opened={chatOpened}
+                onClose={closeChatDrawer}
+                title="Chat"
+                position="right"
+            >
+                <ChatDrawerSection user={user} socket={socket} />
+            </Drawer>
+            <Drawer
+                styles={{ body: { height: "calc(100% - 60px)" } }}
+                opened={waitingListopened}
+                onClose={closeWaitingListDrawer}
+                title="Waiting List"
+                position="right"
+            >
+                <WaitingListDrawer socket={socket} />
+            </Drawer>
+            <Group h="100%" w="100%" align="center" justify="space-between">
+                <Group gap={24}>
+                    <ActionIcon.Group>
+                        <ActionIcon
+                            onClick={() => {
+                                console.log("toggle voice", voice.enabled);
+                                socket.send(
+                                    JSON.stringify({
+                                        type: "update-device-status",
+                                        midi: midi.enabled,
+                                        voice: !voice.enabled,
+                                        video: video.enabled,
+                                    }),
+                                );
+                                dispatch({ type: "toggleVoice" });
+                            }}
+                            size={48}
+                            bg={voice.enabled ? "blue" : "red"}
+                        >
+                            {voice.enabled ? <IconMicrophone /> : <IconMicrophoneOff />}
+                        </ActionIcon>
+                        <ActionIcon
+                            onClick={() => {
+                                socket.send(
+                                    JSON.stringify({
+                                        type: "update-device-status",
+                                        midi: midi.enabled,
+                                        voice: voice.enabled,
+                                        video: !video.enabled,
+                                    }),
+                                );
+                                dispatch({ type: "toggleVideo" });
+                            }}
+                            size={48}
+                            bg={video.enabled ? "blue" : "red"}
+                        >
+                            {video.enabled ? <IconVideo /> : <IconVideoOff />}
+                        </ActionIcon>
+
+                        <ActionIcon
+                            onClick={() => {
+                                socket.send(
+                                    JSON.stringify({
+                                        type: "update-device-status",
+                                        midi: !midi.enabled,
+                                        voice: voice.enabled,
+                                        video: video.enabled,
+                                    }),
+                                );
+                                dispatch({ type: "toggleMidi" });
+                            }}
+                            size={48}
+                            bg={midi.enabled ? "blue" : "red"}
+                        >
+                            {midi.enabled ? <IconMusic /> : <IconMusicOff />}
+                        </ActionIcon>
+                    </ActionIcon.Group>
+                    <SettingsPopover />
+                </Group>
+
+                <Group>
+                    <ActionIcon onClick={openChatDrawer} size={48} variant="default">
+                        <IconMessageCircle size={20} />
+                    </ActionIcon>
+                    {isOwner ? (
+                        <Indicator label={waitingList.length} disabled={waitingList.length === 0}>
+                            <ActionIcon onClick={openWaitingListDrawer} size={48} variant="default">
+                                <IconUserPlus size={20} />
+                            </ActionIcon>
+                        </Indicator>
+                    ) : null}
+                </Group>
+            </Group>
+        </>
     );
 };

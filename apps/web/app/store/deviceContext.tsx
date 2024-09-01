@@ -21,6 +21,7 @@ type State = {
 type Action =
     | { type: "setAudioDeviceId"; id: string }
     | { type: "setVideoDeviceId"; id: string }
+    | { type: "setDeviceIds"; videoId: string; audioId: string }
     | { type: "setMidiDeviceId"; id: string }
     | { type: "setInstrumentType"; instrumentType: InstrumentType }
     | { type: "toggleVoice" }
@@ -60,6 +61,19 @@ function deviceReducer(state: State, action: Action): State {
                 video: {
                     ...state.video,
                     id: action.id,
+                },
+            };
+        }
+        case "setDeviceIds": {
+            return {
+                ...state,
+                video: {
+                    ...state.video,
+                    id: action.videoId,
+                },
+                voice: {
+                    ...state.voice,
+                    id: action.audioId,
                 },
             };
         }
@@ -117,7 +131,7 @@ function DeviceProvider({ children }: { children: React.ReactNode }) {
             enabled: false,
         },
         video: {
-            enabled: false,
+            enabled: true,
         },
         midi: {
             enabled: false,
