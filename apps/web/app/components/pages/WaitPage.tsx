@@ -27,7 +27,7 @@ export const WaitPage = ({ roomId, userId, allowedIntoRoom, roomOwner }: Props) 
 
     const socket = usePartySocket({
         room: roomId,
-        host: "localhost:1999",
+        host: "https://musicall.davidhollins6.partykit.dev",
         onOpen() {
             const message = createServerMessage({
                 type: "join-waiting-room",

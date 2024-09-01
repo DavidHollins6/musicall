@@ -1,7 +1,7 @@
 import { Room } from "@musicall/storage";
 
 export const getRoom = async (id: string): Promise<Room | null> => {
-    const response = await fetch(`http://localhost:3000/room/${id}`);
+    const response = await fetch(`${process.env.API_URL}/room/${id}`);
     if (response.ok) {
         const room = (await response.json()) as Room;
         return room;
@@ -12,7 +12,7 @@ export const getRoom = async (id: string): Promise<Room | null> => {
 };
 
 export const getRoomAllowList = async (id: string): Promise<Array<string>> => {
-    const response = await fetch(`http://localhost:3000/room/${id}/allow-list`);
+    const response = await fetch(`${process.env.API_URL}/room/${id}/allow-list`);
     if (response.ok) {
         const allowList = (await response.json()) as Array<string>;
         return allowList;
@@ -23,7 +23,7 @@ export const getRoomAllowList = async (id: string): Promise<Array<string>> => {
 };
 
 export const getOwnedRooms = async (id: string): Promise<Array<Room>> => {
-    const response = await fetch(`http://localhost:3000/room/owned/${id}`);
+    const response = await fetch(`${process.env.API_URL}/room/owned/${id}`);
     if (response.ok) {
         const allowList = (await response.json()) as Array<Room>;
         return allowList;
@@ -34,7 +34,7 @@ export const getOwnedRooms = async (id: string): Promise<Array<Room>> => {
 };
 
 export const createRoom = async (userId: string, email: string): Promise<Room | null> => {
-    const response = await fetch(`http://localhost:3000/room/create/${userId}`, {
+    const response = await fetch(`${process.env.API_URL}/room/create/${userId}`, {
         method: "POST",
         body: JSON.stringify({
             email,
@@ -52,7 +52,7 @@ export const createRoom = async (userId: string, email: string): Promise<Room | 
 };
 
 export const allowUserIntoRoom = async (id: string, userId: string): Promise<boolean> => {
-    const response = await fetch(`http://localhost:3000/room/${id}/allow`, {
+    const response = await fetch(`${process.env.API_URL}/room/${id}/allow`, {
         method: "POST",
         body: JSON.stringify({
             userId,

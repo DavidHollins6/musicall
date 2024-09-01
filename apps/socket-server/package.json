@@ -2,7 +2,8 @@
     "name": "socket-server",
     "version": "1.0.0",
     "scripts": {
-        "dev": "npx partykit dev"
+        "dev": "npx partykit dev",
+        "deploy": "npx partykit deploy"
     },
     "keywords": [],
     "author": "",
