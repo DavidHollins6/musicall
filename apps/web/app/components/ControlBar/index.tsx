@@ -17,7 +17,8 @@ import { SettingsPopover } from "./SettingsPopover";
 import { WaitingListDrawer } from "./WaitingListDrawer";
 import PartySocket from "partysocket";
 import { usePeers } from "../../store/peersContext";
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
+import { createServerMessage } from "@musicall/types/serverMessage";
 
 export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user: User }> = ({
     isOwner,
@@ -60,14 +61,13 @@ export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user:
                         <ActionIcon
                             onClick={() => {
                                 console.log("toggle voice", voice.enabled);
-                                socket.send(
-                                    JSON.stringify({
-                                        type: "update-device-status",
-                                        midi: midi.enabled,
-                                        voice: !voice.enabled,
-                                        video: video.enabled,
-                                    }),
-                                );
+                                const message = createServerMessage({
+                                    type: "update-device-status",
+                                    midi: midi.enabled,
+                                    voice: !voice.enabled,
+                                    video: video.enabled,
+                                });
+                                socket.send(message);
                                 dispatch({ type: "toggleVoice" });
                             }}
                             size={48}
@@ -77,14 +77,13 @@ export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user:
                         </ActionIcon>
                         <ActionIcon
                             onClick={() => {
-                                socket.send(
-                                    JSON.stringify({
-                                        type: "update-device-status",
-                                        midi: midi.enabled,
-                                        voice: voice.enabled,
-                                        video: !video.enabled,
-                                    }),
-                                );
+                                const message = createServerMessage({
+                                    type: "update-device-status",
+                                    midi: midi.enabled,
+                                    voice: voice.enabled,
+                                    video: !video.enabled,
+                                });
+                                socket.send(message);
                                 dispatch({ type: "toggleVideo" });
                             }}
                             size={48}
@@ -95,14 +94,13 @@ export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user:
 
                         <ActionIcon
                             onClick={() => {
-                                socket.send(
-                                    JSON.stringify({
-                                        type: "update-device-status",
-                                        midi: !midi.enabled,
-                                        voice: voice.enabled,
-                                        video: video.enabled,
-                                    }),
-                                );
+                                const message = createServerMessage({
+                                    type: "update-device-status",
+                                    midi: !midi.enabled,
+                                    voice: voice.enabled,
+                                    video: video.enabled,
+                                });
+                                socket.send(message);
                                 dispatch({ type: "toggleMidi" });
                             }}
                             size={48}

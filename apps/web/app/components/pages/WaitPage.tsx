@@ -2,11 +2,12 @@ import { usePartySocket } from "partysocket/react";
 import { useState } from "react";
 import { z } from "zod";
 import { Button, Stepper, Stack, Group, Card } from "@mantine/core";
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
 import { MidiSetup } from "../midi/MidiSetup";
 import { VideoSetup } from "../Video/VideoSetup";
 import { MicrophoneSetup } from "../audio/MicrophoneSetup";
 import { useNavigate } from "@remix-run/react";
+import { createServerMessage } from "@musicall/types/serverMessage";
 
 type Props = {
     userId: string;
@@ -28,12 +29,11 @@ export const WaitPage = ({ roomId, userId, allowedIntoRoom, roomOwner }: Props) 
         room: roomId,
         host: "localhost:1999",
         onOpen() {
-            socket.send(
-                JSON.stringify({
-                    type: "join-waiting-room",
-                    userId,
-                }),
-            );
+            const message = createServerMessage({
+                type: "join-waiting-room",
+                userId,
+            });
+            socket.send(message);
         },
         onMessage(evt) {
             const result = MessageSchema.safeParse(JSON.parse(String(evt.data)));

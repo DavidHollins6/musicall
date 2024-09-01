@@ -1,13 +1,14 @@
 import { usePartySocket } from "partysocket/react";
-import Peer, { type SignalData } from "simple-peer";
-import z from "zod";
+import Peer from "simple-peer";
 import { usePeers, usePeersDispatcher } from "../store/peersContext";
 import { useDevice, useDeviceDispatcher } from "../store/deviceContext";
 import { useMessageHandler } from "./useMessageHandler";
 import { useCamera } from "./useCamera";
 import { useEffect } from "react";
 import { useMicrophone } from "./useMicrophone";
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
+import { createServerMessage } from "@musicall/types/serverMessage";
+import { ClientMessageSchema } from "@musicall/types/clientMessage";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -36,48 +37,6 @@ type Props = {
     userId: string;
 };
 
-const MessageSchema = z
-    .object({
-        type: z.literal("signal"),
-        signal: z.custom<SignalData>(),
-        peerId: z.string(),
-        userId: z.string(),
-    })
-    .or(
-        z.object({
-            type: z.literal("peer"),
-            peerId: z.string(),
-            initiator: z.boolean(),
-            user: z.custom<User>(),
-            voice: z.boolean(),
-            video: z.boolean(),
-            midi: z.boolean(),
-        }),
-    )
-    .or(
-        z.object({
-            type: z.literal("waiting-room-updated"),
-            waiters: z.string().array(),
-        }),
-    )
-    .or(
-        z.object({
-            type: z.literal("chat"),
-            message: z.string(),
-            from: z.custom<User>(),
-            timestamp: z.number(),
-        }),
-    )
-    .or(
-        z.object({
-            type: z.literal("update-device-status"),
-            peerId: z.string(),
-            voice: z.boolean(),
-            video: z.boolean(),
-            midi: z.boolean(),
-        }),
-    );
-
 export const useWebRTC = ({ room, userId }: Props) => {
     const { peers, localStream } = usePeers();
     const peersDispatch = usePeersDispatcher();
@@ -89,15 +48,14 @@ export const useWebRTC = ({ room, userId }: Props) => {
     const { getStreamById: getAudioStreamById, getDefaultId: getAudioDefaultId } = useMicrophone();
 
     useEffect(() => {
-        socket.send(
-            JSON.stringify({
-                type: "join-room",
-                userId,
-                voice: voice.enabled,
-                video: video.enabled,
-                midi: midi.enabled,
-            }),
-        );
+        const message = createServerMessage({
+            type: "join-room",
+            userId,
+            voice: voice.enabled,
+            video: video.enabled,
+            midi: midi.enabled,
+        });
+        socket.send(message);
     }, []);
 
     useEffect(() => {
@@ -161,7 +119,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
         room: room,
         host: "localhost:1999",
         onMessage(evt) {
-            const result = MessageSchema.safeParse(JSON.parse(String(evt.data)));
+            const result = ClientMessageSchema.safeParse(JSON.parse(String(evt.data)));
 
             if (!result.success) {
                 console.log("could not parse", result);
@@ -211,14 +169,13 @@ export const useWebRTC = ({ room, userId }: Props) => {
         });
 
         peerConnection.on("signal", (data) => {
-            socket.send(
-                JSON.stringify({
-                    type: "signal",
-                    signal: data,
-                    peerId,
-                    userId: userId,
-                }),
-            );
+            const message = createServerMessage({
+                type: "signal",
+                signal: data,
+                peerId,
+                userId: userId,
+            });
+            socket.send(message);
         });
 
         peerConnection.on("error", (e) => {

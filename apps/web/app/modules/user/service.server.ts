@@ -1,7 +1,7 @@
 import { createUser as createUserApi } from "@musicall/api/user";
 import type { AuthSession } from "../auth/types";
 import { createEmailAuthAccount, signInWithEmail, deleteAuthAccount } from "../auth/service.server";
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
 
 export type NonNullableFields<T> = {
     [P in keyof T]: NonNullable<T[P]>;

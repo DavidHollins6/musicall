@@ -9,8 +9,9 @@ import { z } from "zod";
 import { supabaseClient } from "../integrations/supabase/client";
 import { refreshAccessToken } from "../modules/auth/service.server";
 import { commitAuthSession, getAuthSession } from "../modules/auth/session.server";
-import { tryCreateUser, getUserByEmail } from "../modules/user/service.server";
+import { tryCreateUser } from "../modules/user/service.server";
 import { assertIsPost, safeRedirect } from "../utils/http.server";
+import { getUserByEmail } from "@musicall/api/user";
 
 // imagine a user go back after OAuth login success or type this URL
 // we don't want him to fall in a black hole 👽
@@ -70,7 +71,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     // first time sign in, let's create a brand-new User row in supabase
-    const user = await tryCreateUser(authSession);
+    const user = await tryCreateUser({ email: authSession.email, id: authSession.userId, name: "Fred" });
 
     if (!user) {
         return json(

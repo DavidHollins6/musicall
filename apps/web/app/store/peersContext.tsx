@@ -1,4 +1,4 @@
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
 import * as React from "react";
 import Peer from "simple-peer";
 

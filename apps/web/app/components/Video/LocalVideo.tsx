@@ -2,10 +2,10 @@
 import React from "react";
 import { usePeers } from "../../store/peersContext";
 import { Video } from ".";
-import { Avatar, Flex, Group, Text } from "@mantine/core";
+import { Flex, Group, Text } from "@mantine/core";
 import { IconMicrophoneOff } from "@tabler/icons-react";
 import { useDevice } from "../../store/deviceContext";
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
 
 export const LocalVideo: React.FC<{ user: User }> = ({ user }: { user: User }) => {
     const { localStream } = usePeers();

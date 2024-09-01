@@ -2,7 +2,8 @@ import { Avatar, Box, Flex, Stack, Text, TextInput } from "@mantine/core";
 import { usePeers } from "../../store/peersContext";
 import PartySocket from "partysocket";
 import { useState } from "react";
-import { User } from "@musicall/storage/types";
+import { User } from "@musicall/storage";
+import { createServerMessage } from "@musicall/types/serverMessage";
 
 export const ChatDrawerSection: React.FC<{ socket: PartySocket; user: User }> = ({
     socket,
@@ -55,14 +56,13 @@ export const ChatDrawerSection: React.FC<{ socket: PartySocket; user: User }> = 
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
-                    socket.send(
-                        JSON.stringify({
-                            type: "chat",
-                            message,
-                            from: user,
-                            timestamp: Date.now(),
-                        }),
-                    );
+                    const serverMessage = createServerMessage({
+                        type: "chat",
+                        message,
+                        from: user,
+                        timestamp: Date.now(),
+                    });
+                    socket.send(serverMessage);
                     setMessage("");
                 }}
             >

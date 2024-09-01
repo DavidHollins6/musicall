@@ -1,6 +1,7 @@
 import { Avatar, Button, Card, Group, Stack, Text } from "@mantine/core";
 import PartySocket from "partysocket";
 import { usePeers } from "../../store/peersContext";
+import { createServerMessage } from "@musicall/types/serverMessage";
 
 export const WaitingListDrawer = ({ socket }: { socket: PartySocket }) => {
     const { waitingList } = usePeers();
@@ -18,7 +19,8 @@ export const WaitingListDrawer = ({ socket }: { socket: PartySocket }) => {
                         <Text>{w}</Text>
                         <Button
                             onClick={() => {
-                                socket.send(JSON.stringify({ type: "allow-into-room", userId: w }));
+                                const message = createServerMessage({ type: "allow-into-room", userId: w });
+                                socket.send(message);
                             }}
                         >
                             Allow into room
