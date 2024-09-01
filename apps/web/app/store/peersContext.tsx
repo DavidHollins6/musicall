@@ -1,18 +1,20 @@
+import { User } from "@musicall/storage/types";
 import * as React from "react";
 import Peer from "simple-peer";
 
 type PeerData = {
     peerConnection: Peer.Instance;
-    userId: string;
+    user: User;
     peerId: string;
     microphoneEnabled: boolean;
     cameraEnabled: boolean;
+    midiEnabled: boolean;
     stream?: MediaStream;
     connected: boolean;
 };
 
 type ChatMessage = {
-    from: string;
+    from: User;
     message: string;
     timestamp: number;
 };
@@ -31,10 +33,15 @@ type Action =
     | { type: "sendData"; message: string }
     | { type: "setWaitingList"; waitingList: Array<string> }
     | { type: "addChatMessage"; message: ChatMessage }
-    | { type: "setPeerStream"; peerId: string; stream: MediaStream };
+    | { type: "setPeerStream"; peerId: string; stream: MediaStream }
+    | { type: "updateDeviceStatus"; peerId: string; voice: boolean; video: boolean; midi: boolean };
 
 const PeersContext = React.createContext<{ state: State; dispatch: React.Dispatch<Action> }>({
-    state: { peers: {}, waitingList: [], chatMessages: [] },
+    state: {
+        peers: {},
+        waitingList: [],
+        chatMessages: [],
+    },
     dispatch: () => undefined,
 });
 
@@ -92,6 +99,20 @@ function peersReducer(state: State, action: Action) {
         case "addChatMessage": {
             return { ...state, chatMessages: [...state.chatMessages, action.message] };
         }
+        case "updateDeviceStatus": {
+            return {
+                ...state,
+                peers: {
+                    ...state.peers,
+                    [action.peerId]: {
+                        ...state.peers[action.peerId],
+                        microphoneEnabled: action.voice,
+                        cameraEnabled: action.video,
+                        midiEnabled: action.midi,
+                    },
+                },
+            };
+        }
         default: {
             throw new Error(`Unhandled action type`);
         }
@@ -99,7 +120,11 @@ function peersReducer(state: State, action: Action) {
 }
 
 function PeersProvider({ children }: { children: React.ReactNode }) {
-    const [state, dispatch] = React.useReducer(peersReducer, { peers: {}, waitingList: [], chatMessages: [] });
+    const [state, dispatch] = React.useReducer(peersReducer, {
+        peers: {},
+        waitingList: [],
+        chatMessages: [],
+    });
     // NOTE: you *might* need to memoize this value
     // Learn more in http://kcd.im/optimize-context
     const value = { state, dispatch };

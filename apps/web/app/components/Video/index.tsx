@@ -3,9 +3,10 @@ import React, { useEffect, useRef } from "react";
 
 type Props = {
     stream?: MediaStream;
+    muted?: boolean;
 };
 
-export const Video: React.FC<Props> = ({ stream }) => {
+export const Video: React.FC<Props> = ({ stream, muted }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
@@ -20,6 +21,7 @@ export const Video: React.FC<Props> = ({ stream }) => {
             ref={videoRef}
             autoPlay
             playsInline
+            muted={muted}
         />
     );
 };

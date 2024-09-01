@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { InstrumentType, useDevice } from "~/store/deviceContext";
+import { InstrumentType, useDevice } from "../store/deviceContext";
 import { ISoundManager } from "../utils/sound/ISoundManager";
 import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager";
 

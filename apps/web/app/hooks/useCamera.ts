@@ -1,20 +1,32 @@
-import { useState } from "react";
-
 export const useCamera = () => {
-    const [videoDevices, setVideoDevices] = useState<Array<MediaDeviceInfo>>([]);
-
     return {
-        getStream: async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
+        getDefaultId: async () => {
+            //TODO: We could fetch from settings here
+            const videoDevices = (await navigator.mediaDevices.enumerateDevices()).filter(
+                (device) => device.kind === "videoinput",
+            );
+
+            if (videoDevices.length > 0) {
+                const id = videoDevices[0].deviceId;
+
+                await navigator.mediaDevices.getUserMedia({
                     video: {
-                        width: { min: 640, ideal: 1920, max: 1920 },
-                        height: { min: 480, ideal: 1080, max: 1080 },
+                        deviceId: id,
                     },
                 });
 
-                const newDevices = await navigator.mediaDevices.enumerateDevices();
-                setVideoDevices(newDevices.filter((device) => device.kind === "videoinput"));
+                return id;
+            }
+
+            return null;
+        },
+        getStreamById: async (id: string) => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        deviceId: id,
+                    },
+                });
 
                 return stream;
             } catch (e) {
@@ -22,6 +34,10 @@ export const useCamera = () => {
                 return null;
             }
         },
-        videoDevices,
+        getVideoDevices: async () => {
+            const videoDevices = await navigator.mediaDevices.enumerateDevices();
+
+            return videoDevices.filter((device) => device.kind === "videoinput");
+        },
     };
 };

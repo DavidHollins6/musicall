@@ -7,7 +7,7 @@ export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [requestedAccess, setRequestedAccess] = useState(false);
     const [microphoneId, setMicrophoneId] = useState<string | null>(null);
-    const [audioDevices, setAudioDevices] = useState<Array<MediaDeviceInfo>>();
+    const [audioDevices, setAudioDevices] = useState<Array<MediaDeviceInfo>>([]);
 
     const { getStreamById, getAudioDevices } = useMicrophone();
 
@@ -63,7 +63,7 @@ export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
                         setStream(newStream);
                     }}
                     label="Microphone"
-                    data={audioDevices?.map((m) => ({ label: m.label, value: m.deviceId }))}
+                    data={audioDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
                 />
                 <Button onClick={onComplete}>Next</Button>
             </Group>
