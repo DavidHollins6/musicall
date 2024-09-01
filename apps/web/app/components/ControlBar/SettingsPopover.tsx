@@ -5,16 +5,16 @@ import { Input } from "webmidi";
 import { useCamera } from "../../hooks/useCamera";
 import { useMicrophone } from "../../hooks/useMicrophone";
 import { useMidi } from "../../hooks/useMidi";
-import { useDeviceDispatcher } from "../../store/deviceContext";
+import { useDeviceStore } from "../../store/deviceStore";
 
 export const SettingsPopover: React.FC = () => {
-    const dispatch = useDeviceDispatcher();
     const [videoDevices, setVideoDevices] = useState<Array<MediaDeviceInfo>>([]);
     const [audioDevices, setAudioDevices] = useState<Array<MediaDeviceInfo>>([]);
     const [midiInstruments, setMidiInstruments] = useState<Array<Input>>([]);
     const { getVideoDevices } = useCamera();
     const { getAudioDevices } = useMicrophone();
     const { getMidiInstruments } = useMidi();
+    const { setVideoDeviceId, setAudioDeviceId, setMidiDeviceId } = useDeviceStore();
 
     useEffect(() => {
         const initializeData = async () => {
@@ -44,7 +44,7 @@ export const SettingsPopover: React.FC = () => {
                     <NativeSelect
                         size="sm"
                         onChange={async (e) => {
-                            dispatch({ type: "setVideoDeviceId", id: e.target.value });
+                            setVideoDeviceId(e.target.value);
                         }}
                         label="Video"
                         data={videoDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
@@ -52,7 +52,7 @@ export const SettingsPopover: React.FC = () => {
                     <NativeSelect
                         size="sm"
                         onChange={async (e) => {
-                            dispatch({ type: "setAudioDeviceId", id: e.target.value });
+                            setAudioDeviceId(e.target.value);
                         }}
                         label="Microphone"
                         data={audioDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
@@ -60,7 +60,7 @@ export const SettingsPopover: React.FC = () => {
                     <NativeSelect
                         size="sm"
                         onChange={async (e) => {
-                            dispatch({ type: "setMidiDeviceId", id: e.target.value });
+                            setMidiDeviceId(e.target.value);
                         }}
                         label="MIDI"
                         data={midiInstruments.map((m) => ({ label: m.name, value: m.id }))}

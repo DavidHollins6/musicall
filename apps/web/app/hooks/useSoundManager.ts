@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { InstrumentType, useDevice } from "../store/deviceContext";
 import { ISoundManager } from "../utils/sound/ISoundManager";
 import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager";
+import { InstrumentType, useDeviceStore } from "../store/deviceStore";
 
 const getSoundManager = (type: InstrumentType) => {
     switch (type) {
@@ -13,7 +13,7 @@ const getSoundManager = (type: InstrumentType) => {
 };
 
 export const useSoundManager = () => {
-    const { instrumentType } = useDevice();
+    const { instrumentType } = useDeviceStore();
     const [soundManager, setSoundManager] = useState<ISoundManager>(getSoundManager(instrumentType));
 
     useEffect(() => {

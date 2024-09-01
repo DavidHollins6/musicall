@@ -1,15 +1,16 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React from "react";
-import { usePeers } from "../../store/peersContext";
 import { Video } from ".";
 import { Flex, Group, Text } from "@mantine/core";
 import { IconMicrophoneOff } from "@tabler/icons-react";
-import { useDevice } from "../../store/deviceContext";
-import { User } from "@musicall/storage";
+import { useDeviceStore } from "../../store/deviceStore";
+import { usePeerStore } from "../../store/peerStore";
+import { useUserStore } from "../../store/userStore";
 
-export const LocalVideo: React.FC<{ user: User }> = ({ user }: { user: User }) => {
-    const { localStream } = usePeers();
-    const { voice, video } = useDevice();
+export const LocalVideo: React.FC = () => {
+    const { user } = useUserStore();
+    const { localStream } = usePeerStore();
+    const { voice, video } = useDeviceStore();
 
     return (
         <Flex w="100%" h="100%" pos="relative" justify="center" align="center">
