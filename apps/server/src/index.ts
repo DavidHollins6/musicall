@@ -7,7 +7,7 @@ import { createCache, createDb } from "@musicall/storage";
 import { userHandlers } from "./handlers/user";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is not defined");
