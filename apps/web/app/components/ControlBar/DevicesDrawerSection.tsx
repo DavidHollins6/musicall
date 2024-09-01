@@ -4,7 +4,7 @@ import { Input } from "webmidi";
 import { useCamera } from "../../hooks/useCamera";
 import { useMicrophone } from "../../hooks/useMicrophone";
 import { useMidi } from "../../hooks/useMidi";
-import { useDeviceDispatcher } from "../../store/deviceContext";
+import { useDeviceStore } from "../../store/deviceStore";
 
 export const DevicesDrawerSection: React.FC = () => {
     const [videoDevices, setVideoDevices] = useState<Array<MediaDeviceInfo>>([]);
@@ -13,7 +13,7 @@ export const DevicesDrawerSection: React.FC = () => {
     const { getVideoDevices } = useCamera();
     const { getAudioDevices } = useMicrophone();
     const { getMidiInstruments } = useMidi();
-    const deviceDispatch = useDeviceDispatcher();
+    const { setVideoDeviceId, setAudioDeviceId, setMidiDeviceId } = useDeviceStore();
 
     useEffect(() => {
         const initializeData = async () => {
@@ -35,7 +35,7 @@ export const DevicesDrawerSection: React.FC = () => {
             <NativeSelect
                 size="sm"
                 onChange={async (e) => {
-                    deviceDispatch({ type: "setVideoDeviceId", id: e.target.value });
+                    setVideoDeviceId(e.target.value);
                 }}
                 label="Video"
                 data={videoDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
@@ -43,7 +43,7 @@ export const DevicesDrawerSection: React.FC = () => {
             <NativeSelect
                 size="sm"
                 onChange={async (e) => {
-                    deviceDispatch({ type: "setAudioDeviceId", id: e.target.value });
+                    setAudioDeviceId(e.target.value);
                 }}
                 label="Microphone"
                 data={audioDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
@@ -51,7 +51,7 @@ export const DevicesDrawerSection: React.FC = () => {
             <NativeSelect
                 size="sm"
                 onChange={async (e) => {
-                    deviceDispatch({ type: "setMidiDeviceId", id: e.target.value });
+                    setMidiDeviceId(e.target.value);
                 }}
                 label="MIDI"
                 data={midiInstruments.map((m) => ({ label: m.name, value: m.id }))}

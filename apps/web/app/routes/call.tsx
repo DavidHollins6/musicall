@@ -1,13 +1,13 @@
+import { useRef } from "react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { PeersProvider } from "../store/peersContext";
-import { DeviceProvider } from "../store/deviceContext";
 import CallPage from "../components/pages/CallPage";
 import { ClientOnly } from "remix-utils/client-only";
 import { requireAuthSession } from "../modules/auth/session.server";
 import { getOwnedRooms, getRoomAllowList } from "@musicall/api/room";
 import { getUser } from "@musicall/api/user";
+import { createUserStore, UserContext } from "../store/userStore";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
@@ -18,12 +18,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect("/");
     }
 
-    console.log("loading call", userId);
-
     const url = new URL(request.url);
     const roomId = url.searchParams.get("roomId");
-
-    console.log("loading room", roomId);
 
     if (!roomId) {
         return redirect("/");
@@ -43,15 +39,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Call() {
     const { roomId, user, isOwner } = useLoaderData<typeof loader>();
+    const store = useRef(createUserStore({ user, isOwner })).current;
 
     return (
         <ClientOnly>
             {() => (
-                <PeersProvider>
-                    <DeviceProvider>
-                        <CallPage roomId={roomId} user={user} isOwner={isOwner} />
-                    </DeviceProvider>
-                </PeersProvider>
+                <UserContext.Provider value={store}>
+                    <CallPage roomId={roomId} />
+                </UserContext.Provider>
             )}
         </ClientOnly>
     );

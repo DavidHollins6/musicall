@@ -1,7 +1,5 @@
 import { usePartySocket } from "partysocket/react";
 import Peer from "simple-peer";
-import { usePeers, usePeersDispatcher } from "../store/peersContext";
-import { useDevice, useDeviceDispatcher } from "../store/deviceContext";
 import { useMessageHandler } from "./useMessageHandler";
 import { useCamera } from "./useCamera";
 import { useEffect } from "react";
@@ -9,6 +7,9 @@ import { useMicrophone } from "./useMicrophone";
 import { User } from "@musicall/storage";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { ClientMessageSchema } from "@musicall/types/clientMessage";
+import { useDeviceStore } from "../store/deviceStore";
+import { usePeerStore } from "../store/peerStore";
+import { useSocketStore } from "../store/socketStore";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -38,14 +39,23 @@ type Props = {
 };
 
 export const useWebRTC = ({ room, userId }: Props) => {
-    const { peers, localStream } = usePeers();
-    const peersDispatch = usePeersDispatcher();
-    const deviceDispatch = useDeviceDispatcher();
+    const {
+        peers,
+        localStream,
+        setLocalStream,
+        setWaitingList,
+        addChatMessage,
+        updateDeviceStatus,
+        setPeerStream,
+        addPeer: addPeerToStore,
+        removePeer,
+    } = usePeerStore();
 
     const messageHandler = useMessageHandler();
-    const { voice, video, midi } = useDevice();
+    const { voice, video, midi, setDeviceIds } = useDeviceStore();
     const { getStreamById: getVideoStreamById, getDefaultId: getVideoDefaultId } = useCamera();
     const { getStreamById: getAudioStreamById, getDefaultId: getAudioDefaultId } = useMicrophone();
+    const { setSocket } = useSocketStore();
 
     useEffect(() => {
         const message = createServerMessage({
@@ -68,7 +78,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
             const audioDeviceId = await getAudioDefaultId();
 
             if (videoDeviceId && audioDeviceId) {
-                deviceDispatch({ type: "setDeviceIds", videoId: videoDeviceId, audioId: audioDeviceId });
+                setDeviceIds(videoDeviceId, audioDeviceId);
             }
         };
 
@@ -109,7 +119,8 @@ export const useWebRTC = ({ room, userId }: Props) => {
                     newLocalStream.addTrack(track);
                 });
             }
-            peersDispatch({ type: "setLocalStream", localStream: newLocalStream });
+
+            setLocalStream(newLocalStream);
         };
 
         initializeStream();
@@ -142,21 +153,18 @@ export const useWebRTC = ({ room, userId }: Props) => {
                     break;
                 case "waiting-room-updated":
                     console.log("someone joined the waiting room!", result.data);
-                    peersDispatch({ type: "setWaitingList", waitingList: result.data.waiters });
+                    setWaitingList(result.data.waiters);
                     break;
                 case "chat":
-                    peersDispatch({ type: "addChatMessage", message: result.data });
+                    addChatMessage(result.data);
                     break;
                 case "update-device-status":
-                    peersDispatch({
-                        type: "updateDeviceStatus",
-                        peerId: result.data.peerId,
-                        voice: result.data.voice,
-                        video: result.data.video,
-                        midi: result.data.midi,
-                    });
+                    updateDeviceStatus(result.data.peerId, result.data.voice, result.data.video, result.data.midi);
                     break;
             }
+        },
+        onOpen() {
+            setSocket(socket);
         },
     });
 
@@ -196,11 +204,11 @@ export const useWebRTC = ({ room, userId }: Props) => {
             if (peers[user.id]) {
                 peerConnection.destroy();
             }
-            peersDispatch({ type: "removePeer", peerId });
+            removePeer(peerId);
         });
 
         peerConnection.on("stream", (stream) => {
-            peersDispatch({ type: "setPeerStream", stream, peerId });
+            setPeerStream(peerId, stream);
         });
 
         peerConnection.on("data", (message) => {
@@ -208,18 +216,14 @@ export const useWebRTC = ({ room, userId }: Props) => {
             messageHandler(string);
         });
 
-        peersDispatch({
-            type: "addPeer",
-            data: {
-                cameraEnabled: video,
-                connected: false,
-                microphoneEnabled: voice,
-                midiEnabled: midi,
-                peerConnection,
-                peerId,
-                user,
-            },
+        addPeerToStore(peerId, {
+            cameraEnabled: video,
+            connected: false,
+            microphoneEnabled: voice,
+            midiEnabled: midi,
+            peerConnection,
             peerId,
+            user,
         });
     };
 

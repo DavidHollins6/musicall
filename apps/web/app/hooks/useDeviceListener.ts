@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { useDevice } from "~/store/deviceContext";
-import { usePeers } from "~/store/peersContext";
+import { useDeviceStore } from "../store/deviceStore";
+import { usePeerStore } from "../store/peerStore";
 
 export const useDeviceListener = () => {
-    const { video, voice } = useDevice();
-    const { localStream } = usePeers();
+    const { video, voice } = useDeviceStore();
+    const { localStream } = usePeerStore();
 
     useEffect(() => {
         localStream?.getVideoTracks().forEach((track) => (track.enabled = video.enabled));

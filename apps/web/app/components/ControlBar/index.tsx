@@ -12,28 +12,21 @@ import {
     IconUserPlus,
 } from "@tabler/icons-react";
 import { ChatDrawerSection } from "./ChatDrawerSection";
-import { useDevice, useDeviceDispatcher } from "../../store/deviceContext";
 import { SettingsPopover } from "./SettingsPopover";
 import { WaitingListDrawer } from "./WaitingListDrawer";
-import PartySocket from "partysocket";
-import { usePeers } from "../../store/peersContext";
-import { User } from "@musicall/storage";
 import { createServerMessage } from "@musicall/types/serverMessage";
+import { useDeviceStore } from "../../store/deviceStore";
+import { usePeerStore } from "../../store/peerStore";
+import { useSocketStore } from "../../store/socketStore";
+import { useUserStore } from "../../store/userStore";
 
-export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user: User }> = ({
-    isOwner,
-    socket,
-    user,
-}: {
-    isOwner: boolean;
-    socket: PartySocket;
-    user: User;
-}) => {
+export const ControlBar: React.FC = () => {
+    const { socket } = useSocketStore();
     const [chatOpened, { open: openChatDrawer, close: closeChatDrawer }] = useDisclosure(false);
     const [waitingListopened, { open: openWaitingListDrawer, close: closeWaitingListDrawer }] = useDisclosure(false);
-    const { video, midi, voice } = useDevice();
-    const { waitingList } = usePeers();
-    const dispatch = useDeviceDispatcher();
+    const { video, midi, voice, toggleVoice, toggleVideo, toggleMidi } = useDeviceStore();
+    const { waitingList } = usePeerStore();
+    const { isOwner } = useUserStore();
 
     return (
         <>
@@ -44,7 +37,7 @@ export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user:
                 title="Chat"
                 position="right"
             >
-                <ChatDrawerSection user={user} socket={socket} />
+                <ChatDrawerSection />
             </Drawer>
             <Drawer
                 styles={{ body: { height: "calc(100% - 60px)" } }}
@@ -53,7 +46,7 @@ export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user:
                 title="Waiting List"
                 position="right"
             >
-                <WaitingListDrawer socket={socket} />
+                <WaitingListDrawer />
             </Drawer>
             <Group h="100%" w="100%" align="center" justify="space-between">
                 <Group gap={24}>
@@ -67,8 +60,10 @@ export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user:
                                     voice: !voice.enabled,
                                     video: video.enabled,
                                 });
-                                socket.send(message);
-                                dispatch({ type: "toggleVoice" });
+                                if (socket) {
+                                    socket.send(message);
+                                }
+                                toggleVoice();
                             }}
                             size={48}
                             bg={voice.enabled ? "blue" : "red"}
@@ -83,8 +78,10 @@ export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user:
                                     voice: voice.enabled,
                                     video: !video.enabled,
                                 });
-                                socket.send(message);
-                                dispatch({ type: "toggleVideo" });
+                                if (socket) {
+                                    socket.send(message);
+                                }
+                                toggleVideo();
                             }}
                             size={48}
                             bg={video.enabled ? "blue" : "red"}
@@ -100,8 +97,10 @@ export const ControlBar: React.FC<{ isOwner: boolean; socket: PartySocket; user:
                                     voice: voice.enabled,
                                     video: video.enabled,
                                 });
-                                socket.send(message);
-                                dispatch({ type: "toggleMidi" });
+                                if (socket) {
+                                    socket.send(message);
+                                }
+                                toggleMidi();
                             }}
                             size={48}
                             bg={midi.enabled ? "blue" : "red"}

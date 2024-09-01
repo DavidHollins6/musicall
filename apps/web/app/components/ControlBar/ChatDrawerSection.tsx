@@ -1,19 +1,15 @@
 import { Avatar, Box, Flex, Stack, Text, TextInput } from "@mantine/core";
-import { usePeers } from "../../store/peersContext";
-import PartySocket from "partysocket";
 import { useState } from "react";
-import { User } from "@musicall/storage";
 import { createServerMessage } from "@musicall/types/serverMessage";
+import { usePeerStore } from "../../store/peerStore";
+import { useSocketStore } from "../../store/socketStore";
+import { useUserStore } from "../../store/userStore";
 
-export const ChatDrawerSection: React.FC<{ socket: PartySocket; user: User }> = ({
-    socket,
-    user,
-}: {
-    socket: PartySocket;
-    user: User;
-}) => {
-    const { chatMessages } = usePeers();
+export const ChatDrawerSection: React.FC = () => {
+    const { chatMessages } = usePeerStore();
     const [message, setMessage] = useState("");
+    const { socket } = useSocketStore();
+    const { user } = useUserStore();
 
     return (
         <Stack pt={16} h="100%">
@@ -62,7 +58,9 @@ export const ChatDrawerSection: React.FC<{ socket: PartySocket; user: User }> = 
                         from: user,
                         timestamp: Date.now(),
                     });
-                    socket.send(serverMessage);
+                    if (socket) {
+                        socket.send(serverMessage);
+                    }
                     setMessage("");
                 }}
             >

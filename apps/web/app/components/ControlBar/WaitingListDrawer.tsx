@@ -1,10 +1,11 @@
 import { Avatar, Button, Card, Group, Stack, Text } from "@mantine/core";
-import PartySocket from "partysocket";
-import { usePeers } from "../../store/peersContext";
 import { createServerMessage } from "@musicall/types/serverMessage";
+import { usePeerStore } from "../../store/peerStore";
+import { useSocketStore } from "../../store/socketStore";
 
-export const WaitingListDrawer = ({ socket }: { socket: PartySocket }) => {
-    const { waitingList } = usePeers();
+export const WaitingListDrawer = () => {
+    const { waitingList } = usePeerStore();
+    const { socket } = useSocketStore();
 
     if (waitingList.length === 0) {
         return <Text>No one is waiting to join</Text>;
@@ -20,7 +21,9 @@ export const WaitingListDrawer = ({ socket }: { socket: PartySocket }) => {
                         <Button
                             onClick={() => {
                                 const message = createServerMessage({ type: "allow-into-room", userId: w });
-                                socket.send(message);
+                                if (socket) {
+                                    socket.send(message);
+                                }
                             }}
                         >
                             Allow into room

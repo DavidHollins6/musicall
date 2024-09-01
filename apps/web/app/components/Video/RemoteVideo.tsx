@@ -1,16 +1,16 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React from "react";
-import { usePeers } from "../../store/peersContext";
 import { Video } from ".";
 import { Flex, Group, Text } from "@mantine/core";
 import { IconMicrophoneOff } from "@tabler/icons-react";
+import { usePeerStore } from "../../store/peerStore";
 
 type Props = {
     peerId: string;
 };
 
 export const RemoteVideo: React.FC<Props> = ({ peerId }) => {
-    const { peers } = usePeers();
+    const { peers } = usePeerStore();
     const peer = peers[peerId];
 
     return (
