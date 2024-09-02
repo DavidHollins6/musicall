@@ -5,22 +5,25 @@ import { requireAuthSession } from "../modules/auth/session.server";
 import { getOwnedRooms } from "@musicall/api/room";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import { Button, Space } from "@mantine/core";
+import { useSessionStore } from "../store/sessionStore";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-    const { userId, email } = await requireAuthSession(request);
+    const { userId } = await requireAuthSession(request);
 
     const rooms = await getOwnedRooms(userId);
-    return json({ userId, rooms, email });
+
+    return json({ rooms });
 }
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
 
 export default function Index() {
-    const { rooms, email } = useLoaderData<typeof loader>();
+    const { user } = useSessionStore();
+    const { rooms } = useLoaderData<typeof loader>();
 
     return (
         <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-            <h1>Hello {email}</h1>
+            <h1>Hello {user?.name}</h1>
             <Form method="post" action="/logout">
                 <Button type="submit">Logout</Button>
             </Form>

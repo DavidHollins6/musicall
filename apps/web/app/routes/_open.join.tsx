@@ -107,7 +107,7 @@ export default function Join() {
 
     return (
         <Form ref={zo.ref} method="post" replace>
-            <Flex w="100vw" h="100vh" justify="center" align="center">
+            <Flex w="100vw" justify="center" align="center">
                 <Card w="30%" withBorder shadow="sm" padding="lg">
                     <h1>Sign up</h1>
                     <Stack>
