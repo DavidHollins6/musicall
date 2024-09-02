@@ -188,7 +188,6 @@ export default class WebSocketServer implements Party.Server {
     }
 
     async onStart() {
-        console.log("starting room", this.room.id);
         const room = await getRoom(this.room.id);
 
         if (room) {
