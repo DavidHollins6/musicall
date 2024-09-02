@@ -2,7 +2,7 @@ import React from "react";
 
 import { useFetcher } from "@remix-run/react";
 
-import type { action } from "../../../routes/send-magic-link";
+import type { action } from "../../../routes/_open.send-magic-link";
 
 export function ContinueWithEmailForm() {
     const ref = React.useRef<HTMLFormElement>(null);
