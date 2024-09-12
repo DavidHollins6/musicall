@@ -83,7 +83,7 @@ export async function action({ request }: ActionFunctionArgs) {
         return json({ errors: { email: "unable-to-create-account", password: null } }, { status: 500 });
     }
 
-    createRoom(authSession.userId, generateUuid());
+    createRoom({ ownerId: authSession.userId, id: generateUuid(), name: "Default" });
 
     return createAuthSession({
         request,
