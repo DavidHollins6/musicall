@@ -41,6 +41,7 @@
         "redis": "^4.7.0",
         "remix-utils": "^7.6.0",
         "simple-peer": "^9.11.1",
+        "sst": "3.1.7",
         "tone": "^14.7.77",
         "usemods": "^1.6.1",
         "webmidi": "^3.1.8",
