@@ -33,12 +33,10 @@ export const getOwnedRooms = async (id: string): Promise<Array<Room>> => {
     return [];
 };
 
-export const createRoom = async (userId: string, email: string): Promise<Room | null> => {
-    const response = await fetch(`${process.env.API_URL}/room/create/${userId}`, {
+export const createRoom = async (room: Room): Promise<Room | null> => {
+    const response = await fetch(`${process.env.API_URL}/room/create/${room.id}`, {
         method: "POST",
-        body: JSON.stringify({
-            email,
-        }),
+        body: JSON.stringify(room),
         headers: { "Content-Type": "application/json" },
     });
 

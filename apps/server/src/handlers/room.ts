@@ -41,12 +41,15 @@ export const roomHandlers = (app: Express, db: PostgresJsDatabase, redis: RedisC
         res.status(404).send();
     });
 
-    app.post("/room/create/:id", async (req: Request<{ id: string }, unknown, { ownerId: string }>, res) => {
-        const { ownerId } = req.body;
-        const { id } = req.params;
+    app.post(
+        "/room/create/:id",
+        async (req: Request<{ id: string }, unknown, { name: string; ownerId: string }>, res) => {
+            const { ownerId, name } = req.body;
+            const { id } = req.params;
 
-        const result = await db.insert(rooms).values({ id, ownerId }).returning();
+            const result = await db.insert(rooms).values({ id, ownerId, name }).returning();
 
-        res.status(200).send(result);
-    });
+            res.status(200).send(result);
+        },
+    );
 };
