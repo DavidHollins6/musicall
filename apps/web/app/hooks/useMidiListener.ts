@@ -1,25 +1,33 @@
-import { useEffect, useState } from "react";
-import { Message, WebMidi } from "webmidi";
+import { useEffect } from "react";
+import { WebMidi } from "webmidi";
+import { createDataMessage } from "@musicall/types/dataMessage";
+import { useDeviceStore } from "../store/deviceStore";
+import { usePeerStore } from "../store/peerStore";
+import { useMidi } from "./useMidi";
 
-export const useMidiListener = (midiInputId: string, listener: (e: Message) => void) => {
-    const [previousMidiInputId, setPreviousMidiInputId] = useState<string>();
+export const useMidiListener = () => {
+    const { midi } = useDeviceStore();
+    const { getMidiInstruments } = useMidi();
+    const { peers } = usePeerStore();
+
     useEffect(() => {
-        console.log("midi input changed");
-        if (previousMidiInputId) {
-            const previousInput = WebMidi.inputs.find((i) => i.id === previousMidiInputId);
+        getMidiInstruments().then((allInstruments) => {
+            allInstruments.forEach((i) => {
+                i.removeListener("midimessage");
+            });
 
-            if (previousInput) {
-                previousInput.removeListener("midimessage");
+            const newInput = WebMidi.inputs.find((i) => i.id === midi.id);
+
+            if (newInput) {
+                newInput.addListener("midimessage", (e) => {
+                    if (midi.enabled) {
+                        Object.keys(peers).forEach((pId) => {
+                            const peer = peers[pId];
+                            peer.peerConnection.send(createDataMessage({ type: "midi", message: e.message }));
+                        });
+                    }
+                });
             }
-
-            setPreviousMidiInputId(midiInputId);
-        }
-
-        const newInput = WebMidi.inputs.find((i) => i.id === midiInputId);
-
-        if (newInput) {
-            console.log("setting up a listener");
-            newInput.addListener("midimessage", (e) => listener(e.message));
-        }
-    }, [midiInputId]);
+        });
+    }, [midi.id, peers, midi.enabled, getMidiInstruments, midi]);
 };

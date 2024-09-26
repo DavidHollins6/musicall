@@ -7,7 +7,8 @@
     "types": "./index.ts",
     "exports": {
         "./clientMessage": "./src/clientMessage.ts",
-        "./serverMessage": "./src/serverMessage.ts"
+        "./serverMessage": "./src/serverMessage.ts",
+        "./dataMessage": "./src/dataMessage.ts"
     },
     "devDependencies": {
         "@musicall/typescript-config": "workspace:*",
@@ -16,6 +17,7 @@
     "dependencies": {
         "@musicall/storage": "workspace:*",
         "simple-peer": "^9.11.1",
+        "webmidi": "^3.1.8",
         "zod": "^3.23.8"
     }
 }

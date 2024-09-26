@@ -17,13 +17,11 @@ export class KeyboardSoundManager implements ISoundManager {
 
         if (message.messageType === "noteon") {
             const note = noteMidiToString(message.key);
-            console.log("attack", note);
             this.synth.triggerAttack(note, Tone.now());
         }
 
         if (message.messageType === "noteoff") {
             const note = noteMidiToString(message.key);
-            console.log("release", note);
             this.synth.triggerRelease(note, Tone.now());
         }
     }

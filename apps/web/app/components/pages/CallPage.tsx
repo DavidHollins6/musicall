@@ -4,6 +4,8 @@ import { Box, Flex, rem, useMantineTheme } from "@mantine/core";
 import { ControlBar } from "../ControlBar";
 import { useDeviceListener } from "../../hooks/useDeviceListener";
 import { useUserStore } from "../../store/userStore";
+import { useDataMessageListener } from "../../hooks/useDataMessageListener";
+import { useMidiListener } from "~/hooks/useMidiListener";
 
 type Props = {
     roomId: string;
@@ -13,6 +15,8 @@ export default function CallPage({ roomId }: Props) {
     const { user } = useUserStore();
     useWebRTC({ room: roomId, userId: user.id });
     useDeviceListener();
+    useDataMessageListener();
+    useMidiListener();
     const theme = useMantineTheme();
 
     return (
