@@ -1,6 +1,5 @@
 import { usePartySocket } from "partysocket/react";
 import Peer from "simple-peer";
-import { useMessageHandler } from "./useMessageHandler";
 import { useCamera } from "./useCamera";
 import { useEffect } from "react";
 import { useMicrophone } from "./useMicrophone";
@@ -51,22 +50,10 @@ export const useWebRTC = ({ room, userId }: Props) => {
         removePeer,
     } = usePeerStore();
 
-    const messageHandler = useMessageHandler();
     const { voice, video, midi, setDeviceIds } = useDeviceStore();
     const { getStreamById: getVideoStreamById, getDefaultId: getVideoDefaultId } = useCamera();
     const { getStreamById: getAudioStreamById, getDefaultId: getAudioDefaultId } = useMicrophone();
     const { setSocket } = useSocketStore();
-
-    useEffect(() => {
-        const message = createServerMessage({
-            type: "join-room",
-            userId,
-            voice: voice.enabled,
-            video: video.enabled,
-            midi: midi.enabled,
-        });
-        socket.send(message);
-    }, []);
 
     useEffect(() => {
         const initializeIds = async () => {
@@ -128,7 +115,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
 
     const socket = usePartySocket({
         room: room,
-        host: "https://musicall.davidhollins6.partykit.dev",
+        host: "https://localhost:1999",
         onMessage(evt) {
             const result = ClientMessageSchema.safeParse(JSON.parse(String(evt.data)));
 
@@ -165,6 +152,14 @@ export const useWebRTC = ({ room, userId }: Props) => {
         },
         onOpen() {
             setSocket(socket);
+            const message = createServerMessage({
+                type: "join-room",
+                userId,
+                voice: voice.enabled,
+                video: video.enabled,
+                midi: midi.enabled,
+            });
+            socket.send(message);
         },
     });
 
@@ -209,11 +204,6 @@ export const useWebRTC = ({ room, userId }: Props) => {
 
         peerConnection.on("stream", (stream) => {
             setPeerStream(peerId, stream);
-        });
-
-        peerConnection.on("data", (message) => {
-            const string = new TextDecoder().decode(message);
-            messageHandler(string);
         });
 
         addPeerToStore(peerId, {

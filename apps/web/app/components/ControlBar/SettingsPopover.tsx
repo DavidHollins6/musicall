@@ -14,7 +14,7 @@ export const SettingsPopover: React.FC = () => {
     const { getVideoDevices } = useCamera();
     const { getAudioDevices } = useMicrophone();
     const { getMidiInstruments } = useMidi();
-    const { setVideoDeviceId, setAudioDeviceId, setMidiDeviceId } = useDeviceStore();
+    const { setVideoDeviceId, setAudioDeviceId, setMidiDeviceId, midi } = useDeviceStore();
 
     useEffect(() => {
         const initializeData = async () => {
@@ -26,6 +26,10 @@ export const SettingsPopover: React.FC = () => {
 
             const midiInstruments = await getMidiInstruments();
             setMidiInstruments(midiInstruments);
+
+            if (!midi.id && midiInstruments.length > 0) {
+                setMidiDeviceId(midiInstruments[0].id);
+            }
         };
 
         initializeData();
