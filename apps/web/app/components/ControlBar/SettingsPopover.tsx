@@ -28,7 +28,6 @@ export const SettingsPopover: React.FC = () => {
             setMidiInstruments(midiInstruments);
 
             if (!midi.id && midiInstruments.length > 0) {
-                console.log(midi, midiInstruments);
                 setMidiDeviceId(midiInstruments[0].id);
             }
         };
