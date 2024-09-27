@@ -93,7 +93,6 @@ export const useWebRTC = ({ room, userId }: Props) => {
             const newLocalStream = new MediaStream();
 
             if (videoStream) {
-                console.log("enabled", video.enabled);
                 videoStream.getVideoTracks().forEach((track) => {
                     track.enabled = video.enabled;
                     newLocalStream.addTrack(track);
