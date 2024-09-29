@@ -1,34 +1,19 @@
-import { Box, Button, Center, Group, LoadingOverlay, NativeSelect, Text } from "@mantine/core";
-import midimessage from "midimessage";
+import { Box, Button, Group, LoadingOverlay, NativeSelect } from "@mantine/core";
 import { useState } from "react";
-import { useMidiListener } from "../../hooks/useMidiListener";
-import { noteMidiToString } from "../../utils/sound/noteMidiToString";
-import { useMidi } from "../../hooks/useMidi";
-import { Input } from "webmidi";
+import { useMidiStore } from "../../store/midiStore";
+import { WebMidi } from "webmidi";
+import { useDeviceStore } from "../../store/deviceStore";
+import { useMidiSoundPlayer } from "../../hooks/useMidiSoundPlayer";
 
 export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
-    const [selectedMidiInput, setSelectedMidiInput] = useState("");
-    const [lastHitNote, setLastHitNote] = useState<string>("...");
     const [requestedAccess, setRequestedAccess] = useState(false);
-    const [midiInstruments, setMidiInstruments] = useState<Array<Input>>([]);
-
-    const { getMidiInstruments } = useMidi();
-
-    useMidiListener(selectedMidiInput, (event) => {
-        const message = midimessage(event);
-        if (message.messageType === "noteon") {
-            console.log(message);
-            setLastHitNote(noteMidiToString(message.key));
-        }
-    });
+    const { midiInputs, refreshMidiInputs } = useMidiStore();
+    const { setMidiDeviceId, midi } = useDeviceStore();
+    useMidiSoundPlayer();
 
     return (
         <Box pos="relative" h="100%">
-            <Box style={{ height: "calc(100% - 78px)" }} pos="relative">
-                <Center h="100%">
-                    <Text style={{ fontSize: "124px" }}>{lastHitNote}</Text>
-                </Center>
-            </Box>
+            <Box style={{ height: "calc(100% - 78px)" }} pos="relative"></Box>
             <LoadingOverlay
                 visible={!requestedAccess}
                 zIndex={1000}
@@ -37,9 +22,9 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                     children: (
                         <Button
                             onClick={async () => {
-                                const newMidiInstruments = await getMidiInstruments();
-                                setMidiInstruments(newMidiInstruments);
-                                setSelectedMidiInput(newMidiInstruments[0].id);
+                                await WebMidi.enable();
+                                refreshMidiInputs();
+                                setMidiDeviceId(WebMidi.inputs[0].id);
                                 setRequestedAccess(true);
                             }}
                         >
@@ -51,11 +36,11 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
             <Group h="78px" justify="space-between" align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
-                        setSelectedMidiInput(e.currentTarget.value);
+                        setMidiDeviceId(e.currentTarget.value);
                     }}
                     label="Instrument"
-                    value={selectedMidiInput}
-                    data={midiInstruments?.map((m) => ({ label: m.name, value: m.id }))}
+                    value={midi.id}
+                    data={midiInputs?.map((m) => ({ label: m.name, value: m.id }))}
                 />
                 <Button onClick={onComplete}>Next</Button>
             </Group>

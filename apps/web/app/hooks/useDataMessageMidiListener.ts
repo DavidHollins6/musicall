@@ -3,12 +3,12 @@ import { MessageEvent, WebMidi } from "webmidi";
 import { createDataMessage } from "@musicall/types/dataMessage";
 import { useDeviceStore } from "../store/deviceStore";
 import { usePeerStore } from "../store/peerStore";
-import { useMidi } from "./useMidi";
 import { useEffectEvent } from "./useEffectEvent";
+import { useMidiStore } from "../store/midiStore";
 
-export const useMidiListener = () => {
+export const useDataMessageMidiListener = () => {
     const { midi } = useDeviceStore();
-    const { getMidiInstruments } = useMidi();
+    const { midiInputs } = useMidiStore();
     const { peers } = usePeerStore();
 
     const onMidiMessage = useEffectEvent((e: MessageEvent) => {
@@ -21,16 +21,14 @@ export const useMidiListener = () => {
     });
 
     useEffect(() => {
-        getMidiInstruments().then((allInstruments) => {
-            allInstruments.forEach((i) => {
-                i.removeListener("midimessage");
-            });
-
-            const newInput = WebMidi.inputs.find((i) => i.id === midi.id);
-
-            if (newInput) {
-                newInput.addListener("midimessage", onMidiMessage);
-            }
+        midiInputs.forEach((i) => {
+            i.removeListener("midimessage");
         });
-    }, [midi.id, getMidiInstruments]);
+
+        const newInput = WebMidi.inputs.find((i) => i.id === midi.id);
+
+        if (newInput) {
+            newInput.addListener("midimessage", onMidiMessage);
+        }
+    }, [midiInputs.length, midi.id]);
 };
