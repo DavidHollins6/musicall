@@ -1,20 +1,18 @@
 import { ActionIcon, NativeSelect, Popover, Stack } from "@mantine/core";
 import { IconSettings } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { Input } from "webmidi";
 import { useCamera } from "../../hooks/useCamera";
 import { useMicrophone } from "../../hooks/useMicrophone";
-import { useMidi } from "../../hooks/useMidi";
 import { useDeviceStore } from "../../store/deviceStore";
+import { useMidiStore } from "../../store/midiStore";
 
 export const SettingsPopover: React.FC = () => {
     const [videoDevices, setVideoDevices] = useState<Array<MediaDeviceInfo>>([]);
     const [audioDevices, setAudioDevices] = useState<Array<MediaDeviceInfo>>([]);
-    const [midiInstruments, setMidiInstruments] = useState<Array<Input>>([]);
     const { getVideoDevices } = useCamera();
     const { getAudioDevices } = useMicrophone();
-    const { getMidiInstruments } = useMidi();
-    const { setVideoDeviceId, setAudioDeviceId, setMidiDeviceId, midi } = useDeviceStore();
+    const { midiInputs } = useMidiStore();
+    const { setVideoDeviceId, setAudioDeviceId, setMidiDeviceId } = useDeviceStore();
 
     useEffect(() => {
         const initializeData = async () => {
@@ -23,13 +21,6 @@ export const SettingsPopover: React.FC = () => {
 
             const newAudioDevices = await getAudioDevices();
             setAudioDevices(newAudioDevices);
-
-            const midiInstruments = await getMidiInstruments();
-            setMidiInstruments(midiInstruments);
-
-            if (!midi.id && midiInstruments.length > 0) {
-                setMidiDeviceId(midiInstruments[0].id);
-            }
         };
 
         initializeData();
@@ -67,7 +58,7 @@ export const SettingsPopover: React.FC = () => {
                             setMidiDeviceId(e.target.value);
                         }}
                         label="MIDI"
-                        data={midiInstruments.map((m) => ({ label: m.name, value: m.id }))}
+                        data={midiInputs.map((m) => ({ label: m.name, value: m.id }))}
                     />
                 </Stack>
             </Popover.Dropdown>

@@ -50,24 +50,13 @@ export const useWebRTC = ({ room, userId }: Props) => {
         removePeer,
     } = usePeerStore();
 
-    const { voice, video, midi, setDeviceIds } = useDeviceStore();
-    const { getStreamById: getVideoStreamById, getDefaultId: getVideoDefaultId } = useCamera();
-    const { getStreamById: getAudioStreamById, getDefaultId: getAudioDefaultId } = useMicrophone();
+    const { voice, video, midi } = useDeviceStore();
+    const { getStreamById: getVideoStreamById } = useCamera();
+    const { getStreamById: getAudioStreamById } = useMicrophone();
     const { setSocket } = useSocketStore();
 
     useEffect(() => {
-        const initializeIds = async () => {
-            await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-            });
-            const videoDeviceId = await getVideoDefaultId();
-            const audioDeviceId = await getAudioDefaultId();
-
-            if (videoDeviceId && audioDeviceId) {
-                setDeviceIds(videoDeviceId, audioDeviceId);
-            }
-        };
+        const initializeIds = async () => {};
 
         initializeIds();
     }, []);
