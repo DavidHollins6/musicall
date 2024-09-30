@@ -1,18 +1,21 @@
 import { useState } from "react";
-import { Button, Box, Group, LoadingOverlay, NativeSelect, Progress } from "@mantine/core";
+import { Button, Box, Group, LoadingOverlay, NativeSelect, Progress, Stack } from "@mantine/core";
 import { useMicrophoneState } from "../../hooks/useMicrophoneState";
 import { useMicVolume } from "../../hooks/useMicVolume";
 
 export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
     const [requestedAccess, setRequestedAccess] = useState(false);
-    const { refreshDevices, devices, select, mediaStream } = useMicrophoneState();
-    const { audioLevel } = useMicVolume(mediaStream);
+    const { setDevices, devices, select, mediaStream, microphone } = useMicrophoneState();
+    const { audioLevel } = useMicVolume(mediaStream, 50);
+
+    console.log(audioLevel);
 
     return (
         <Box pos="relative" h="100%">
-            <Box style={{ height: "calc(100% - 78px)" }} pos="relative">
+            <Stack justify="center" style={{ height: "calc(100% - 78px)" }} pos="relative">
+                Volume:
                 <Progress value={audioLevel} />
-            </Box>
+            </Stack>
             <LoadingOverlay
                 visible={!requestedAccess}
                 zIndex={1000}
@@ -21,9 +24,20 @@ export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
                     children: (
                         <Button
                             onClick={async () => {
-                                await refreshDevices();
+                                await navigator.mediaDevices.getUserMedia({
+                                    audio: true,
+                                });
 
-                                select(devices[0].deviceId);
+                                const allDevices = await navigator.mediaDevices.enumerateDevices();
+                                const audioDevices = allDevices.filter((d) => d.kind === "audioinput");
+
+                                if (audioDevices.length > 0) {
+                                    setDevices(audioDevices);
+
+                                    select(audioDevices[0].deviceId);
+                                    microphone.enable();
+                                }
+
                                 setRequestedAccess(true);
                             }}
                         >

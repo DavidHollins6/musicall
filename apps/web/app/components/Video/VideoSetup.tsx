@@ -4,8 +4,8 @@ import { Button, Box, Group, LoadingOverlay, NativeSelect } from "@mantine/core"
 import { useCameraState } from "../../hooks/useCameraState";
 
 export const VideoSetup = ({ onComplete }: { onComplete: () => void }) => {
+    const { selectedDevice, devices, select, mediaStream, setDevices } = useCameraState();
     const [requestedAccess, setRequestedAccess] = useState(false);
-    const { refreshDevices, selectedDevice, devices, select, mediaStream } = useCameraState();
 
     return (
         <Box pos="relative" h="100%">
@@ -20,9 +20,19 @@ export const VideoSetup = ({ onComplete }: { onComplete: () => void }) => {
                     children: (
                         <Button
                             onClick={async () => {
-                                await refreshDevices();
+                                await navigator.mediaDevices.getUserMedia({
+                                    video: true,
+                                });
 
-                                select(devices[0].deviceId);
+                                const allDevices = await navigator.mediaDevices.enumerateDevices();
+                                const videoDevices = allDevices.filter((d) => d.kind === "videoinput");
+
+                                if (videoDevices.length > 0) {
+                                    setDevices(videoDevices);
+
+                                    select(videoDevices[0].deviceId);
+                                }
+
                                 setRequestedAccess(true);
                             }}
                         >

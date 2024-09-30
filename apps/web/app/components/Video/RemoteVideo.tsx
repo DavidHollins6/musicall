@@ -23,7 +23,7 @@ export const RemoteVideo: React.FC<Props> = ({ peerId }) => {
             pos="relative"
             justify="center"
             align="center"
-            className={audioLevel > 50 ? classes.talking : classes.nottalking}
+            className={audioLevel > 30 ? classes.talking : ""}
         >
             <Video stream={peer.stream} />
             <Group

@@ -44,12 +44,15 @@ export const useCameraState = () => {
             });
             setNewVideo(stream, id);
         },
-        hasBrowserPermission: false,
         mediaStream: video.stream,
         defaultCameraDevice: null,
         defaultCameraOn: false,
         refreshDevices: async () => {
-            setVideoDevices(await getDevices());
+            const devices = await getDevices();
+            setVideoDevices(devices);
+        },
+        setDevices: (devices: Array<MediaDeviceInfo>) => {
+            setVideoDevices(devices);
         },
     };
 };

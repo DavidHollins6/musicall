@@ -50,5 +50,8 @@ export const useMicrophoneState = () => {
         refreshDevices: async () => {
             setVoiceDevices(await getDevices());
         },
+        setDevices: (devices: Array<MediaDeviceInfo>) => {
+            setVoiceDevices(devices);
+        },
     };
 };

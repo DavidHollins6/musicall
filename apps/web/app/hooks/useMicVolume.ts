@@ -4,17 +4,17 @@ import { createSoundDetector } from "@stream-io/video-react-sdk";
 import { useEffectEvent } from "./useEffectEvent";
 import { useMicrophoneState } from "./useMicrophoneState";
 
-export const useMicVolume = () => {
-    const { microphone, mediaStream } = useMicrophoneState();
-    const [audioLevel, setAudioLevel] = useThrottledState(0, 500);
+export const useMicVolume = (stream?: MediaStream, throttleAmount?: number) => {
+    const { microphone } = useMicrophoneState();
+    const [audioLevel, setAudioLevel] = useThrottledState(0, throttleAmount || 500);
 
     const onAudioLevel = useEffectEvent(({ audioLevel: al }: { audioLevel: number }) => {
         setAudioLevel(al);
     });
 
     useEffect(() => {
-        if (!microphone.isMute && mediaStream) {
-            const disposeSoundDetector = createSoundDetector(mediaStream, onAudioLevel, {
+        if (!microphone.isMute && stream) {
+            const disposeSoundDetector = createSoundDetector(stream, onAudioLevel, {
                 detectionFrequencyInMs: 80,
                 destroyStreamOnStop: false,
             });
@@ -23,7 +23,7 @@ export const useMicVolume = () => {
                 disposeSoundDetector().catch(console.error);
             };
         }
-    }, [mediaStream, microphone.isMute]);
+    }, [stream, microphone.isMute]);
 
     return { audioLevel };
 };

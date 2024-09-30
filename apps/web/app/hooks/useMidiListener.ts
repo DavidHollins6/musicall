@@ -1,24 +1,21 @@
 import { useEffect } from "react";
 import { MessageEvent, WebMidi } from "webmidi";
-import { useDeviceStore } from "../store/deviceStore";
 import { useEffectEvent } from "./useEffectEvent";
-import { useMidiStore } from "../store/midiStore";
+import { useMidiState } from "./useMidiState";
 
 export const useMidiListener = (callback: (e: MessageEvent) => void) => {
-    const { midi } = useDeviceStore();
-    const { midiInputs } = useMidiStore();
-
+    const { devices, selectedDevice } = useMidiState();
     const onMidiMessage = useEffectEvent(callback);
 
     useEffect(() => {
-        midiInputs.forEach((i) => {
+        devices.forEach((i) => {
             i.removeListener("midimessage");
         });
 
-        const newInput = WebMidi.inputs.find((i) => i.id === midi.id);
+        const newInput = WebMidi.inputs.find((i) => i.id === selectedDevice);
 
         if (newInput) {
             newInput.addListener("midimessage", onMidiMessage);
         }
-    }, [midiInputs.length, midi.id]);
+    }, [devices.length, selectedDevice]);
 };

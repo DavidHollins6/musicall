@@ -35,11 +35,11 @@ export const VideoGrid = () => {
             cols={cols[5]}
             spacing="md"
         >
-            <Card p={0} radius="md" shadow="md" bg="black" pos="relative">
+            <Card p={4} radius="md" shadow="md" bg="black" pos="relative">
                 <LocalVideo />
             </Card>
             {Object.keys(peers).map((p) => (
-                <Card p={0} radius="md" shadow="md" bg="black" pos="relative" key={`video-${p}`}>
+                <Card p={4} radius="md" shadow="md" bg="black" pos="relative" key={`video-${p}`}>
                     <RemoteVideo peerId={peers[p].peerId} />
                 </Card>
             ))}

@@ -14,8 +14,9 @@ export const LocalVideo: React.FC = () => {
     const { user } = useUserStore();
     const { localStream } = usePeerStore();
     const { camera } = useCameraState();
-    const { microphone } = useMicrophoneState();
-    const { audioLevel } = useMicVolume();
+    const { microphone, mediaStream } = useMicrophoneState();
+    const { audioLevel } = useMicVolume(mediaStream);
+    console.log(audioLevel);
 
     return (
         <Flex
@@ -24,7 +25,7 @@ export const LocalVideo: React.FC = () => {
             pos="relative"
             justify="center"
             align="center"
-            className={audioLevel > 50 ? classes.talking : classes.nottalking}
+            className={audioLevel > 30 ? classes.talking : ""}
         >
             {/* <Avatar w="100%" h="100%" radius="xl" /> */}
             {camera.isMute ? null : <Video muted stream={localStream} />}

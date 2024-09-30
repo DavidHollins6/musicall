@@ -4,11 +4,11 @@ import { useEffect } from "react";
 import { User } from "@musicall/storage";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { ClientMessageSchema } from "@musicall/types/clientMessage";
-import { useDeviceStore } from "../store/deviceStore";
 import { usePeerStore } from "../store/peerStore";
 import { useSocketStore } from "../store/socketStore";
 import { useCameraState } from "./useCameraState";
 import { useMicrophoneState } from "./useMicrophoneState";
+import { useMidiState } from "./useMidiState";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -50,7 +50,6 @@ export const useWebRTC = ({ room, userId }: Props) => {
         removePeer,
     } = usePeerStore();
 
-    const { midi } = useDeviceStore();
     const { setSocket } = useSocketStore();
     const {
         mediaStream: videoStream,
@@ -71,6 +70,8 @@ export const useWebRTC = ({ room, userId }: Props) => {
         devices: voiceDevices,
         select: selectVoice,
     } = useMicrophoneState();
+
+    const { defaultMidiOn } = useMidiState();
 
     useEffect(() => {
         const initializeIds = async () => {
@@ -162,7 +163,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
                 userId,
                 voice: defaultMicrophoneOn,
                 video: defaultCameraOn,
-                midi: midi.enabled,
+                midi: defaultMidiOn,
             });
             socket.send(message);
         },
