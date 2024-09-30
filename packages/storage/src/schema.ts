@@ -30,7 +30,7 @@ export const mappings = pgTable("mappings", {
 export const users = pgTable("users", {
     id: uuid("id").primaryKey().notNull(),
     email: varchar("email"),
-    name: varchar("name"),
+    name: varchar("name").notNull(),
 });
 
 export const rooms = pgTable("rooms", {

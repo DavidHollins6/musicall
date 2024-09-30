@@ -23,7 +23,7 @@ type ChatMessage = {
 type State = {
     peers: Record<string, PeerData>;
     localStream?: MediaStream;
-    waitingList: Array<string>;
+    waitingList: Array<{ name: string; userId: string }>;
     chatMessages: Array<ChatMessage>;
 };
 
@@ -31,7 +31,7 @@ type Actions = {
     addPeer: (peerId: string, data: PeerData) => void;
     removePeer: (peerId: string) => void;
     setLocalStream: (localStream: MediaStream) => void;
-    setWaitingList: (waitingList: Array<string>) => void;
+    setWaitingList: (waitingList: Array<{ name: string; userId: string }>) => void;
     addChatMessage: (message: ChatMessage) => void;
     setPeerStream: (peerId: string, stream: MediaStream) => void;
     updateDeviceStatus: (peerId: string, voice: boolean, video: boolean, midi: boolean) => void;

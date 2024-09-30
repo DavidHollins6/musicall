@@ -9,11 +9,11 @@ import {
     IconMusic,
     IconMusicOff,
     IconMessageCircle,
-    IconUserPlus,
+    IconUsers,
 } from "@tabler/icons-react";
 import { ChatDrawerSection } from "./ChatDrawerSection";
 import { SettingsPopover } from "./SettingsPopover";
-import { WaitingListDrawer } from "./WaitingListDrawer";
+import { ParticipantsDrawer } from "./ParticipantsDrawer";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { usePeerStore } from "../../store/peerStore";
 import { useSocketStore } from "../../store/socketStore";
@@ -25,7 +25,7 @@ import { useMidiState } from "../../hooks/useMidiState";
 export const ControlBar: React.FC = () => {
     const { socket } = useSocketStore();
     const [chatOpened, { open: openChatDrawer, close: closeChatDrawer }] = useDisclosure(false);
-    const [waitingListopened, { open: openWaitingListDrawer, close: closeWaitingListDrawer }] = useDisclosure(false);
+    const [participantsOpened, { open: openParticipantsDrawer, close: closeParticipantsDrawer }] = useDisclosure(false);
     const { waitingList, localStream } = usePeerStore();
     const { isOwner } = useUserStore();
     const { camera } = useCameraState();
@@ -45,12 +45,11 @@ export const ControlBar: React.FC = () => {
             </Drawer>
             <Drawer
                 styles={{ body: { height: "calc(100% - 60px)" } }}
-                opened={waitingListopened}
-                onClose={closeWaitingListDrawer}
-                title="Waiting List"
+                opened={participantsOpened}
+                onClose={closeParticipantsDrawer}
                 position="right"
             >
-                <WaitingListDrawer />
+                <ParticipantsDrawer />
             </Drawer>
             <Group h="100%" w="100%" align="center" justify="space-between">
                 <Group gap={24}>
@@ -124,13 +123,11 @@ export const ControlBar: React.FC = () => {
                     <ActionIcon onClick={openChatDrawer} size={48} variant="default">
                         <IconMessageCircle size={20} />
                     </ActionIcon>
-                    {isOwner ? (
-                        <Indicator label={waitingList.length} disabled={waitingList.length === 0}>
-                            <ActionIcon onClick={openWaitingListDrawer} size={48} variant="default">
-                                <IconUserPlus size={20} />
-                            </ActionIcon>
-                        </Indicator>
-                    ) : null}
+                    <Indicator label={isOwner ? waitingList.length : 0} disabled={!isOwner || waitingList.length === 0}>
+                        <ActionIcon onClick={openParticipantsDrawer} size={48} variant="default">
+                            <IconUsers size={20} />
+                        </ActionIcon>
+                    </Indicator>
                 </Group>
             </Group>
         </>

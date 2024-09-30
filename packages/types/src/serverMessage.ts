@@ -25,6 +25,7 @@ export type ServerAllowIntoRoomMessage = {
 export type ServerJoinWaitingRoomMessage = {
     type: "join-waiting-room";
     userId: string;
+    name: string;
 };
 
 export type ServerChatMessage = {

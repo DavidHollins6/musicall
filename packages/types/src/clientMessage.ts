@@ -21,7 +21,7 @@ export type ClientPeer = {
 
 export type ClientWaitingRoomUpdated = {
     type: "waiting-room-updated";
-    waiters: string[];
+    waiters: Array<{ userId: string; name: string }>;
 };
 
 export type ClientChat = {
