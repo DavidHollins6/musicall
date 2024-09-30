@@ -1,0 +1,9 @@
+.talking {
+    border: 4px solid var(--mantine-color-lime-filled);
+    border-radius: 8px;
+}
+
+.nottalking {
+    border: 4px solid transparent;
+    border-radius: 8px;
+}

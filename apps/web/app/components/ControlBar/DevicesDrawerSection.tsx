@@ -1,36 +1,21 @@
 import { NativeSelect, Stack } from "@mantine/core";
-import { useEffect, useState } from "react";
-import { useCamera } from "../../hooks/useCamera";
-import { useMicrophone } from "../../hooks/useMicrophone";
 import { useDeviceStore } from "../../store/deviceStore";
 import { useMidiStore } from "../../store/midiStore";
+import { useCameraState } from "../../hooks/useCameraState";
+import { useMicrophoneState } from "../../hooks/useMicrophoneState";
 
 export const DevicesDrawerSection: React.FC = () => {
-    const [videoDevices, setVideoDevices] = useState<Array<MediaDeviceInfo>>([]);
-    const [audioDevices, setAudioDevices] = useState<Array<MediaDeviceInfo>>([]);
     const { midiInputs } = useMidiStore();
-    const { getVideoDevices } = useCamera();
-    const { getAudioDevices } = useMicrophone();
-    const { setVideoDeviceId, setAudioDeviceId, setMidiDeviceId } = useDeviceStore();
-
-    useEffect(() => {
-        const initializeData = async () => {
-            const newVideoDevices = await getVideoDevices();
-            setVideoDevices(newVideoDevices);
-
-            const newAudioDevices = await getAudioDevices();
-            setAudioDevices(newAudioDevices);
-        };
-
-        initializeData();
-    }, []);
+    const { devices: videoDevices, select: selectVideo } = useCameraState();
+    const { devices: voiceDevices, select: selectVoice } = useMicrophoneState();
+    const { setMidiDeviceId } = useDeviceStore();
 
     return (
         <Stack pt={16}>
             <NativeSelect
                 size="sm"
                 onChange={async (e) => {
-                    setVideoDeviceId(e.target.value);
+                    selectVideo(e.target.value);
                 }}
                 label="Video"
                 data={videoDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
@@ -38,10 +23,10 @@ export const DevicesDrawerSection: React.FC = () => {
             <NativeSelect
                 size="sm"
                 onChange={async (e) => {
-                    setAudioDeviceId(e.target.value);
+                    selectVoice(e.target.value);
                 }}
                 label="Microphone"
-                data={audioDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
+                data={voiceDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
             />
             <NativeSelect
                 size="sm"

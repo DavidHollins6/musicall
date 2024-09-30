@@ -1,17 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Message, WebMidi } from "webmidi";
 import { useDeviceStore } from "../store/deviceStore";
 import { useEffectEvent } from "./useEffectEvent";
 import { useMidiStore } from "../store/midiStore";
-import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager";
+import { useSoundManager } from "./useSoundManager";
 
 export const useMidiSoundPlayer = () => {
     const { midi } = useDeviceStore();
     const { midiInputs } = useMidiStore();
-    const soundManager = useRef(new KeyboardSoundManager());
+    const soundManager = useSoundManager();
 
     const onMidiMessage = useEffectEvent((e: Message) => {
-        soundManager.current.handleMidiEvent(e);
+        soundManager.handleMidiEvent(e);
     });
 
     useEffect(() => {

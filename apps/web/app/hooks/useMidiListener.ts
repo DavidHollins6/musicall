@@ -1,24 +1,14 @@
 import { useEffect } from "react";
 import { MessageEvent, WebMidi } from "webmidi";
-import { createDataMessage } from "@musicall/types/dataMessage";
 import { useDeviceStore } from "../store/deviceStore";
-import { usePeerStore } from "../store/peerStore";
 import { useEffectEvent } from "./useEffectEvent";
 import { useMidiStore } from "../store/midiStore";
 
-export const useDataMessageMidiListener = () => {
+export const useMidiListener = (callback: (e: MessageEvent) => void) => {
     const { midi } = useDeviceStore();
     const { midiInputs } = useMidiStore();
-    const { peers } = usePeerStore();
 
-    const onMidiMessage = useEffectEvent((e: MessageEvent) => {
-        if (midi.enabled) {
-            Object.keys(peers).forEach((pId) => {
-                const peer = peers[pId];
-                peer.peerConnection.send(createDataMessage({ type: "midi", message: e.message }));
-            });
-        }
-    });
+    const onMidiMessage = useEffectEvent(callback);
 
     useEffect(() => {
         midiInputs.forEach((i) => {

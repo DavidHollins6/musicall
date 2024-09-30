@@ -3,7 +3,9 @@ import React from "react";
 import { Video } from ".";
 import { Flex, Group, Text } from "@mantine/core";
 import { IconMicrophoneOff } from "@tabler/icons-react";
+import classes from "./video.module.css";
 import { usePeerStore } from "../../store/peerStore";
+import { useMicVolume } from "../../hooks/useMicVolume";
 
 type Props = {
     peerId: string;
@@ -12,9 +14,17 @@ type Props = {
 export const RemoteVideo: React.FC<Props> = ({ peerId }) => {
     const { peers } = usePeerStore();
     const peer = peers[peerId];
+    const { audioLevel } = useMicVolume(peer.stream);
 
     return (
-        <Flex w="100%" h="100%" pos="relative" justify="center" align="center">
+        <Flex
+            w="100%"
+            h="100%"
+            pos="relative"
+            justify="center"
+            align="center"
+            className={audioLevel > 50 ? classes.talking : classes.nottalking}
+        >
             <Video stream={peer.stream} />
             <Group
                 gap={4}

@@ -19,14 +19,20 @@ import { useDeviceStore } from "../../store/deviceStore";
 import { usePeerStore } from "../../store/peerStore";
 import { useSocketStore } from "../../store/socketStore";
 import { useUserStore } from "../../store/userStore";
+import { useCameraState } from "../../hooks/useCameraState";
+import { useMicrophoneState } from "../../hooks/useMicrophoneState";
 
 export const ControlBar: React.FC = () => {
     const { socket } = useSocketStore();
     const [chatOpened, { open: openChatDrawer, close: closeChatDrawer }] = useDisclosure(false);
     const [waitingListopened, { open: openWaitingListDrawer, close: closeWaitingListDrawer }] = useDisclosure(false);
-    const { video, midi, voice, toggleVoice, toggleVideo, toggleMidi } = useDeviceStore();
-    const { waitingList } = usePeerStore();
+    const { midi, toggleMidi } = useDeviceStore();
+    const { waitingList, localStream } = usePeerStore();
     const { isOwner } = useUserStore();
+    const { camera } = useCameraState();
+    const { microphone } = useMicrophoneState();
+
+    console.log(localStream?.getVideoTracks());
 
     return (
         <>
@@ -53,40 +59,45 @@ export const ControlBar: React.FC = () => {
                     <ActionIcon.Group>
                         <ActionIcon
                             onClick={() => {
-                                console.log("toggle voice", voice.enabled);
                                 const message = createServerMessage({
                                     type: "update-device-status",
                                     midi: midi.enabled,
-                                    voice: !voice.enabled,
-                                    video: video.enabled,
+                                    voice: !microphone.isMute,
+                                    video: camera.isMute,
                                 });
                                 if (socket) {
                                     socket.send(message);
                                 }
-                                toggleVoice();
+
+                                localStream?.getAudioTracks().forEach((track) => (track.enabled = microphone.isMute));
+
+                                microphone.toggle();
                             }}
                             size={48}
-                            bg={voice.enabled ? "blue" : "red"}
+                            bg={microphone.isMute ? "red" : "blue"}
                         >
-                            {voice.enabled ? <IconMicrophone /> : <IconMicrophoneOff />}
+                            {microphone.isMute ? <IconMicrophoneOff /> : <IconMicrophone />}
                         </ActionIcon>
                         <ActionIcon
                             onClick={() => {
                                 const message = createServerMessage({
                                     type: "update-device-status",
                                     midi: midi.enabled,
-                                    voice: voice.enabled,
-                                    video: !video.enabled,
+                                    voice: microphone.isMute,
+                                    video: !camera.isMute,
                                 });
                                 if (socket) {
                                     socket.send(message);
                                 }
-                                toggleVideo();
+
+                                localStream?.getVideoTracks().forEach((track) => (track.enabled = camera.isMute));
+
+                                camera.toggle();
                             }}
                             size={48}
-                            bg={video.enabled ? "blue" : "red"}
+                            bg={camera.isMute ? "red" : "blue"}
                         >
-                            {video.enabled ? <IconVideo /> : <IconVideoOff />}
+                            {camera.isMute ? <IconVideoOff /> : <IconVideo />}
                         </ActionIcon>
 
                         <ActionIcon
@@ -94,8 +105,8 @@ export const ControlBar: React.FC = () => {
                                 const message = createServerMessage({
                                     type: "update-device-status",
                                     midi: !midi.enabled,
-                                    voice: voice.enabled,
-                                    video: video.enabled,
+                                    voice: microphone.isMute,
+                                    video: camera.isMute,
                                 });
                                 if (socket) {
                                     socket.send(message);
