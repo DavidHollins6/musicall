@@ -1,16 +1,11 @@
 import { useEffect } from "react";
-import { Message, WebMidi } from "webmidi";
+import { MessageEvent, WebMidi } from "webmidi";
 import { useEffectEvent } from "./useEffectEvent";
-import { useSoundManager } from "./useSoundManager";
 import { useMidiState } from "./useMidiState";
 
-export const useMidiSoundPlayer = () => {
-    const soundManager = useSoundManager();
+export const useMidiListener = (callback: (e: MessageEvent) => void) => {
     const { devices, selectedDevice } = useMidiState();
-
-    const onMidiMessage = useEffectEvent((e: Message) => {
-        soundManager.handleMidiEvent(e);
-    });
+    const onMidiMessage = useEffectEvent(callback);
 
     useEffect(() => {
         devices.forEach((i) => {

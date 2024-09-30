@@ -15,18 +15,22 @@ import { ChatDrawerSection } from "./ChatDrawerSection";
 import { SettingsPopover } from "./SettingsPopover";
 import { WaitingListDrawer } from "./WaitingListDrawer";
 import { createServerMessage } from "@musicall/types/serverMessage";
-import { useDeviceStore } from "../../store/deviceStore";
 import { usePeerStore } from "../../store/peerStore";
 import { useSocketStore } from "../../store/socketStore";
 import { useUserStore } from "../../store/userStore";
+import { useCameraState } from "../../hooks/useCameraState";
+import { useMicrophoneState } from "../../hooks/useMicrophoneState";
+import { useMidiState } from "../../hooks/useMidiState";
 
 export const ControlBar: React.FC = () => {
     const { socket } = useSocketStore();
     const [chatOpened, { open: openChatDrawer, close: closeChatDrawer }] = useDisclosure(false);
     const [waitingListopened, { open: openWaitingListDrawer, close: closeWaitingListDrawer }] = useDisclosure(false);
-    const { video, midi, voice, toggleVoice, toggleVideo, toggleMidi } = useDeviceStore();
-    const { waitingList } = usePeerStore();
+    const { waitingList, localStream } = usePeerStore();
     const { isOwner } = useUserStore();
+    const { camera } = useCameraState();
+    const { microphone } = useMicrophoneState();
+    const { midi } = useMidiState();
 
     return (
         <>
@@ -53,59 +57,64 @@ export const ControlBar: React.FC = () => {
                     <ActionIcon.Group>
                         <ActionIcon
                             onClick={() => {
-                                console.log("toggle voice", voice.enabled);
                                 const message = createServerMessage({
                                     type: "update-device-status",
-                                    midi: midi.enabled,
-                                    voice: !voice.enabled,
-                                    video: video.enabled,
+                                    midi: midi.isMute,
+                                    voice: !microphone.isMute,
+                                    video: camera.isMute,
                                 });
                                 if (socket) {
                                     socket.send(message);
                                 }
-                                toggleVoice();
+
+                                localStream?.getAudioTracks().forEach((track) => (track.enabled = microphone.isMute));
+
+                                microphone.toggle();
                             }}
                             size={48}
-                            bg={voice.enabled ? "blue" : "red"}
+                            bg={microphone.isMute ? "red" : "blue"}
                         >
-                            {voice.enabled ? <IconMicrophone /> : <IconMicrophoneOff />}
+                            {microphone.isMute ? <IconMicrophoneOff /> : <IconMicrophone />}
                         </ActionIcon>
                         <ActionIcon
                             onClick={() => {
                                 const message = createServerMessage({
                                     type: "update-device-status",
-                                    midi: midi.enabled,
-                                    voice: voice.enabled,
-                                    video: !video.enabled,
+                                    midi: midi.isMute,
+                                    voice: microphone.isMute,
+                                    video: !camera.isMute,
                                 });
                                 if (socket) {
                                     socket.send(message);
                                 }
-                                toggleVideo();
+
+                                localStream?.getVideoTracks().forEach((track) => (track.enabled = camera.isMute));
+
+                                camera.toggle();
                             }}
                             size={48}
-                            bg={video.enabled ? "blue" : "red"}
+                            bg={camera.isMute ? "red" : "blue"}
                         >
-                            {video.enabled ? <IconVideo /> : <IconVideoOff />}
+                            {camera.isMute ? <IconVideoOff /> : <IconVideo />}
                         </ActionIcon>
 
                         <ActionIcon
                             onClick={() => {
                                 const message = createServerMessage({
                                     type: "update-device-status",
-                                    midi: !midi.enabled,
-                                    voice: voice.enabled,
-                                    video: video.enabled,
+                                    midi: !midi.isMute,
+                                    voice: microphone.isMute,
+                                    video: camera.isMute,
                                 });
                                 if (socket) {
                                     socket.send(message);
                                 }
-                                toggleMidi();
+                                midi.toggle();
                             }}
                             size={48}
-                            bg={midi.enabled ? "blue" : "red"}
+                            bg={midi.isMute ? "red" : "blue"}
                         >
-                            {midi.enabled ? <IconMusic /> : <IconMusicOff />}
+                            {midi.isMute ? <IconMusicOff /> : <IconMusic />}
                         </ActionIcon>
                     </ActionIcon.Group>
                     <SettingsPopover />

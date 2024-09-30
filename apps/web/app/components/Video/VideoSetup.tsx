@@ -1,20 +1,16 @@
 import { useState } from "react";
 import { Video } from ".";
-import { useCamera } from "../../hooks/useCamera";
 import { Button, Box, Group, LoadingOverlay, NativeSelect } from "@mantine/core";
+import { useCameraState } from "../../hooks/useCameraState";
 
 export const VideoSetup = ({ onComplete }: { onComplete: () => void }) => {
-    const [stream, setStream] = useState<MediaStream>();
+    const { selectedDevice, devices, select, mediaStream, setDevices } = useCameraState();
     const [requestedAccess, setRequestedAccess] = useState(false);
-    const [selectedVideoDeviceId, setSelectedVideoDeviceId] = useState<string | null>(null);
-    const [videoDevices, setVideoDevices] = useState<Array<MediaDeviceInfo>>([]);
-
-    const { getStreamById, getVideoDevices } = useCamera();
 
     return (
         <Box pos="relative" h="100%">
             <Box style={{ height: "calc(100% - 78px)" }} bg="black" pos="relative">
-                <Video key={selectedVideoDeviceId} stream={stream} />
+                <Video key={selectedDevice} stream={mediaStream} />
             </Box>
             <LoadingOverlay
                 visible={!requestedAccess}
@@ -24,15 +20,19 @@ export const VideoSetup = ({ onComplete }: { onComplete: () => void }) => {
                     children: (
                         <Button
                             onClick={async () => {
-                                const newVideoDevices = await getVideoDevices();
-                                setVideoDevices(newVideoDevices);
-                                const newStream = await getStreamById(newVideoDevices[0].deviceId);
+                                await navigator.mediaDevices.getUserMedia({
+                                    video: true,
+                                });
 
-                                if (!newStream) {
-                                    return;
+                                const allDevices = await navigator.mediaDevices.enumerateDevices();
+                                const videoDevices = allDevices.filter((d) => d.kind === "videoinput");
+
+                                if (videoDevices.length > 0) {
+                                    setDevices(videoDevices);
+
+                                    select(videoDevices[0].deviceId);
                                 }
 
-                                setStream(newStream);
                                 setRequestedAccess(true);
                             }}
                         >
@@ -44,15 +44,10 @@ export const VideoSetup = ({ onComplete }: { onComplete: () => void }) => {
             <Group h="78px" justify="space-between" align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
-                        setSelectedVideoDeviceId(e.currentTarget.value);
-                        const newStream = await getStreamById(e.currentTarget.value);
-                        if (!newStream) {
-                            return;
-                        }
-                        setStream(newStream);
+                        select(e.currentTarget.value);
                     }}
                     label="Video"
-                    data={videoDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
+                    data={devices.map((m) => ({ label: m.label, value: m.deviceId }))}
                 />
                 <Button onClick={onComplete}>Next</Button>
             </Group>

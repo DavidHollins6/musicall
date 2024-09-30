@@ -1,34 +1,21 @@
 import { useState } from "react";
-import { Button, Box, Group, LoadingOverlay, NativeSelect, Card } from "@mantine/core";
-import { useMicrophone } from "../../hooks/useMicrophone";
-import { Visualizer } from "react-sound-visualizer";
+import { Button, Box, Group, LoadingOverlay, NativeSelect, Progress, Stack } from "@mantine/core";
+import { useMicrophoneState } from "../../hooks/useMicrophoneState";
+import { useMicVolume } from "../../hooks/useMicVolume";
 
 export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
-    const [stream, setStream] = useState<MediaStream | null>(null);
     const [requestedAccess, setRequestedAccess] = useState(false);
-    const [microphoneId, setMicrophoneId] = useState<string | null>(null);
-    const [audioDevices, setAudioDevices] = useState<Array<MediaDeviceInfo>>([]);
+    const { setDevices, devices, select, mediaStream, microphone } = useMicrophoneState();
+    const { audioLevel } = useMicVolume(mediaStream, 50);
 
-    const { getStreamById, getAudioDevices } = useMicrophone();
+    console.log(audioLevel);
 
     return (
         <Box pos="relative" h="100%">
-            <Box style={{ height: "calc(100% - 78px)" }} pos="relative">
-                <Visualizer key={microphoneId} audio={stream} autoStart>
-                    {({ canvasRef }) => (
-                        <>
-                            <Card
-                                h="100%"
-                                style={{ display: "flex", alignItems: "center", justifyContent: "center " }}
-                                withBorder
-                                shadow="xs"
-                            >
-                                <canvas style={{ width: "100%", maxHeight: "100%" }} ref={canvasRef} />
-                            </Card>
-                        </>
-                    )}
-                </Visualizer>
-            </Box>
+            <Stack justify="center" style={{ height: "calc(100% - 78px)" }} pos="relative">
+                Volume:
+                <Progress value={audioLevel} />
+            </Stack>
             <LoadingOverlay
                 visible={!requestedAccess}
                 zIndex={1000}
@@ -37,16 +24,20 @@ export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
                     children: (
                         <Button
                             onClick={async () => {
-                                const newAudioDevices = await getAudioDevices();
-                                setAudioDevices(newAudioDevices);
+                                await navigator.mediaDevices.getUserMedia({
+                                    audio: true,
+                                });
 
-                                const newStream = await getStreamById(newAudioDevices[0].deviceId);
+                                const allDevices = await navigator.mediaDevices.enumerateDevices();
+                                const audioDevices = allDevices.filter((d) => d.kind === "audioinput");
 
-                                if (!newStream) {
-                                    return;
+                                if (audioDevices.length > 0) {
+                                    setDevices(audioDevices);
+
+                                    select(audioDevices[0].deviceId);
+                                    microphone.enable();
                                 }
 
-                                setStream(newStream);
                                 setRequestedAccess(true);
                             }}
                         >
@@ -58,12 +49,10 @@ export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
             <Group h="78px" justify="space-between" align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
-                        setMicrophoneId(e.currentTarget.value);
-                        const newStream = await getStreamById(e.currentTarget.value);
-                        setStream(newStream);
+                        select(e.currentTarget.value);
                     }}
                     label="Microphone"
-                    data={audioDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
+                    data={devices.map((m) => ({ label: m.label, value: m.deviceId }))}
                 />
                 <Button onClick={onComplete}>Next</Button>
             </Group>

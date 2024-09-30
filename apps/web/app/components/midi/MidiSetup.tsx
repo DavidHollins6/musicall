@@ -1,14 +1,12 @@
 import { Box, Button, Group, LoadingOverlay, NativeSelect } from "@mantine/core";
 import { useState } from "react";
-import { useMidiStore } from "../../store/midiStore";
 import { WebMidi } from "webmidi";
-import { useDeviceStore } from "../../store/deviceStore";
 import { useMidiSoundPlayer } from "../../hooks/useMidiSoundPlayer";
+import { useMidiState } from "../../hooks/useMidiState";
 
 export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
     const [requestedAccess, setRequestedAccess] = useState(false);
-    const { midiInputs, refreshMidiInputs } = useMidiStore();
-    const { setMidiDeviceId, midi } = useDeviceStore();
+    const { select, devices, selectedDevice, refreshDevices } = useMidiState();
     useMidiSoundPlayer();
 
     return (
@@ -23,8 +21,8 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                         <Button
                             onClick={async () => {
                                 await WebMidi.enable();
-                                refreshMidiInputs();
-                                setMidiDeviceId(WebMidi.inputs[0].id);
+                                refreshDevices();
+                                select(WebMidi.inputs[0].id);
                                 setRequestedAccess(true);
                             }}
                         >
@@ -36,11 +34,11 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
             <Group h="78px" justify="space-between" align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
-                        setMidiDeviceId(e.currentTarget.value);
+                        select(e.currentTarget.value);
                     }}
                     label="Instrument"
-                    value={midi.id}
-                    data={midiInputs?.map((m) => ({ label: m.name, value: m.id }))}
+                    value={selectedDevice}
+                    data={devices?.map((m) => ({ label: m.name, value: m.id }))}
                 />
                 <Button onClick={onComplete}>Next</Button>
             </Group>

@@ -1,14 +1,14 @@
 import { usePartySocket } from "partysocket/react";
 import Peer from "simple-peer";
-import { useCamera } from "./useCamera";
 import { useEffect } from "react";
-import { useMicrophone } from "./useMicrophone";
 import { User } from "@musicall/storage";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { ClientMessageSchema } from "@musicall/types/clientMessage";
-import { useDeviceStore } from "../store/deviceStore";
 import { usePeerStore } from "../store/peerStore";
 import { useSocketStore } from "../store/socketStore";
+import { useCameraState } from "./useCameraState";
+import { useMicrophoneState } from "./useMicrophoneState";
+import { useMidiState } from "./useMidiState";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -50,13 +50,34 @@ export const useWebRTC = ({ room, userId }: Props) => {
         removePeer,
     } = usePeerStore();
 
-    const { voice, video, midi } = useDeviceStore();
-    const { getStreamById: getVideoStreamById } = useCamera();
-    const { getStreamById: getAudioStreamById } = useMicrophone();
     const { setSocket } = useSocketStore();
+    const {
+        mediaStream: videoStream,
+        selectedDevice: selectedVideoDevice,
+        camera,
+        defaultCameraOn,
+        defaultCameraDevice,
+        devices: videoDevices,
+        select: selectVideo,
+    } = useCameraState();
+
+    const {
+        mediaStream: voiceStream,
+        selectedDevice: selectedVoiceDevice,
+        microphone,
+        defaultMicrophoneOn,
+        defaultMicrophoneDevice,
+        devices: voiceDevices,
+        select: selectVoice,
+    } = useMicrophoneState();
+
+    const { defaultMidiOn } = useMidiState();
 
     useEffect(() => {
-        const initializeIds = async () => {};
+        const initializeIds = async () => {
+            selectVideo(defaultCameraDevice || videoDevices[0].deviceId);
+            selectVoice(defaultMicrophoneDevice || voiceDevices[0].deviceId);
+        };
 
         initializeIds();
     }, []);
@@ -72,25 +93,22 @@ export const useWebRTC = ({ room, userId }: Props) => {
 
     useEffect(() => {
         const initializeStream = async () => {
-            if (!video.id || !voice.id) {
+            if (!selectedVideoDevice || !selectedVoiceDevice) {
                 return;
             }
-
-            const videoStream = await getVideoStreamById(video.id);
-            const audioStream = await getAudioStreamById(voice.id);
 
             const newLocalStream = new MediaStream();
 
             if (videoStream) {
                 videoStream.getVideoTracks().forEach((track) => {
-                    track.enabled = video.enabled;
+                    track.enabled = !camera.isMute;
                     newLocalStream.addTrack(track);
                 });
             }
 
-            if (audioStream) {
-                audioStream.getAudioTracks().forEach((track) => {
-                    track.enabled = voice.enabled;
+            if (voiceStream) {
+                voiceStream.getAudioTracks().forEach((track) => {
+                    track.enabled = !microphone.isMute;
                     newLocalStream.addTrack(track);
                 });
             }
@@ -99,7 +117,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
         };
 
         initializeStream();
-    }, [video.id, voice.id]);
+    }, [selectedVideoDevice, selectedVoiceDevice]);
 
     const socket = usePartySocket({
         room: room,
@@ -143,9 +161,9 @@ export const useWebRTC = ({ room, userId }: Props) => {
             const message = createServerMessage({
                 type: "join-room",
                 userId,
-                voice: voice.enabled,
-                video: video.enabled,
-                midi: midi.enabled,
+                voice: defaultMicrophoneOn,
+                video: defaultCameraOn,
+                midi: defaultMidiOn,
             });
             socket.send(message);
         },
