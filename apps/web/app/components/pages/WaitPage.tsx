@@ -1,7 +1,7 @@
 import { usePartySocket } from "partysocket/react";
 import { useState } from "react";
 import { z } from "zod";
-import { Button, Stepper, Stack, Group, Card } from "@mantine/core";
+import { Button, Stepper, Stack, Group, Card, Checkbox } from "@mantine/core";
 import { User } from "@musicall/storage";
 import { MidiSetup } from "../midi/MidiSetup";
 import { VideoSetup } from "../Video/VideoSetup";
@@ -22,6 +22,7 @@ const MessageSchema = z.object({
 });
 
 export const WaitPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
+    const [autoJoin, setAutoJoin] = useState(false);
     const [allowed, setAllowed] = useState(allowedIntoRoom);
     const [active, setActive] = useState(0);
     const navigate = useNavigate();
@@ -47,7 +48,11 @@ export const WaitPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
             }
 
             if (result.data.type === "allow-into-room") {
-                setAllowed(true);
+                if (autoJoin) {
+                    navigate(`/call?roomId=${roomId}`);
+                } else {
+                    setAllowed(true);
+                }
             }
         },
     });
@@ -103,6 +108,11 @@ export const WaitPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
             </Card>
             <Group justify="flex-end" flex={0}>
                 {allowed ? "You may enter!" : `Waiting for ${roomOwner.name} to let you in...`}
+                <Checkbox
+                    label="Auto-join room"
+                    checked={autoJoin}
+                    onChange={(event) => setAutoJoin(event.currentTarget.checked)}
+                />
                 <Button
                     disabled={!allowed}
                     m={20}
