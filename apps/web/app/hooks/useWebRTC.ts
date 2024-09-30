@@ -144,8 +144,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
                 case "signal":
                     peers[result.data.peerId].peerConnection.signal(result.data.signal);
                     break;
-                case "waiting-room-updated":
-                    console.log("someone joined the waiting room!", result.data);
+                case "lobby-updated":
                     setWaitingList(result.data.waiters);
                     break;
                 case "chat":

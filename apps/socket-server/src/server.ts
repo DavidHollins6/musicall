@@ -44,16 +44,14 @@ export default class WebSocketServer implements Party.Server {
                 );
 
                 const message = createClientMessage({
-                    type: "waiting-room-updated",
+                    type: "lobby-updated",
                     waiters: this.waiterUserIdsMap.map((w) => ({ userId: w.userId, name: w.name })),
                 });
                 this.owner?.send(message);
                 break;
             }
 
-            case "join-waiting-room": {
-                console.log("SOMEONE JOINED WAITING ROOM");
-
+            case "join-lobby": {
                 this.waiters.push(sender);
                 this.waiterUserIdsMap.push({
                     userId: result.data.userId,
@@ -62,7 +60,7 @@ export default class WebSocketServer implements Party.Server {
                 });
 
                 const message = createClientMessage({
-                    type: "waiting-room-updated",
+                    type: "lobby-updated",
                     waiters: this.waiterUserIdsMap.map((w) => ({ userId: w.userId, name: w.name })),
                 });
 
@@ -79,7 +77,7 @@ export default class WebSocketServer implements Party.Server {
 
                 if (this.roomOwnerId && this.roomOwnerId === result.data.userId) {
                     const message = createClientMessage({
-                        type: "waiting-room-updated",
+                        type: "lobby-updated",
                         waiters: this.waiterUserIdsMap.map((w) => ({ userId: w.userId, name: w.name })),
                     });
 
@@ -205,7 +203,7 @@ export default class WebSocketServer implements Party.Server {
             this.waiters = this.waiters.filter((w) => w.id !== waiterUser.connectionId);
 
             const message = createClientMessage({
-                type: "waiting-room-updated",
+                type: "lobby-updated",
                 waiters: this.waiterUserIdsMap.map((w) => ({ userId: w.userId, name: w.name })),
             });
 
