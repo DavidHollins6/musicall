@@ -20,7 +20,7 @@ export type ClientPeer = {
 };
 
 export type ClientWaitingRoomUpdated = {
-    type: "waiting-room-updated";
+    type: "lobby-updated";
     waiters: Array<{ userId: string; name: string }>;
 };
 

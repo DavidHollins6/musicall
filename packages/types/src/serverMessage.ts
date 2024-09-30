@@ -23,7 +23,7 @@ export type ServerAllowIntoRoomMessage = {
 };
 
 export type ServerJoinWaitingRoomMessage = {
-    type: "join-waiting-room";
+    type: "join-lobby";
     userId: string;
     name: string;
 };

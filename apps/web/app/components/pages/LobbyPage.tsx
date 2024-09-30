@@ -21,7 +21,7 @@ const MessageSchema = z.object({
     type: z.literal("allow-into-room"),
 });
 
-export const WaitPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
+export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
     const [autoJoin, setAutoJoin] = useState(false);
     const [allowed, setAllowed] = useState(allowedIntoRoom);
     const [active, setActive] = useState(0);
@@ -33,7 +33,7 @@ export const WaitPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
         host: "https://localhost:1999",
         onOpen() {
             const message = createServerMessage({
-                type: "join-waiting-room",
+                type: "join-lobby",
                 userId: user.id,
                 name: user.name,
             });

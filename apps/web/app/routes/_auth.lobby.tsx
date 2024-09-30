@@ -3,11 +3,11 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { ClientOnly } from "remix-utils/client-only";
 import { requireAuthSession } from "../modules/auth/session.server";
-import { WaitPage } from "../components/pages/WaitPage";
 import { useLoaderData } from "@remix-run/react";
 import { getOwnedRooms, getRoom, getRoomAllowList } from "@musicall/api/room";
 import { getUser } from "@musicall/api/user";
 import { createUserStore, UserContext } from "../store/userStore";
+import { LobbyPage } from "../components/pages/LobbyPage";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
@@ -56,7 +56,12 @@ export default function Wait() {
         <ClientOnly>
             {() => (
                 <UserContext.Provider value={store}>
-                    <WaitPage roomOwner={roomOwner} roomId={roomId} userId={userId} allowedIntoRoom={allowedIntoRoom} />
+                    <LobbyPage
+                        roomOwner={roomOwner}
+                        roomId={roomId}
+                        userId={userId}
+                        allowedIntoRoom={allowedIntoRoom}
+                    />
                 </UserContext.Provider>
             )}
         </ClientOnly>

@@ -31,7 +31,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const isInAllowList = allowList.includes(userId);
 
     if (!ownsThisRoom && !isInAllowList) {
-        return redirect(`/wait?roomId=${roomId}`);
+        return redirect(`/lobby?roomId=${roomId}`);
     }
 
     return json({ user, roomId, isOwner: ownsThisRoom });
