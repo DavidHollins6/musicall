@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { ClientOnly } from "remix-utils/client-only";
@@ -6,9 +7,16 @@ import { WaitPage } from "../components/pages/WaitPage";
 import { useLoaderData } from "@remix-run/react";
 import { getOwnedRooms, getRoom, getRoomAllowList } from "@musicall/api/room";
 import { getUser } from "@musicall/api/user";
+import { createUserStore, UserContext } from "../store/userStore";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
+
+    const user = await getUser(userId);
+
+    if (!user) {
+        return redirect("/");
+    }
 
     const url = new URL(request.url);
     const roomId = url.searchParams.get("roomId");
@@ -29,7 +37,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect("/");
     }
 
-    console.log(room);
     const roomOwner = await getUser(room.ownerId);
 
     if (!roomOwner) {
@@ -38,15 +45,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const allowList = await getRoomAllowList(roomId);
     const allowedIntoRoom = allowList.includes(userId);
 
-    return json({ userId, roomId, allowedIntoRoom, roomOwner });
+    return json({ userId, roomId, allowedIntoRoom, roomOwner, user });
 }
 
 export default function Wait() {
-    const { roomId, userId, allowedIntoRoom, roomOwner } = useLoaderData<typeof loader>();
+    const { roomId, userId, allowedIntoRoom, roomOwner, user } = useLoaderData<typeof loader>();
+    const store = useRef(createUserStore({ user, isOwner: false })).current;
 
     return (
         <ClientOnly>
-            {() => <WaitPage roomOwner={roomOwner} roomId={roomId} userId={userId} allowedIntoRoom={allowedIntoRoom} />}
+            {() => (
+                <UserContext.Provider value={store}>
+                    <WaitPage roomOwner={roomOwner} roomId={roomId} userId={userId} allowedIntoRoom={allowedIntoRoom} />
+                </UserContext.Provider>
+            )}
         </ClientOnly>
     );
 }

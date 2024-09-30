@@ -8,6 +8,7 @@ import { VideoSetup } from "../Video/VideoSetup";
 import { MicrophoneSetup } from "../audio/MicrophoneSetup";
 import { useNavigate } from "@remix-run/react";
 import { createServerMessage } from "@musicall/types/serverMessage";
+import { useUserStore } from "../../store/userStore";
 
 type Props = {
     userId: string;
@@ -20,10 +21,11 @@ const MessageSchema = z.object({
     type: z.literal("allow-into-room"),
 });
 
-export const WaitPage = ({ roomId, userId, allowedIntoRoom, roomOwner }: Props) => {
+export const WaitPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
     const [allowed, setAllowed] = useState(allowedIntoRoom);
     const [active, setActive] = useState(0);
     const navigate = useNavigate();
+    const { user } = useUserStore();
 
     const socket = usePartySocket({
         room: roomId,
@@ -31,7 +33,8 @@ export const WaitPage = ({ roomId, userId, allowedIntoRoom, roomOwner }: Props) 
         onOpen() {
             const message = createServerMessage({
                 type: "join-waiting-room",
-                userId,
+                userId: user.id,
+                name: user.name,
             });
             socket.send(message);
         },

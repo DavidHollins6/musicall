@@ -16,7 +16,7 @@ type Participant = {
 export default class WebSocketServer implements Party.Server {
     participants: Array<Participant> = [];
     waiters: Array<Party.Connection> = [];
-    waiterUserIdsMap: Array<{ userId: string; connectionId: string }> = [];
+    waiterUserIdsMap: Array<{ userId: string; connectionId: string; name: string }> = [];
     owner?: Party.Connection;
     roomOwnerId?: string;
 
@@ -45,7 +45,7 @@ export default class WebSocketServer implements Party.Server {
 
                 const message = createClientMessage({
                     type: "waiting-room-updated",
-                    waiters: this.waiterUserIdsMap.map((w) => w.userId),
+                    waiters: this.waiterUserIdsMap.map((w) => ({ userId: w.userId, name: w.name })),
                 });
                 this.owner?.send(message);
                 break;
@@ -58,11 +58,12 @@ export default class WebSocketServer implements Party.Server {
                 this.waiterUserIdsMap.push({
                     userId: result.data.userId,
                     connectionId: sender.id,
+                    name: result.data.name,
                 });
 
                 const message = createClientMessage({
                     type: "waiting-room-updated",
-                    waiters: this.waiterUserIdsMap.map((w) => w.userId),
+                    waiters: this.waiterUserIdsMap.map((w) => ({ userId: w.userId, name: w.name })),
                 });
 
                 this.owner?.send(message);
@@ -79,7 +80,7 @@ export default class WebSocketServer implements Party.Server {
                 if (this.roomOwnerId && this.roomOwnerId === result.data.userId) {
                     const message = createClientMessage({
                         type: "waiting-room-updated",
-                        waiters: this.waiterUserIdsMap.map((w) => w.userId),
+                        waiters: this.waiterUserIdsMap.map((w) => ({ userId: w.userId, name: w.name })),
                     });
 
                     sender.send(message);
@@ -205,7 +206,7 @@ export default class WebSocketServer implements Party.Server {
 
             const message = createClientMessage({
                 type: "waiting-room-updated",
-                waiters: this.waiterUserIdsMap.map((w) => w.userId),
+                waiters: this.waiterUserIdsMap.map((w) => ({ userId: w.userId, name: w.name })),
             });
 
             this.owner?.send(message);
