@@ -77,6 +77,8 @@ export async function action({ request }: ActionFunctionArgs) {
         return json({ errors: { email: "user-already-exist", password: null } }, { status: 400 });
     }
 
+    console.log("create me that user");
+
     const authSession = await createUserAccount(email, password, name);
 
     if (!authSession) {

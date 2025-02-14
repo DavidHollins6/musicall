@@ -16,6 +16,9 @@
         "migrate": {
             "cache": false
         },
+        "generate": {
+            "cache": false
+        },
         "deploy": {
             "cache": false
         }

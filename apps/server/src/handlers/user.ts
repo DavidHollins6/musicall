@@ -1,9 +1,9 @@
 import type { Express, Request } from "express";
 import { users } from "@musicall/storage";
 import { eq } from "drizzle-orm";
-import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-export const userHandlers = (app: Express, db: PostgresJsDatabase) => {
+export const userHandlers = (app: Express, db: NodePgDatabase) => {
     app.get("/user/:id", async (req, res) => {
         const result = await db.select().from(users).where(eq(users.id, req.params.id));
 

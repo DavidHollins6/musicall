@@ -11,6 +11,8 @@ export async function createEmailAuthAccount(email: string, password: string) {
         email_confirm: true, // FIXME: demo purpose, assert that email is confirmed. For production, check email confirmation
     });
 
+    console.log(error);
+
     if (!data.user || error) return null;
 
     return data.user;

@@ -13,6 +13,7 @@
     "typescript": "latest"
   },
   "dependencies": {
-    "@musicall/storage": "workspace:*"
+    "@musicall/storage": "workspace:*",
+    "ky": "^1.7.5"
   }
 }

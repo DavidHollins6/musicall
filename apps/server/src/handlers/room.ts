@@ -1,9 +1,9 @@
 import type { Express, Request } from "express";
 import { rooms, RedisCache } from "@musicall/storage";
-import { and, eq } from "drizzle-orm";
-import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { eq } from "drizzle-orm";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-export const roomHandlers = (app: Express, db: PostgresJsDatabase, redis: RedisCache) => {
+export const roomHandlers = (app: Express, db: NodePgDatabase, redis: RedisCache) => {
     app.get("/room/:id", async (req, res) => {
         const roomsResult = await db.select().from(rooms).where(eq(rooms.id, req.params.id));
 
