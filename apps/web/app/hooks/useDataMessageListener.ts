@@ -1,11 +1,11 @@
 import { DataMessageSchema } from "@musicall/types/dataMessage";
 import { useEffect, useRef } from "react";
-import { usePeerStore } from "../store/peerStore";
 import { useEffectEvent } from "./useEffectEvent";
 import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager";
+import { usePeerStateMachine } from "../machines/peerMachine";
 
 export const useDataMessageListener = () => {
-    const { peers } = usePeerStore();
+    const peerStateMachine = usePeerStateMachine();
     const soundManager = useRef(new KeyboardSoundManager());
 
     const onMessageRecieved = useEffectEvent((message: Uint8Array) => {
@@ -15,7 +15,7 @@ export const useDataMessageListener = () => {
         const result = DataMessageSchema.safeParse(messageObject);
 
         if (!result.success) {
-            console.log("could not parse", result);
+            console.error("could not parse", result);
             return;
         }
 
@@ -27,10 +27,10 @@ export const useDataMessageListener = () => {
     });
 
     useEffect(() => {
-        Object.keys(peers).forEach((pId) => {
-            const peer = peers[pId];
+        Object.keys(peerStateMachine.context.peers).forEach((pId) => {
+            const peer = peerStateMachine.context.peers[pId];
             peer.peerConnection.removeListener("data", onMessageRecieved);
             peer.peerConnection.addListener("data", onMessageRecieved);
         });
-    }, [peers]);
+    }, [peerStateMachine.context.peers]);
 };

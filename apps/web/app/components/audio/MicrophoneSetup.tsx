@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { Button, Box, Group, LoadingOverlay, NativeSelect, Progress, Stack } from "@mantine/core";
 import { useMicrophoneState } from "../../hooks/useMicrophoneState";
@@ -7,8 +8,6 @@ export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
     const [requestedAccess, setRequestedAccess] = useState(false);
     const { setDevices, devices, select, mediaStream, microphone } = useMicrophoneState();
     const { audioLevel } = useMicVolume(mediaStream, 50);
-
-    console.log(audioLevel);
 
     return (
         <Box pos="relative" h="100%">

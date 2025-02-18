@@ -1,20 +1,21 @@
+"use client";
+
 import { Avatar, Box, Flex, Stack, Text, TextInput } from "@mantine/core";
 import { useState } from "react";
 import { createServerMessage } from "@musicall/types/serverMessage";
-import { usePeerStore } from "../../store/peerStore";
-import { useSocketStore } from "../../store/socketStore";
 import { useUserStore } from "../../store/userStore";
+import { useChatStateMachine } from "../../machines/chatMachine";
+import { useSocketStateMachine } from "../../machines/socketStateMachine";
 
 export const ChatDrawerSection: React.FC = () => {
-    const { chatMessages } = usePeerStore();
+    const chatStateMachine = useChatStateMachine();
+    const socketStateMachine = useSocketStateMachine();
     const [message, setMessage] = useState("");
-    const { socket } = useSocketStore();
     const { user } = useUserStore();
-
     return (
         <Stack pt={16} h="100%">
             <Box flex={1}>
-                {chatMessages.map((message) => (
+                {chatStateMachine.context.messages.map((message) => (
                     <Flex
                         gap={8}
                         direction={message.from.id === user.id ? "row-reverse" : "row"}
@@ -58,9 +59,7 @@ export const ChatDrawerSection: React.FC = () => {
                         from: user,
                         timestamp: Date.now(),
                     });
-                    if (socket) {
-                        socket.send(serverMessage);
-                    }
+                    socketStateMachine.send({ type: "socket.sendMessage", message: serverMessage });
                     setMessage("");
                 }}
             >

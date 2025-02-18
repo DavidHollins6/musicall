@@ -33,7 +33,6 @@ export class DrumSoundManager implements ISoundManager {
     }
 
     changeMappings(_mappings: Mapping[]) {
-        console.log(_mappings);
         this.mappings = _mappings;
     }
 }

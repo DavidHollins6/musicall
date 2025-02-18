@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { ActionIcon, Drawer, Group, Indicator } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -15,22 +17,25 @@ import { ChatDrawerSection } from "./ChatDrawerSection";
 import { SettingsPopover } from "./SettingsPopover";
 import { ParticipantsDrawer } from "./ParticipantsDrawer";
 import { createServerMessage } from "@musicall/types/serverMessage";
-import { usePeerStore } from "../../store/peerStore";
-import { useSocketStore } from "../../store/socketStore";
 import { useUserStore } from "../../store/userStore";
-import { useCameraState } from "../../hooks/useCameraState";
-import { useMicrophoneState } from "../../hooks/useMicrophoneState";
-import { useMidiState } from "../../hooks/useMidiState";
+import { useMidiStateMachine } from "../../machines/midiMachine";
+import { useVideoStateMachine } from "../../machines/videoMachine";
+import { useVoiceStateMachine } from "../../machines/voiceMachine";
+import { useSocketStateMachine } from "../../machines/socketStateMachine";
+import { usePeerStateMachine } from "../../machines/peerMachine";
+import { useStreamStateMachine } from "../../machines/streamMachine";
 
 export const ControlBar: React.FC = () => {
-    const { socket } = useSocketStore();
     const [chatOpened, { open: openChatDrawer, close: closeChatDrawer }] = useDisclosure(false);
     const [participantsOpened, { open: openParticipantsDrawer, close: closeParticipantsDrawer }] = useDisclosure(false);
-    const { waitingList, localStream } = usePeerStore();
     const { isOwner } = useUserStore();
-    const { camera } = useCameraState();
-    const { microphone } = useMicrophoneState();
-    const { midi } = useMidiState();
+
+    const midiStateMachine = useMidiStateMachine();
+    const videoStateMachine = useVideoStateMachine();
+    const voiceStateMachine = useVoiceStateMachine();
+    const socketStateMachine = useSocketStateMachine();
+    const peerStateMachine = usePeerStateMachine();
+    const streamStateMachine = useStreamStateMachine();
 
     return (
         <>
@@ -55,65 +60,81 @@ export const ControlBar: React.FC = () => {
                 <Group gap={24}>
                     <ActionIcon.Group>
                         <ActionIcon
+                            disabled={voiceStateMachine.value !== "initialized"}
                             onClick={() => {
                                 const message = createServerMessage({
                                     type: "update-device-status",
-                                    midi: midi.isMute,
-                                    voice: !microphone.isMute,
-                                    video: camera.isMute,
+                                    midi: midiStateMachine.context.enabled,
+                                    voice: !voiceStateMachine.context.enabled,
+                                    video: videoStateMachine.context.enabled,
                                 });
-                                if (socket) {
-                                    socket.send(message);
+                                socketStateMachine.send({ type: "socket.sendMessage", message });
+
+                                if (streamStateMachine.context.stream) {
+                                    streamStateMachine.context.stream.getAudioTracks().forEach((at) => {
+                                        at.enabled = !voiceStateMachine.context.enabled;
+                                    });
                                 }
 
-                                localStream?.getAudioTracks().forEach((track) => (track.enabled = microphone.isMute));
-
-                                microphone.toggle();
+                                voiceStateMachine.send({
+                                    type: "voice.toggle",
+                                    enabled: !voiceStateMachine.context.enabled,
+                                });
                             }}
                             size={48}
-                            bg={microphone.isMute ? "red" : "blue"}
+                            bg={voiceStateMachine.context.enabled ? "blue" : "red"}
                         >
-                            {microphone.isMute ? <IconMicrophoneOff /> : <IconMicrophone />}
+                            {voiceStateMachine.context.enabled ? <IconMicrophone /> : <IconMicrophoneOff />}
                         </ActionIcon>
                         <ActionIcon
+                            disabled={videoStateMachine.value !== "initialized"}
                             onClick={() => {
                                 const message = createServerMessage({
                                     type: "update-device-status",
-                                    midi: midi.isMute,
-                                    voice: microphone.isMute,
-                                    video: !camera.isMute,
+                                    midi: midiStateMachine.context.enabled,
+                                    voice: voiceStateMachine.context.enabled,
+                                    video: !videoStateMachine.context.enabled,
                                 });
-                                if (socket) {
-                                    socket.send(message);
+                                socketStateMachine.send({ type: "socket.sendMessage", message });
+
+                                if (streamStateMachine.context.stream) {
+                                    streamStateMachine.context.stream.getVideoTracks().forEach((at) => {
+                                        at.enabled = !videoStateMachine.context.enabled;
+                                    });
                                 }
 
-                                localStream?.getVideoTracks().forEach((track) => (track.enabled = camera.isMute));
-
-                                camera.toggle();
+                                videoStateMachine.send({
+                                    type: "video.toggle",
+                                    enabled: !videoStateMachine.context.enabled,
+                                });
                             }}
                             size={48}
-                            bg={camera.isMute ? "red" : "blue"}
+                            bg={videoStateMachine.context.enabled ? "blue" : "red"}
                         >
-                            {camera.isMute ? <IconVideoOff /> : <IconVideo />}
+                            {videoStateMachine.context.enabled ? <IconVideo /> : <IconVideoOff />}
                         </ActionIcon>
 
                         <ActionIcon
+                            disabled={midiStateMachine.value !== "initialized"}
                             onClick={() => {
                                 const message = createServerMessage({
                                     type: "update-device-status",
-                                    midi: !midi.isMute,
-                                    voice: microphone.isMute,
-                                    video: camera.isMute,
+                                    midi: !midiStateMachine.context.enabled,
+                                    voice: voiceStateMachine.context.enabled,
+                                    video: videoStateMachine.context.enabled,
                                 });
-                                if (socket) {
-                                    socket.send(message);
-                                }
-                                midi.toggle();
+
+                                socketStateMachine.send({ type: "socket.sendMessage", message });
+
+                                midiStateMachine.send({
+                                    type: "midi.toggle",
+                                    enabled: !midiStateMachine.context.enabled,
+                                });
                             }}
                             size={48}
-                            bg={midi.isMute ? "red" : "blue"}
+                            bg={midiStateMachine.context.enabled ? "blue" : "red"}
                         >
-                            {midi.isMute ? <IconMusicOff /> : <IconMusic />}
+                            {midiStateMachine.context.enabled ? <IconMusic /> : <IconMusicOff />}
                         </ActionIcon>
                     </ActionIcon.Group>
                     <SettingsPopover />
@@ -123,7 +144,10 @@ export const ControlBar: React.FC = () => {
                     <ActionIcon onClick={openChatDrawer} size={48} variant="default">
                         <IconMessageCircle size={20} />
                     </ActionIcon>
-                    <Indicator label={isOwner ? waitingList.length : 0} disabled={!isOwner || waitingList.length === 0}>
+                    <Indicator
+                        label={isOwner ? peerStateMachine.context.waitingList.length : 0}
+                        disabled={!isOwner || peerStateMachine.context.waitingList.length === 0}
+                    >
                         <ActionIcon onClick={openParticipantsDrawer} size={48} variant="default">
                             <IconUsers size={20} />
                         </ActionIcon>
