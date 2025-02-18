@@ -58,6 +58,15 @@ export const voiceMachine = setup({
                     target: "#voice.failure",
                 },
             },
+            on: {
+                "voice.toggle": {
+                    actions: [
+                        assign({
+                            enabled: ({ event }) => event.enabled,
+                        }),
+                    ],
+                },
+            },
         },
         initialized: {
             on: {
@@ -91,17 +100,28 @@ export const voiceMachine = setup({
                 input: ({ context }) => ({ deviceId: context.device?.deviceId }),
                 onDone: {
                     target: "#voice.initialized",
-                    actions: enqueueActions(({ event, enqueue, context }) => {
-                        console.log("switching devices");
-                        event.output.getAudioTracks().forEach((at) => (at.enabled = context.enabled));
-                        enqueue.sendTo(streamActor, () => ({
-                            type: "stream.updateAudioStream",
-                            stream: event.output,
-                        }));
+                    actions: enqueueActions(({ enqueue, event, context }) => {
+                        enqueue.raise({ type: "voice.setStream", stream: event.output });
+                        enqueue.sendTo(streamActor, () => {
+                            event.output.getAudioTracks().forEach((at) => (at.enabled = context.enabled));
+                            return {
+                                type: "stream.updateAudioStream",
+                                stream: event.output,
+                            };
+                        });
                     }),
                 },
                 onError: {
                     target: "#voice.failure",
+                },
+            },
+            on: {
+                "voice.toggle": {
+                    actions: [
+                        assign({
+                            enabled: ({ event }) => event.enabled,
+                        }),
+                    ],
                 },
             },
         },
@@ -115,6 +135,15 @@ export const voiceMachine = setup({
                 },
                 onError: {
                     target: "#voice.failure",
+                },
+            },
+            on: {
+                "voice.toggle": {
+                    actions: [
+                        assign({
+                            enabled: ({ event }) => event.enabled,
+                        }),
+                    ],
                 },
             },
         },

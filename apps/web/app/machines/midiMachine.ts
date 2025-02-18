@@ -15,6 +15,8 @@ import {
 } from "xstate";
 import { peerActor } from "./peerMachine";
 import { DataMessage } from "@musicall/types/dataMessage";
+import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager";
+import { ISoundManager } from "../utils/sound/ISoundManager";
 
 export const midiMachine = setup({
     types: {} as {
@@ -22,6 +24,8 @@ export const midiMachine = setup({
             inputs: Array<Input>;
             enabled: boolean;
             selectedInput: Input | null;
+            type: "local" | "peers";
+            soundManager?: ISoundManager;
         };
         events:
             | {
@@ -30,6 +34,10 @@ export const midiMachine = setup({
             | {
                   type: "midi.selectMidiInput";
                   selectedInput: Input;
+              }
+            | {
+                  type: "midi.setType";
+                  newType: "local" | "peers";
               }
             | { type: "midi.toggle"; enabled: boolean }
             | { type: "midi.sendMessage"; event: MessageEvent };
@@ -80,6 +88,7 @@ export const midiMachine = setup({
         inputs: [],
         enabled: false,
         selectedInput: null,
+        type: "local",
     },
     initial: "initializing",
     states: {
@@ -106,6 +115,18 @@ export const midiMachine = setup({
                 },
                 onError: {
                     target: "#midi.failedInitializing",
+                },
+            },
+            on: {
+                "midi.toggle": {
+                    actions: assign({
+                        enabled: ({ event }) => event.enabled,
+                    }),
+                },
+                "midi.setType": {
+                    actions: assign({
+                        type: ({ event }) => event.newType,
+                    }),
                 },
             },
         },
@@ -140,11 +161,30 @@ export const midiMachine = setup({
                 },
                 "midi.sendMessage": {
                     guard: ({ context }) => context.enabled,
-                    actions: sendTo(peerActor, ({ event }) => {
-                        return {
-                            type: "peer.sendDataToAll",
-                            message: { type: "midi", message: event.event.message } as DataMessage,
-                        };
+                    actions: enqueueActions(({ enqueue, event, context }) => {
+                        if (context.type === "peers") {
+                            enqueue.sendTo(peerActor, () => {
+                                return {
+                                    type: "peer.sendDataToAll",
+                                    message: { type: "midi", message: event.event.message } as DataMessage,
+                                };
+                            });
+                        }
+
+                        if (context.type === "local") {
+                            if (!context.soundManager) {
+                                const newSoundManager = new KeyboardSoundManager();
+                                newSoundManager.handleMidiEvent(event.event.message);
+                                enqueue.assign({ soundManager: newSoundManager });
+                            } else {
+                                context.soundManager.handleMidiEvent(event.event.message);
+                            }
+                        }
+                    }),
+                },
+                "midi.setType": {
+                    actions: assign({
+                        type: ({ event }) => event.newType,
                     }),
                 },
             },

@@ -1,16 +1,16 @@
 import { useSelector } from "@xstate/react";
-import { assign, createActor, fromPromise, sendTo, setup } from "xstate";
+import { assign, createActor, enqueueActions, fromPromise, setup } from "xstate";
 import { streamActor } from "./streamMachine";
 
 export const videoMachine = setup({
-    types: {} as {
-        context: {
+    types: {
+        context: {} as {
             device?: MediaDeviceInfo;
             availableDevices: Array<MediaDeviceInfo>;
             enabled: boolean;
             stream?: MediaStream;
-        };
-        events:
+        },
+        events: {} as
             | {
                   type: "video.setDevice";
                   device: MediaDeviceInfo;
@@ -19,7 +19,7 @@ export const videoMachine = setup({
                   type: "video.scanAvailableDevices";
               }
             | { type: "video.toggle"; enabled: boolean }
-            | { type: "video.setStream"; stream: MediaStream };
+            | { type: "video.setStream"; stream: MediaStream },
     },
     actors: {
         scanDevices: fromPromise(async () => {
@@ -60,6 +60,13 @@ export const videoMachine = setup({
                     target: "#video.failure",
                 },
             },
+            "video.toggle": {
+                actions: [
+                    assign({
+                        enabled: ({ event }) => event.enabled,
+                    }),
+                ],
+            },
         },
         initialized: {
             on: {
@@ -82,12 +89,6 @@ export const videoMachine = setup({
                         assign({
                             enabled: ({ event }) => event.enabled,
                         }),
-                        sendTo(streamActor, ({ event }) => {
-                            return {
-                                type: "stream.toggleVideoStreamEnabled",
-                                enabled: event.enabled,
-                            };
-                        }),
                     ],
                 },
             },
@@ -99,17 +100,27 @@ export const videoMachine = setup({
                 input: ({ context }) => ({ deviceId: context.device?.deviceId }),
                 onDone: {
                     target: "#video.initialized",
-                    actions: sendTo(streamActor, ({ event, context }) => {
-                        event.output.getVideoTracks().forEach((at) => (at.enabled = context.enabled));
-                        return {
-                            type: "stream.updateVideoStream",
-                            stream: event.output,
-                        };
+                    actions: enqueueActions(({ enqueue, event, context }) => {
+                        enqueue.raise({ type: "video.setStream", stream: event.output });
+                        enqueue.sendTo(streamActor, () => {
+                            event.output.getVideoTracks().forEach((at) => (at.enabled = context.enabled));
+                            return {
+                                type: "stream.updateVideoStream",
+                                stream: event.output,
+                            };
+                        });
                     }),
                 },
                 onError: {
                     target: "#video.failure",
                 },
+            },
+            "video.toggle": {
+                actions: [
+                    assign({
+                        enabled: ({ event }) => event.enabled,
+                    }),
+                ],
             },
         },
         scanning: {
@@ -123,6 +134,13 @@ export const videoMachine = setup({
                 onError: {
                     target: "#video.failure",
                 },
+            },
+            "video.toggle": {
+                actions: [
+                    assign({
+                        enabled: ({ event }) => event.enabled,
+                    }),
+                ],
             },
         },
     },

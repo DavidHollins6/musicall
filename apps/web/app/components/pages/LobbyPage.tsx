@@ -9,7 +9,7 @@ import { MicrophoneSetup } from "../audio/MicrophoneSetup";
 import { useNavigate } from "@remix-run/react";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { useUserStore } from "../../store/userStore";
-import { useSocketStateMachine } from "~/machines/socketStateMachine";
+import { useSocketStateMachine } from "../../machines/socketStateMachine";
 
 type Props = {
     userId: string;
@@ -30,7 +30,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
     const { user } = useUserStore();
     const socketStateMachine = useSocketStateMachine();
 
-    const socket = usePartySocket({
+    usePartySocket({
         room: roomId,
         host: "https://localhost:1999",
         onOpen() {

@@ -1,39 +1,26 @@
-import { useState } from "react";
 import { Video } from ".";
 import { Button, Box, Group, LoadingOverlay, NativeSelect } from "@mantine/core";
-import { useCameraState } from "../../hooks/useCameraState";
+import { useVideoStateMachine, videoActor } from "../../machines/videoMachine";
 
 export const VideoSetup = ({ onComplete }: { onComplete: () => void }) => {
-    const { selectedDevice, devices, select, mediaStream, setDevices } = useCameraState();
-    const [requestedAccess, setRequestedAccess] = useState(false);
+    const videoStateMachine = useVideoStateMachine();
+    videoStateMachine.context.stream?.getVideoTracks().forEach((vt) => (vt.enabled = true));
 
     return (
         <Box pos="relative" h="100%">
             <Box style={{ height: "calc(100% - 78px)" }} bg="black" pos="relative">
-                <Video key={selectedDevice} stream={mediaStream} />
+                <Video stream={videoStateMachine.context.stream} />
             </Box>
             <LoadingOverlay
-                visible={!requestedAccess}
+                visible={videoStateMachine.value === "initializing"}
                 zIndex={1000}
                 overlayProps={{ blur: 2 }}
                 loaderProps={{
                     children: (
                         <Button
                             onClick={async () => {
-                                await navigator.mediaDevices.getUserMedia({
-                                    video: true,
-                                });
-
-                                const allDevices = await navigator.mediaDevices.enumerateDevices();
-                                const videoDevices = allDevices.filter((d) => d.kind === "videoinput");
-
-                                if (videoDevices.length > 0) {
-                                    setDevices(videoDevices);
-
-                                    select(videoDevices[0].deviceId);
-                                }
-
-                                setRequestedAccess(true);
+                                videoActor.start();
+                                videoStateMachine.send({ type: "video.toggle", enabled: true });
                             }}
                         >
                             Request Access to Camera
@@ -44,10 +31,18 @@ export const VideoSetup = ({ onComplete }: { onComplete: () => void }) => {
             <Group h="78px" justify="space-between" align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
-                        select(e.currentTarget.value);
+                        const newDevice = videoStateMachine.context.availableDevices.find(
+                            (d) => d.deviceId === e.currentTarget.value,
+                        );
+                        if (newDevice) {
+                            videoStateMachine.send({ type: "video.setDevice", device: newDevice });
+                        }
                     }}
                     label="Video"
-                    data={devices.map((m) => ({ label: m.label, value: m.deviceId }))}
+                    data={videoStateMachine.context.availableDevices.map((m) => ({
+                        label: m.label,
+                        value: m.deviceId,
+                    }))}
                 />
                 <Button onClick={onComplete}>Next</Button>
             </Group>

@@ -1,13 +1,13 @@
 "use client";
-import { useState } from "react";
 import { Button, Box, Group, LoadingOverlay, NativeSelect, Progress, Stack } from "@mantine/core";
-import { useMicrophoneState } from "../../hooks/useMicrophoneState";
 import { useMicVolume } from "../../hooks/useMicVolume";
+import { useVoiceStateMachine, voiceActor } from "../../machines/voiceMachine";
 
 export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
-    const [requestedAccess, setRequestedAccess] = useState(false);
-    const { setDevices, devices, select, mediaStream, microphone } = useMicrophoneState();
-    const { audioLevel } = useMicVolume(mediaStream, 50);
+    const voiceStateMachine = useVoiceStateMachine();
+    const { audioLevel } = useMicVolume(voiceStateMachine.context.stream, 50);
+
+    voiceStateMachine.context.stream?.getAudioTracks().forEach((at) => (at.enabled = true));
 
     return (
         <Box pos="relative" h="100%">
@@ -16,28 +16,15 @@ export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
                 <Progress value={audioLevel} />
             </Stack>
             <LoadingOverlay
-                visible={!requestedAccess}
+                visible={voiceStateMachine.value === "initializing"}
                 zIndex={1000}
                 overlayProps={{ blur: 2 }}
                 loaderProps={{
                     children: (
                         <Button
                             onClick={async () => {
-                                await navigator.mediaDevices.getUserMedia({
-                                    audio: true,
-                                });
-
-                                const allDevices = await navigator.mediaDevices.enumerateDevices();
-                                const audioDevices = allDevices.filter((d) => d.kind === "audioinput");
-
-                                if (audioDevices.length > 0) {
-                                    setDevices(audioDevices);
-
-                                    select(audioDevices[0].deviceId);
-                                    microphone.enable();
-                                }
-
-                                setRequestedAccess(true);
+                                voiceActor.start();
+                                voiceStateMachine.send({ type: "voice.toggle", enabled: true });
                             }}
                         >
                             Request Access to Microphone
@@ -48,10 +35,18 @@ export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
             <Group h="78px" justify="space-between" align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
-                        select(e.currentTarget.value);
+                        const newDevice = voiceStateMachine.context.availableDevices.find(
+                            (d) => d.deviceId === e.currentTarget.value,
+                        );
+                        if (newDevice) {
+                            voiceStateMachine.send({ type: "voice.setDevice", device: newDevice });
+                        }
                     }}
                     label="Microphone"
-                    data={devices.map((m) => ({ label: m.label, value: m.deviceId }))}
+                    data={voiceStateMachine.context.availableDevices.map((m) => ({
+                        label: m.label,
+                        value: m.deviceId,
+                    }))}
                 />
                 <Button onClick={onComplete}>Next</Button>
             </Group>

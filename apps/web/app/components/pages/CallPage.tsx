@@ -29,6 +29,7 @@ export default function CallPage({ roomId }: Props) {
     useEffect(() => {
         streamActor.start();
         midiActor.start();
+        midiStateMachine.send({ type: "midi.setType", newType: "peers" });
         voiceActor.start();
         videoActor.start();
         peerActor.start();

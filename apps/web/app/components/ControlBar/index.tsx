@@ -80,6 +80,11 @@ export const ControlBar: React.FC = () => {
                                     type: "voice.toggle",
                                     enabled: !voiceStateMachine.context.enabled,
                                 });
+
+                                streamStateMachine.send({
+                                    type: "stream.toggleAudioStreamEnabled",
+                                    enabled: !voiceStateMachine.context.enabled,
+                                });
                             }}
                             size={48}
                             bg={voiceStateMachine.context.enabled ? "blue" : "red"}
@@ -105,6 +110,11 @@ export const ControlBar: React.FC = () => {
 
                                 videoStateMachine.send({
                                     type: "video.toggle",
+                                    enabled: !videoStateMachine.context.enabled,
+                                });
+
+                                streamStateMachine.send({
+                                    type: "stream.toggleVideoStreamEnabled",
                                     enabled: !videoStateMachine.context.enabled,
                                 });
                             }}

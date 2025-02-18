@@ -1,29 +1,22 @@
 import { Box, Button, Group, LoadingOverlay, NativeSelect } from "@mantine/core";
-import { useState } from "react";
-import { WebMidi } from "webmidi";
-import { useMidiSoundPlayer } from "../../hooks/useMidiSoundPlayer";
-import { useMidiState } from "../../hooks/useMidiState";
+import { midiActor, useMidiStateMachine } from "../../machines/midiMachine";
 
 export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
-    const [requestedAccess, setRequestedAccess] = useState(false);
-    const { select, devices, selectedDevice, refreshDevices } = useMidiState();
-    useMidiSoundPlayer();
+    const midiStateMachine = useMidiStateMachine();
 
     return (
         <Box pos="relative" h="100%">
             <Box style={{ height: "calc(100% - 78px)" }} pos="relative"></Box>
             <LoadingOverlay
-                visible={!requestedAccess}
+                visible={midiStateMachine.value === "initializing"}
                 zIndex={1000}
                 overlayProps={{ blur: 2 }}
                 loaderProps={{
                     children: (
                         <Button
                             onClick={async () => {
-                                await WebMidi.enable();
-                                refreshDevices();
-                                select(WebMidi.inputs[0].id);
-                                setRequestedAccess(true);
+                                midiActor.start();
+                                midiStateMachine.send({ type: "midi.toggle", enabled: true });
                             }}
                         >
                             Request Access to Instruments
@@ -34,11 +27,15 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
             <Group h="78px" justify="space-between" align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
-                        select(e.currentTarget.value);
+                        const newInput = midiStateMachine.context.inputs.find((i) => i.id === e.currentTarget.value);
+
+                        if (newInput) {
+                            midiStateMachine.send({ type: "midi.selectMidiInput", selectedInput: newInput });
+                        }
                     }}
                     label="Instrument"
-                    value={selectedDevice}
-                    data={devices?.map((m) => ({ label: m.name, value: m.id }))}
+                    value={midiStateMachine.context.selectedInput?.id}
+                    data={midiStateMachine.context.inputs.map((m) => ({ label: m.name, value: m.id }))}
                 />
                 <Button onClick={onComplete}>Next</Button>
             </Group>
