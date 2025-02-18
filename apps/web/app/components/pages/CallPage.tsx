@@ -1,51 +1,55 @@
+"use client";
+
 import { VideoGrid } from "../Video/VideoGrid";
 import { Box, Flex, rem, useMantineTheme } from "@mantine/core";
 import { ControlBar } from "../ControlBar";
-import { useEffect, useState } from "react";
-import { WebMidi } from "webmidi";
 import { FullWidthLoader } from "../Loader";
 import { Call } from "../Call";
-import { useCameraState } from "../../hooks/useCameraState";
-import { useMicrophoneState } from "../../hooks/useMicrophoneState";
+import { midiActor, useMidiStateMachine } from "../../machines/midiMachine";
+import { useEffect } from "react";
+import { useVoiceStateMachine, voiceActor } from "../../machines/voiceMachine";
+import { useVideoStateMachine, videoActor } from "../../machines/videoMachine";
+import { peerActor } from "../../machines/peerMachine";
+import { streamActor, useStreamStateMachine } from "../../machines/streamMachine";
+import { chatActor } from "../../machines/chatMachine";
+import { socketActor } from "../../machines/socketStateMachine";
 
 type Props = {
     roomId: string;
 };
 
 export default function CallPage({ roomId }: Props) {
-    const [askedPermissions, setAskedPermissions] = useState(false);
-    const { refreshDevices: refreshVideoDevices } = useCameraState();
-    const { refreshDevices: refreshVoiceDevices } = useMicrophoneState();
-
     const theme = useMantineTheme();
 
-    const askForPermissions = async () => {
-        try {
-            await WebMidi.enable();
-        } catch (e) {
-            console.log("Declined MIDI", e);
-        }
-
-        try {
-            await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-            });
-            refreshVideoDevices();
-            refreshVoiceDevices();
-        } catch (e) {
-            console.log("Declined Video/Audio");
-        }
-    };
+    const midiStateMachine = useMidiStateMachine();
+    const voiceStateMachine = useVoiceStateMachine();
+    const videoStateMachine = useVideoStateMachine();
+    const streamStateMachine = useStreamStateMachine();
 
     useEffect(() => {
-        askForPermissions().then(() => {
-            setAskedPermissions(true);
-        });
+        streamActor.start();
+        midiActor.start();
+        voiceActor.start();
+        videoActor.start();
+        peerActor.start();
+        chatActor.start();
+        socketActor.start();
     }, []);
 
-    if (!askedPermissions) {
-        return <FullWidthLoader />;
+    if (midiStateMachine.value === "initializing") {
+        return <FullWidthLoader message="Checking Permissions" />;
+    }
+
+    if (voiceStateMachine.value === "initializing") {
+        return <FullWidthLoader message="Checking Permissions" />;
+    }
+
+    if (videoStateMachine.value === "initializing") {
+        return <FullWidthLoader message="Checking Permissions" />;
+    }
+
+    if (streamStateMachine.value === "disabled") {
+        return <FullWidthLoader message="Creating Stream" />;
     }
 
     return (

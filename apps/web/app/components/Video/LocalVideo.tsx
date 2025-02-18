@@ -1,22 +1,20 @@
+"use client";
+
 /* eslint-disable jsx-a11y/media-has-caption */
 import React from "react";
 import { Video } from ".";
 import { Flex, Group, Text } from "@mantine/core";
 import { IconMicrophoneOff } from "@tabler/icons-react";
-import { usePeerStore } from "../../store/peerStore";
 import { useUserStore } from "../../store/userStore";
-import classes from "./video.module.css";
-import { useMicVolume } from "../../hooks/useMicVolume";
-import { useCameraState } from "../../hooks/useCameraState";
-import { useMicrophoneState } from "../../hooks/useMicrophoneState";
+import { useVoiceStateMachine } from "../../machines/voiceMachine";
+import { useVideoStateMachine } from "../../machines/videoMachine";
+import { useStreamStateMachine } from "../../machines/streamMachine";
 
 export const LocalVideo: React.FC = () => {
     const { user } = useUserStore();
-    const { localStream } = usePeerStore();
-    const { camera } = useCameraState();
-    const { microphone, mediaStream } = useMicrophoneState();
-    const { audioLevel } = useMicVolume(mediaStream);
-    console.log(audioLevel);
+    const voiceStateMachine = useVoiceStateMachine();
+    const videoStateMachine = useVideoStateMachine();
+    const streamMachine = useStreamStateMachine();
 
     return (
         <Flex
@@ -25,10 +23,10 @@ export const LocalVideo: React.FC = () => {
             pos="relative"
             justify="center"
             align="center"
-            className={audioLevel > 30 ? classes.talking : ""}
+            // className={audioLevel > 30 ? classes.talking : ""}
         >
             {/* <Avatar w="100%" h="100%" radius="xl" /> */}
-            {camera.isMute ? null : <Video muted stream={localStream} />}
+            {videoStateMachine.context.enabled ? <Video muted stream={streamMachine.context.stream} /> : null}
             <Group
                 gap={4}
                 p={4}
@@ -38,7 +36,7 @@ export const LocalVideo: React.FC = () => {
                 style={{ borderTopLeftRadius: "4px" }}
                 bg="linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, .65) 40%)"
             >
-                {!microphone.isMute ? null : <IconMicrophoneOff size={16} color="red" />}
+                {voiceStateMachine.context.enabled ? null : <IconMicrophoneOff size={16} color="red" />}
                 <Text color="white">{user.name} (You)</Text>
             </Group>
         </Flex>

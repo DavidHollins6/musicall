@@ -1,18 +1,7 @@
 import { User } from "@musicall/storage";
-import Peer from "simple-peer";
 import { create } from "zustand";
 import { produce } from "immer";
-
-type PeerData = {
-    peerConnection: Peer.Instance;
-    user: User;
-    peerId: string;
-    microphoneEnabled: boolean;
-    cameraEnabled: boolean;
-    midiEnabled: boolean;
-    stream?: MediaStream;
-    connected: boolean;
-};
+import { PeerData } from "../types/PeerData";
 
 type ChatMessage = {
     from: User;

@@ -1,7 +1,9 @@
+"use client";
+
 import { RemoteVideo } from "./RemoteVideo";
 import { LocalVideo } from "./LocalVideo";
 import { Card, SimpleGrid } from "@mantine/core";
-import { usePeerStore } from "../../store/peerStore";
+import { usePeerStateMachine } from "../../machines/peerMachine";
 
 const cols = {
     1: 1,
@@ -15,7 +17,7 @@ const cols = {
 };
 
 export const VideoGrid = () => {
-    const { peers } = usePeerStore();
+    const peerStateMachine = usePeerStateMachine();
 
     // const totalParticipants = Object.keys(peers).length + 1;
     const totalParticipants = 5;
@@ -38,9 +40,9 @@ export const VideoGrid = () => {
             <Card p={4} radius="md" shadow="md" bg="black" pos="relative">
                 <LocalVideo />
             </Card>
-            {Object.keys(peers).map((p) => (
+            {Object.keys(peerStateMachine.context.peers).map((p) => (
                 <Card p={4} radius="md" shadow="md" bg="black" pos="relative" key={`video-${p}`}>
-                    <RemoteVideo peerId={peers[p].peerId} />
+                    <RemoteVideo peerId={peerStateMachine.context.peers[p].peerId} />
                 </Card>
             ))}
         </SimpleGrid>

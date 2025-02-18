@@ -43,13 +43,19 @@ export type ClientAllowIntoRoom = {
     type: "allow-into-room";
 };
 
+export type ClientLeft = {
+    type: "client-left";
+    peerId: string;
+};
+
 export const ClientMessageSchema = z
     .custom<ClientSignal>()
     .or(z.custom<ClientPeer>())
     .or(z.custom<ClientWaitingRoomUpdated>())
     .or(z.custom<ClientChat>())
     .or(z.custom<ClientUpdateDeviceStatus>())
-    .or(z.custom<ClientAllowIntoRoom>());
+    .or(z.custom<ClientAllowIntoRoom>())
+    .or(z.custom<ClientLeft>());
 
 export type ClientMessages =
     | ClientSignal
@@ -57,7 +63,8 @@ export type ClientMessages =
     | ClientWaitingRoomUpdated
     | ClientChat
     | ClientUpdateDeviceStatus
-    | ClientAllowIntoRoom;
+    | ClientAllowIntoRoom
+    | ClientLeft;
 
 export const createClientMessage = (message: ClientMessages) => {
     return JSON.stringify(message);

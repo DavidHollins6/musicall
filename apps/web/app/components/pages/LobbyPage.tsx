@@ -9,6 +9,7 @@ import { MicrophoneSetup } from "../audio/MicrophoneSetup";
 import { useNavigate } from "@remix-run/react";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { useUserStore } from "../../store/userStore";
+import { useSocketStateMachine } from "~/machines/socketStateMachine";
 
 type Props = {
     userId: string;
@@ -27,6 +28,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
     const [active, setActive] = useState(0);
     const navigate = useNavigate();
     const { user } = useUserStore();
+    const socketStateMachine = useSocketStateMachine();
 
     const socket = usePartySocket({
         room: roomId,
@@ -37,13 +39,13 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
                 userId: user.id,
                 name: user.name,
             });
-            socket.send(message);
+            socketStateMachine.send({ type: "socket.sendMessage", message });
         },
         onMessage(evt) {
             const result = MessageSchema.safeParse(JSON.parse(String(evt.data)));
 
             if (!result.success) {
-                console.log("could not parse", result);
+                console.error("could not parse", result);
                 return;
             }
 

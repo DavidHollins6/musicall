@@ -86,7 +86,6 @@ export default class WebSocketServer implements Party.Server {
                     this.owner = sender;
                 }
 
-                console.log("someone has joined", sender.id, result.data.userId);
                 const voice = result.data.voice;
                 const video = result.data.video;
                 const midi = result.data.midi;
@@ -149,18 +148,15 @@ export default class WebSocketServer implements Party.Server {
             }
 
             case "chat": {
-                console.log("got a chat!!!", result.data);
                 const message = createClientMessage(result.data);
                 this.room.broadcast(message);
                 break;
             }
 
             case "update-device-status": {
-                console.log(result.data);
                 const newVoice = result.data.voice;
                 const newVideo = result.data.video;
                 const newMidi = result.data.midi;
-
                 this.participants.forEach((p) => {
                     if (p.connection.id === sender.id) {
                         p.voice = newVoice;
@@ -195,6 +191,7 @@ export default class WebSocketServer implements Party.Server {
     }
 
     async onClose(connection: Party.Connection) {
+        console.log("person left");
         const waiterUser = this.waiterUserIdsMap.find((w) => w.connectionId === connection.id);
 
         if (waiterUser) {
@@ -208,6 +205,17 @@ export default class WebSocketServer implements Party.Server {
             });
 
             this.owner?.send(message);
+
+            const leavingMessage = createClientMessage({
+                type: "client-left",
+                peerId: connection.id,
+            });
+
+            this.participants.forEach((participant) => {
+                if (participant.connection.id !== connection.id) {
+                    connection.send(leavingMessage);
+                }
+            });
         }
 
         this.participants = this.participants.filter((p) => p.connection.id !== connection.id);

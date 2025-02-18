@@ -1,14 +1,17 @@
+"use client";
+
 import { usePartySocket } from "partysocket/react";
 import Peer from "simple-peer";
-import { useEffect } from "react";
 import { User } from "@musicall/storage";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { ClientMessageSchema } from "@musicall/types/clientMessage";
-import { usePeerStore } from "../store/peerStore";
-import { useSocketStore } from "../store/socketStore";
-import { useCameraState } from "./useCameraState";
-import { useMicrophoneState } from "./useMicrophoneState";
-import { useMidiState } from "./useMidiState";
+import { useMidiStateMachine } from "../machines/midiMachine";
+import { useChatStateMachine } from "../machines/chatMachine";
+import { usePeerStateMachine } from "../machines/peerMachine";
+import { useVideoStateMachine } from "../machines/videoMachine";
+import { useVoiceStateMachine } from "../machines/voiceMachine";
+import { useSocketStateMachine } from "../machines/socketStateMachine";
+import { useStreamStateMachine } from "../machines/streamMachine";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -38,86 +41,13 @@ type Props = {
 };
 
 export const useWebRTC = ({ room, userId }: Props) => {
-    const {
-        peers,
-        localStream,
-        setLocalStream,
-        setWaitingList,
-        addChatMessage,
-        updateDeviceStatus,
-        setPeerStream,
-        addPeer: addPeerToStore,
-        removePeer,
-    } = usePeerStore();
-
-    const { setSocket } = useSocketStore();
-    const {
-        mediaStream: videoStream,
-        selectedDevice: selectedVideoDevice,
-        camera,
-        defaultCameraOn,
-        defaultCameraDevice,
-        devices: videoDevices,
-        select: selectVideo,
-    } = useCameraState();
-
-    const {
-        mediaStream: voiceStream,
-        selectedDevice: selectedVoiceDevice,
-        microphone,
-        defaultMicrophoneOn,
-        defaultMicrophoneDevice,
-        devices: voiceDevices,
-        select: selectVoice,
-    } = useMicrophoneState();
-
-    const { defaultMidiOn } = useMidiState();
-
-    useEffect(() => {
-        const initializeIds = async () => {
-            selectVideo(defaultCameraDevice || videoDevices[0].deviceId);
-            selectVoice(defaultMicrophoneDevice || voiceDevices[0].deviceId);
-        };
-
-        initializeIds();
-    }, []);
-
-    useEffect(() => {
-        if (localStream) {
-            Object.keys(peers).forEach((pId) => {
-                const peer = peers[pId];
-                peer.peerConnection.addStream(localStream);
-            });
-        }
-    }, [localStream]);
-
-    useEffect(() => {
-        const initializeStream = async () => {
-            if (!selectedVideoDevice || !selectedVoiceDevice) {
-                return;
-            }
-
-            const newLocalStream = new MediaStream();
-
-            if (videoStream) {
-                videoStream.getVideoTracks().forEach((track) => {
-                    track.enabled = !camera.isMute;
-                    newLocalStream.addTrack(track);
-                });
-            }
-
-            if (voiceStream) {
-                voiceStream.getAudioTracks().forEach((track) => {
-                    track.enabled = !microphone.isMute;
-                    newLocalStream.addTrack(track);
-                });
-            }
-
-            setLocalStream(newLocalStream);
-        };
-
-        initializeStream();
-    }, [selectedVideoDevice, selectedVoiceDevice]);
+    const chatStateMachine = useChatStateMachine();
+    const peerStateMachine = usePeerStateMachine();
+    const videoStateMachine = useVideoStateMachine();
+    const voiceStateMachine = useVoiceStateMachine();
+    const socketStateMachine = useSocketStateMachine();
+    const midiStateMachine = useMidiStateMachine();
+    const streamStateMachine = useStreamStateMachine();
 
     const socket = usePartySocket({
         room: room,
@@ -126,7 +56,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
             const result = ClientMessageSchema.safeParse(JSON.parse(String(evt.data)));
 
             if (!result.success) {
-                console.log("could not parse", result);
+                console.error("could not parse", result);
                 return;
             }
 
@@ -142,29 +72,44 @@ export const useWebRTC = ({ room, userId }: Props) => {
                     );
                     break;
                 case "signal":
-                    peers[result.data.peerId].peerConnection.signal(result.data.signal);
+                    peerStateMachine.context.peers[result.data.peerId].peerConnection.signal(result.data.signal);
                     break;
                 case "lobby-updated":
-                    setWaitingList(result.data.waiters);
+                    peerStateMachine.send({ type: "peer.setWaitingList", waitingList: result.data.waiters });
                     break;
                 case "chat":
-                    addChatMessage(result.data);
+                    chatStateMachine.send({ type: "chat.sendMessage", message: result.data });
                     break;
                 case "update-device-status":
-                    updateDeviceStatus(result.data.peerId, result.data.voice, result.data.video, result.data.midi);
+                    peerStateMachine.send({
+                        type: "peer.setDeviceStatus",
+                        cameraEnabled: result.data.video,
+                        microphoneEnabled: result.data.voice,
+                        midiEnabled: result.data.midi,
+                        peerId: result.data.peerId,
+                    });
+                    break;
+                case "client-left":
+                    console.log("someone left");
                     break;
             }
         },
         onOpen() {
-            setSocket(socket);
+            socketStateMachine.send({
+                type: "socket.initialized",
+                socket,
+            });
+            videoStateMachine.send({ type: "video.scanAvailableDevices" });
+            voiceStateMachine.send({ type: "voice.scanAvailableDevices" });
+            midiStateMachine.send({ type: "midi.scanInputs" });
             const message = createServerMessage({
                 type: "join-room",
                 userId,
-                voice: defaultMicrophoneOn,
-                video: defaultCameraOn,
-                midi: defaultMidiOn,
+                voice: voiceStateMachine.context.enabled,
+                video: videoStateMachine.context.enabled,
+                midi: midiStateMachine.context.enabled,
             });
-            socket.send(message);
+            socketStateMachine.send({ type: "socket.sendMessage", message });
         },
     });
 
@@ -173,7 +118,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
             initiator: initiator,
             config: CONFIG,
             trickle: USE_TRICKLE,
-            stream: localStream,
+            stream: streamStateMachine.context.stream,
         });
 
         peerConnection.on("signal", (data) => {
@@ -183,44 +128,60 @@ export const useWebRTC = ({ room, userId }: Props) => {
                 peerId,
                 userId: userId,
             });
-            socket.send(message);
+            socketStateMachine.send({ type: "socket.sendMessage", message });
         });
 
         peerConnection.on("error", (e) => {
-            console.error(e);
+            console.log(e);
         });
 
         peerConnection.on("connect", () => {
-            console.log("peer connected");
-            Object.keys(peers).forEach((k) => {
-                if (peers[k].peerConnection.streams.length === 0 && localStream) {
-                    peers[k].peerConnection.addStream(localStream);
+            Object.keys(peerStateMachine.context.peers).forEach((k) => {
+                if (
+                    peerStateMachine.context.peers[k].peerConnection.streams.length === 0 &&
+                    streamStateMachine.context.stream
+                ) {
+                    streamStateMachine.context.stream.getTracks().forEach((track) => {
+                        peerStateMachine.context.peers[k].peerConnection.addTrack(
+                            track,
+                            streamStateMachine.context.stream as MediaStream,
+                        );
+                    });
                 }
             });
         });
 
         peerConnection.on("close", () => {
-            console.log("it has closed!!");
-            if (peers[user.id]) {
+            if (peerStateMachine.context.peers[user.id]) {
                 peerConnection.destroy();
             }
-            removePeer(peerId);
+            peerStateMachine.send({ type: "peer.removePeer", peerId });
+        });
+
+        peerConnection.on("end", () => {
+            console.log("ended");
+        });
+
+        peerConnection.on("data", () => {
+            console.error("i received a message");
         });
 
         peerConnection.on("stream", (stream) => {
-            setPeerStream(peerId, stream);
+            console.log("got their stream", stream.getVideoTracks());
+            peerStateMachine.send({ type: "peer.setStream", peerId, stream });
         });
 
-        addPeerToStore(peerId, {
-            cameraEnabled: video,
-            connected: false,
-            microphoneEnabled: voice,
-            midiEnabled: midi,
-            peerConnection,
-            peerId,
-            user,
+        peerStateMachine.send({
+            type: "peer.addPeer",
+            peer: {
+                cameraEnabled: video,
+                connected: false,
+                microphoneEnabled: voice,
+                midiEnabled: midi,
+                peerConnection,
+                peerId,
+                user,
+            },
         });
     };
-
-    return { socket };
 };

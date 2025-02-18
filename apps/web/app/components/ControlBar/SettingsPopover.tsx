@@ -1,13 +1,16 @@
+"use client";
+
 import { ActionIcon, NativeSelect, Popover, Stack } from "@mantine/core";
 import { IconSettings } from "@tabler/icons-react";
-import { useCameraState } from "../../hooks/useCameraState";
-import { useMicrophoneState } from "../../hooks/useMicrophoneState";
-import { useMidiState } from "../../hooks/useMidiState";
+import { WebMidi } from "webmidi";
+import { useMidiStateMachine } from "../../machines/midiMachine";
+import { useVideoStateMachine } from "../../machines/videoMachine";
+import { useVoiceStateMachine } from "../../machines/voiceMachine";
 
 export const SettingsPopover: React.FC = () => {
-    const { devices: videoDevices, select: selectVideo } = useCameraState();
-    const { devices: voiceDevices, select: selectVoice } = useMicrophoneState();
-    const { devices: midiDevices, select: selectMidi } = useMidiState();
+    const videoStateMachine = useVideoStateMachine();
+    const voiceStateMachine = useVoiceStateMachine();
+    const midiStateMachine = useMidiStateMachine();
 
     return (
         <Popover width={300} position="top-start" withArrow shadow="md">
@@ -22,26 +25,45 @@ export const SettingsPopover: React.FC = () => {
                     <NativeSelect
                         size="sm"
                         onChange={async (e) => {
-                            selectVideo(e.target.value);
+                            const newDevice = videoStateMachine.context.availableDevices.find(
+                                (d) => d.deviceId === e.target.value,
+                            );
+                            if (newDevice) {
+                                videoStateMachine.send({ type: "video.setDevice", device: newDevice });
+                            }
                         }}
                         label="Video"
-                        data={videoDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
+                        data={videoStateMachine.context.availableDevices.map((m) => ({
+                            label: m.label,
+                            value: m.deviceId,
+                        }))}
                     />
                     <NativeSelect
                         size="sm"
                         onChange={async (e) => {
-                            selectVoice(e.target.value);
+                            const newDevice = voiceStateMachine.context.availableDevices.find(
+                                (d) => d.deviceId === e.target.value,
+                            );
+                            if (newDevice) {
+                                voiceStateMachine.send({ type: "voice.setDevice", device: newDevice });
+                            }
                         }}
                         label="Microphone"
-                        data={voiceDevices.map((m) => ({ label: m.label, value: m.deviceId }))}
+                        data={voiceStateMachine.context.availableDevices.map((m) => ({
+                            label: m.label,
+                            value: m.deviceId,
+                        }))}
                     />
                     <NativeSelect
                         size="sm"
                         onChange={async (e) => {
-                            selectMidi(e.target.value);
+                            const newInput = WebMidi.inputs.find((i) => i.id === e.target.value);
+                            if (newInput) {
+                                midiStateMachine.send({ type: "midi.selectMidiInput", selectedInput: newInput });
+                            }
                         }}
                         label="MIDI"
-                        data={midiDevices.map((m) => ({ label: m.name, value: m.id }))}
+                        data={midiStateMachine.context.inputs.map((m) => ({ label: m.name, value: m.id }))}
                     />
                 </Stack>
             </Popover.Dropdown>

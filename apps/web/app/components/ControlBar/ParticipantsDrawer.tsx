@@ -1,19 +1,22 @@
+"use client";
+
 import { Avatar, Button, Card, Divider, Group, Stack, Text, Title } from "@mantine/core";
 import { createServerMessage } from "@musicall/types/serverMessage";
-import { usePeerStore } from "../../store/peerStore";
-import { useSocketStore } from "../../store/socketStore";
 import { useUserStore } from "../../store/userStore";
+import { usePeerStateMachine } from "../../machines/peerMachine";
+import { useSocketStateMachine } from "../../machines/socketStateMachine";
 
 export const ParticipantsDrawer = () => {
-    const { waitingList, peers } = usePeerStore();
+    const peerStateMachine = usePeerStateMachine();
     const { user } = useUserStore();
-    const { socket } = useSocketStore();
+
+    const socketStateMachine = useSocketStateMachine();
 
     return (
         <Stack>
             <Stack>
                 <Title order={3}>Waiting List</Title>
-                {waitingList.map((w) => (
+                {peerStateMachine.context.waitingList.map((w) => (
                     <Card key={w.userId}>
                         <Group>
                             <Avatar />
@@ -21,9 +24,7 @@ export const ParticipantsDrawer = () => {
                             <Button
                                 onClick={() => {
                                     const message = createServerMessage({ type: "allow-into-room", userId: w.userId });
-                                    if (socket) {
-                                        socket.send(message);
-                                    }
+                                    socketStateMachine.send({ type: "socket.sendMessage", message });
                                 }}
                             >
                                 Allow into room
@@ -41,8 +42,8 @@ export const ParticipantsDrawer = () => {
                         <Text>{user.name} (You)</Text>
                     </Group>
                 </Card>
-                {Object.keys(peers).map((p) => {
-                    const peer = peers[p];
+                {Object.keys(peerStateMachine.context.peers).map((p) => {
+                    const peer = peerStateMachine.context.peers[p];
                     return (
                         <Card key={p}>
                             <Group>
