@@ -156,6 +156,9 @@ importers:
       '@xstate/react':
         specifier: ^5.0.2
         version: 5.0.2(@types/react@18.3.3)(react@18.3.1)(xstate@5.19.2)
+      howler:
+        specifier: ^2.2.4
+        version: 2.2.4
       immer:
         specifier: ^10.1.1
         version: 10.1.1
@@ -3729,6 +3732,9 @@ packages:
   hosted-git-info@6.1.1:
     resolution: {integrity: sha512-r0EI+HBMcXadMrugk0GCQ+6BQV39PiWAZVfq7oIckeGiN7sjRGyQxPdft3nQekFTCQbYxLBH+/axZMeH8UX6+w==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+
+  howler@2.2.4:
+    resolution: {integrity: sha512-iARIBPgcQrwtEr+tALF+rapJ8qSc+Set2GJQl7xT1MQzWaVkFebdJhR3alVlSiUf5U7nAANKuj3aWpwerocD5w==}
 
   html@1.0.0:
     resolution: {integrity: sha512-lw/7YsdKiP3kk5PnR1INY17iJuzdAtJewxr14ozKJWbbR97znovZ0mh+WEMZ8rjc3lgTK+ID/htTjuyGKB52Kw==}
@@ -10145,6 +10151,8 @@ snapshots:
   hosted-git-info@6.1.1:
     dependencies:
       lru-cache: 7.18.3
+
+  howler@2.2.4: {}
 
   html@1.0.0:
     dependencies:

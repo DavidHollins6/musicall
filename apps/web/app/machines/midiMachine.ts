@@ -17,6 +17,7 @@ import { peerActor } from "./peerMachine";
 import { DataMessage } from "@musicall/types/dataMessage";
 import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager";
 import { ISoundManager } from "../utils/sound/ISoundManager";
+import { DrumSoundManager } from "../utils/sound/DrumSoundManager";
 
 export const midiMachine = setup({
     types: {} as {
@@ -41,7 +42,8 @@ export const midiMachine = setup({
               }
             | { type: "midi.toggle"; enabled: boolean }
             | { type: "midi.sendMessage"; event: MessageEvent }
-            | { type: "midi.playSound"; message: MessageEvent["message"] };
+            | { type: "midi.playSound"; message: MessageEvent["message"] }
+            | { type: "midi.setInstrument"; instrument: "drums" | "keyboard" };
     },
     actors: {
         enableWebMidi: fromPromise(async () => {
@@ -129,6 +131,12 @@ export const midiMachine = setup({
                         type: ({ event }) => event.newType,
                     }),
                 },
+                "midi.setInstrument": {
+                    actions: assign({
+                        soundManager: ({ event }) =>
+                            event.instrument === "keyboard" ? new KeyboardSoundManager() : new DrumSoundManager(),
+                    }),
+                },
             },
         },
         initialized: {
@@ -142,6 +150,12 @@ export const midiMachine = setup({
                 },
             },
             on: {
+                "midi.setInstrument": {
+                    actions: assign({
+                        soundManager: ({ event }) =>
+                            event.instrument === "keyboard" ? new KeyboardSoundManager() : new DrumSoundManager(),
+                    }),
+                },
                 "midi.scanInputs": {
                     actions: assign({
                         inputs: WebMidi.inputs,
@@ -161,12 +175,8 @@ export const midiMachine = setup({
                     ],
                 },
                 "midi.playSound": {
-                    actions: enqueueActions(({ context, enqueue, event }) => {
-                        if (!context.soundManager) {
-                            const newSoundManager = new KeyboardSoundManager();
-                            newSoundManager.handleMidiEvent(event.message);
-                            enqueue.assign({ soundManager: newSoundManager });
-                        } else {
+                    actions: enqueueActions(({ context, event }) => {
+                        if (context.soundManager) {
                             context.soundManager.handleMidiEvent(event.message);
                         }
                     }),

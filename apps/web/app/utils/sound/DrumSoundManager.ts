@@ -1,38 +1,34 @@
-import { base } from "$app/paths";
 import midimessage from "midimessage";
-import type { MessageEvent } from "webmidi";
+import { Howl, Howler } from "howler";
+import * as Tone from "tone";
+import type { Message } from "webmidi";
 import type { ISoundManager } from "./ISoundManager";
+import { noteMidiToString } from "./noteMidiToString";
 
 export class DrumSoundManager implements ISoundManager {
-    mappings: Mapping[];
-    triggerTypes: TriggerType[];
+    howl: Howl;
 
-    constructor(_mappings: Mapping[], _triggerTypes: TriggerType[]) {
-        this.mappings = _mappings;
-        this.triggerTypes = _triggerTypes;
+    constructor() {
+        this.howl = new Howl({
+            src: ["./audio/drums/drums.webm", "./audio/drums/drums.mp3"],
+            sprite: {
+                clap: [0, 734.2630385487529],
+                "closed-hihat": [2000, 445.94104308390035],
+                crash: [4000, 1978.6848072562354],
+                kick: [7000, 553.0839002267571],
+                "open-hihat": [9000, 962.7664399092968],
+                snare: [11000, 354.48979591836684],
+            },
+        });
     }
 
-    handleMidiEvent(event: MessageEvent["message"]) {
+    handleMidiEvent(event: Message) {
         const message = midimessage(event);
+
         if (message.messageType === "noteon") {
-            const mapping = this.mappings.find((m) => m.value === message.key);
-            let fileName: string | null | undefined = null;
-            if (mapping) {
-                fileName = this.triggerTypes.find((t) => t.id === mapping?.triggerTypeId)?.fileName;
-            } else {
-                fileName = this.triggerTypes.find((t) => t.defaultMappingValue === message.key)?.fileName;
-            }
-            if (fileName) {
-                setTimeout(() => {
-                    const sound = new Audio(`${base}/audio/${fileName}.wav`);
-                    sound.volume = message.velocity / 127;
-                    sound.play();
-                }, 0);
-            }
+            this.howl.play("snare");
         }
     }
 
-    changeMappings(_mappings: Mapping[]) {
-        this.mappings = _mappings;
-    }
+    changeMappings() {}
 }

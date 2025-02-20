@@ -21,6 +21,7 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                             onClick={async () => {
                                 midiActor.start();
                                 midiStateMachine.send({ type: "midi.toggle", enabled: true });
+                                midiStateMachine.send({ type: "midi.setInstrument", instrument: "drums" });
                             }}
                         >
                             Request Access to Instruments
