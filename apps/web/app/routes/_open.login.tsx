@@ -8,7 +8,7 @@ import { createAuthSession, getAuthSession } from "../modules/auth/session.serve
 import { signInWithEmail } from "../modules/auth/service.server";
 import { isFormProcessing } from "../utils/form";
 import { assertIsPost } from "../utils/http.server";
-import { Blockquote, Button, Card, Divider, Flex, Group, Input, Stack } from "@mantine/core";
+import { Blockquote, Button, Card, Divider, Flex, Group, Input, Stack, useMatches } from "@mantine/core";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const authSession = await getAuthSession(request);
@@ -69,11 +69,20 @@ export default function LoginPage() {
 
     const navigation = useNavigation();
     const disabled = isFormProcessing(navigation.state);
+    const mobileView = useMatches({
+        base: true,
+        lg: false,
+    });
 
     return (
-        <Form ref={zo.ref} method="post" replace>
-            <Flex w="100vw" justify="center" align="center">
-                <Card w="30%" withBorder shadow="sm" padding="lg">
+        <Form ref={zo.ref} method="post" replace style={{ height: "100%" }}>
+            <Flex h="100%" w="100vw" justify="center" align="center">
+                <Card
+                    w={{ base: " 100%", lg: "30%" }}
+                    withBorder={!mobileView}
+                    shadow={mobileView ? "" : "sm"}
+                    padding="lg"
+                >
                     <h1>Login</h1>
                     <Stack>
                         <Input.Wrapper label="Email" error={zo.errors.email()?.message}>
