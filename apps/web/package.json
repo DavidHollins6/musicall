@@ -26,6 +26,7 @@
         "@types/simple-peer": "^9.11.8",
         "@uidotdev/usehooks": "^2.4.1",
         "@xstate/react": "^5.0.2",
+        "howler": "^2.2.4",
         "immer": "^10.1.1",
         "isbot": "^4.1.0",
         "midimessage": "^1.0.5",
