@@ -23,7 +23,7 @@ export default function Index() {
     const { rooms } = useLoaderData<typeof loader>();
 
     return (
-        <Center pos="relative">
+        <Center h="100%" pos="relative">
             {rooms.map((room) => (
                 <Card w="300px" h="300px" withBorder shadow="md" radius="50%" key={room.id}>
                     <Center h="100%">

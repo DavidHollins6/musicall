@@ -25,7 +25,7 @@ export const Header = () => {
     const formRef = useRef<HTMLFormElement>(null);
 
     return (
-        <Box>
+        <Box bg="indigo.0">
             <header className={classes.header}>
                 <VisuallyHidden>
                     <Form ref={formRef} action="/logout" method="POST">
