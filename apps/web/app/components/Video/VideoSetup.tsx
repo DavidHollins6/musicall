@@ -1,10 +1,14 @@
 import { Video } from ".";
-import { Button, Box, Group, LoadingOverlay, NativeSelect } from "@mantine/core";
+import { Button, Box, Group, LoadingOverlay, NativeSelect, useMatches } from "@mantine/core";
 import { useVideoStateMachine, videoActor } from "../../machines/videoMachine";
 
 export const VideoSetup = ({ onComplete }: { onComplete: () => void }) => {
     const videoStateMachine = useVideoStateMachine();
     videoStateMachine.context.stream?.getVideoTracks().forEach((vt) => (vt.enabled = true));
+    const inputsGrow = useMatches({
+        base: true,
+        lg: false,
+    });
 
     return (
         <Box pos="relative" h="100%">
@@ -28,7 +32,7 @@ export const VideoSetup = ({ onComplete }: { onComplete: () => void }) => {
                     ),
                 }}
             />
-            <Group h="78px" justify="space-between" align="flex-end">
+            <Group h="78px" justify="space-between" grow={inputsGrow} align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
                         const newDevice = videoStateMachine.context.availableDevices.find(

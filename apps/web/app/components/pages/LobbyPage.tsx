@@ -1,7 +1,7 @@
 import { usePartySocket } from "partysocket/react";
 import { useState } from "react";
 import { z } from "zod";
-import { Button, Stepper, Stack, Group, Card, Checkbox } from "@mantine/core";
+import { Button, Stepper, Stack, Group, Card, useMatches, Switch, Title, Center } from "@mantine/core";
 import { User } from "@musicall/storage";
 import { MidiSetup } from "../midi/MidiSetup";
 import { VideoSetup } from "../Video/VideoSetup";
@@ -29,6 +29,19 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
     const navigate = useNavigate();
     const { user } = useUserStore();
     const socketStateMachine = useSocketStateMachine();
+    const cardBorder = useMatches({
+        sm: false,
+        lg: true,
+    });
+    const cardShadow = useMatches({
+        sm: "",
+        lg: "lg",
+    });
+
+    const mobileView = useMatches({
+        base: true,
+        lg: false,
+    });
 
     const socket = usePartySocket({
         room: roomId,
@@ -66,14 +79,15 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
 
     return (
         <Stack h="100%">
+            <Title m="20px">{roomOwner.name}&#39;s Waiting Room</Title>
             <Card
-                shadow="lg"
-                withBorder
+                shadow={cardShadow}
+                withBorder={cardBorder}
                 pos="relative"
                 radius="lg"
-                w="50%"
-                mt={20}
-                mx="auto"
+                w={{ lg: "50%", xs: "100%" }}
+                mx={{ lg: "auto" }}
+                mt={{ lg: "20px" }}
                 style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
             >
                 <Stepper
@@ -86,7 +100,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
                         },
                     }}
                 >
-                    <Stepper.Step label="Video">
+                    <Stepper.Step label={mobileView ? (active === 0 ? "Video" : "") : "Video"}>
                         <VideoSetup
                             onComplete={() => {
                                 setActive(1);
@@ -94,7 +108,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
                         />
                     </Stepper.Step>
 
-                    <Stepper.Step label="Microphone">
+                    <Stepper.Step label={mobileView ? (active === 1 ? "Mic" : "") : "Mic"}>
                         <MicrophoneSetup
                             onComplete={() => {
                                 setActive(2);
@@ -102,7 +116,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
                         />
                     </Stepper.Step>
 
-                    <Stepper.Step label="Instrument">
+                    <Stepper.Step label={mobileView ? (active === 2 ? "Instrument" : "") : "Instrument"}>
                         <MidiSetup
                             onComplete={() => {
                                 setActive(3);
@@ -110,12 +124,13 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
                         />
                     </Stepper.Step>
 
-                    <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>
+                    <Stepper.Completed>
+                        <Center mt={50}>You&#39;re good to go!</Center>
+                    </Stepper.Completed>
                 </Stepper>
             </Card>
-            <Group justify="flex-end" flex={0}>
-                {allowed ? "You may enter!" : `Waiting for ${roomOwner.name} to let you in...`}
-                <Checkbox
+            <Group justify="flex-end" grow={mobileView} m={mobileView ? 20 : 0} flex={0}>
+                <Switch
                     label="Auto-join room"
                     checked={autoJoin}
                     onChange={(event) => setAutoJoin(event.currentTarget.checked)}

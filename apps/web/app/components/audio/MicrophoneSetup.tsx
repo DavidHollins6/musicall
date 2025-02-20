@@ -1,11 +1,15 @@
 "use client";
-import { Button, Box, Group, LoadingOverlay, NativeSelect, Progress, Stack } from "@mantine/core";
+import { Button, Box, Group, LoadingOverlay, NativeSelect, Progress, Stack, useMatches } from "@mantine/core";
 import { useMicVolume } from "../../hooks/useMicVolume";
 import { useVoiceStateMachine, voiceActor } from "../../machines/voiceMachine";
 
 export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
     const voiceStateMachine = useVoiceStateMachine();
     const { audioLevel } = useMicVolume(voiceStateMachine.context.stream, 50);
+    const inputsGrow = useMatches({
+        base: true,
+        lg: false,
+    });
 
     voiceStateMachine.context.stream?.getAudioTracks().forEach((at) => (at.enabled = true));
 
@@ -32,7 +36,7 @@ export const MicrophoneSetup = ({ onComplete }: { onComplete: () => void }) => {
                     ),
                 }}
             />
-            <Group h="78px" justify="space-between" align="flex-end">
+            <Group h="78px" grow={inputsGrow} justify="space-between" align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
                         const newDevice = voiceStateMachine.context.availableDevices.find(

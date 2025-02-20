@@ -1,8 +1,12 @@
-import { Box, Button, Group, LoadingOverlay, NativeSelect } from "@mantine/core";
+import { Box, Button, Group, LoadingOverlay, NativeSelect, useMatches } from "@mantine/core";
 import { midiActor, useMidiStateMachine } from "../../machines/midiMachine";
 
 export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
     const midiStateMachine = useMidiStateMachine();
+    const inputsGrow = useMatches({
+        base: true,
+        lg: false,
+    });
 
     return (
         <Box pos="relative" h="100%">
@@ -24,7 +28,7 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                     ),
                 }}
             />
-            <Group h="78px" justify="space-between" align="flex-end">
+            <Group h="78px" grow={inputsGrow} justify="space-between" align="flex-end">
                 <NativeSelect
                     onChange={async (e) => {
                         const newInput = midiStateMachine.context.inputs.find((i) => i.id === e.currentTarget.value);
