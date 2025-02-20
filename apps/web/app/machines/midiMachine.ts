@@ -40,7 +40,8 @@ export const midiMachine = setup({
                   newType: "local" | "peers";
               }
             | { type: "midi.toggle"; enabled: boolean }
-            | { type: "midi.sendMessage"; event: MessageEvent };
+            | { type: "midi.sendMessage"; event: MessageEvent }
+            | { type: "midi.playSound"; message: MessageEvent["message"] };
     },
     actors: {
         enableWebMidi: fromPromise(async () => {
@@ -159,6 +160,17 @@ export const midiMachine = setup({
                         ({ event }) => sendTo("addEventListener", { type: "switchInput", device: event.selectedInput }),
                     ],
                 },
+                "midi.playSound": {
+                    actions: enqueueActions(({ context, enqueue, event }) => {
+                        if (!context.soundManager) {
+                            const newSoundManager = new KeyboardSoundManager();
+                            newSoundManager.handleMidiEvent(event.message);
+                            enqueue.assign({ soundManager: newSoundManager });
+                        } else {
+                            context.soundManager.handleMidiEvent(event.message);
+                        }
+                    }),
+                },
                 "midi.sendMessage": {
                     guard: ({ context }) => context.enabled,
                     actions: enqueueActions(({ enqueue, event, context }) => {
@@ -180,11 +192,6 @@ export const midiMachine = setup({
                                 context.soundManager.handleMidiEvent(event.event.message);
                             }
                         }
-                    }),
-                },
-                "midi.setType": {
-                    actions: assign({
-                        type: ({ event }) => event.newType,
                     }),
                 },
             },

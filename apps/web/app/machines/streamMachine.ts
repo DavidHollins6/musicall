@@ -64,8 +64,6 @@ export const streamMachine = setup({
                         const videoTracksExist = newStream.getVideoTracks().length > 0;
                         const audioTracksExist = newStream.getAudioTracks().length > 0;
 
-                        console.log(videoTracksExist, audioTracksExist);
-
                         if (videoTracksExist && audioTracksExist) {
                             enqueue.raise({ type: "stream.enable" });
                         }
@@ -80,7 +78,6 @@ export const streamMachine = setup({
             on: {
                 "stream.updateAudioStream": {
                     actions: enqueueActions(({ context, event, enqueue }) => {
-                        console.log("updating audio stream");
                         const newStream = context.stream || new MediaStream();
 
                         newStream?.getAudioTracks().forEach((at) => {

@@ -19,7 +19,7 @@ export const peerMachine = setup({
             | { type: "peer.toggleVideo"; enabled: boolean; localStream: MediaStream }
             | { type: "peer.toggleAudio"; enabled: boolean; localStream: MediaStream }
             | { type: "peer.sendData"; peerId: string; message: DataMessage }
-            | { type: "peer.sendDataToAll"; message: DataMessage }
+            | { type: "peer.sendDataToAll"; message: DataMessage; exclude?: Array<string> }
             | { type: "peer.setWaitingList"; waitingList: Array<{ name: string; userId: string }> }
             | {
                   type: "peer.setDeviceStatus";
@@ -68,7 +68,11 @@ export const peerMachine = setup({
                 },
                 "peer.sendDataToAll": {
                     actions: ({ context, event }) => {
-                        Object.keys(context.peers).forEach((pId) => {
+                        const peersToSendTo =
+                            event.exclude && event.exclude.length > 0
+                                ? Object.keys(context.peers).filter((pId) => event.exclude?.includes(pId))
+                                : Object.keys(context.peers);
+                        peersToSendTo.forEach((pId) => {
                             const peer = context.peers[pId];
                             if (peer) {
                                 peer.peerConnection.send(

@@ -30,16 +30,21 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
     const { user } = useUserStore();
     const socketStateMachine = useSocketStateMachine();
 
-    usePartySocket({
+    const socket = usePartySocket({
         room: roomId,
         host: "https://localhost:1999",
         onOpen() {
+            socketStateMachine.send({
+                type: "socket.initialized",
+                socket,
+            });
+
             const message = createServerMessage({
                 type: "join-lobby",
                 userId: user.id,
                 name: user.name,
             });
-            socketStateMachine.send({ type: "socket.sendMessage", message });
+            socket.send(message);
         },
         onMessage(evt) {
             const result = MessageSchema.safeParse(JSON.parse(String(evt.data)));

@@ -12,6 +12,7 @@ import { useVideoStateMachine } from "../machines/videoMachine";
 import { useVoiceStateMachine } from "../machines/voiceMachine";
 import { useSocketStateMachine } from "../machines/socketStateMachine";
 import { useStreamStateMachine } from "../machines/streamMachine";
+import { DataMessageSchema } from "@musicall/types/dataMessage";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -162,12 +163,25 @@ export const useWebRTC = ({ room, userId }: Props) => {
             console.log("ended");
         });
 
-        peerConnection.on("data", () => {
-            console.error("i received a message");
+        peerConnection.on("data", (data) => {
+            const messageString = new TextDecoder().decode(data);
+            const messageObject = JSON.parse(messageString);
+
+            const result = DataMessageSchema.safeParse(messageObject);
+
+            if (!result.success) {
+                console.log("could not parse", result);
+                return;
+            }
+
+            switch (result.data.type) {
+                case "midi":
+                    midiStateMachine.send({ type: "midi.playSound", message: result.data.message });
+                    break;
+            }
         });
 
         peerConnection.on("stream", (stream) => {
-            console.log("got their stream", stream.getVideoTracks());
             peerStateMachine.send({ type: "peer.setStream", peerId, stream });
         });
 
