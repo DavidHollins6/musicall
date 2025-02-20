@@ -30,6 +30,7 @@ export default function CallPage({ roomId }: Props) {
         streamActor.start();
         midiActor.start();
         midiStateMachine.send({ type: "midi.setType", newType: "peers" });
+        midiStateMachine.send({ type: "midi.setInstrument", instrument: "drums" });
         voiceActor.start();
         videoActor.start();
         peerActor.start();
