@@ -12,7 +12,7 @@ import { isFormProcessing } from "../utils/form";
 import { assertIsPost } from "../utils/http.server";
 import { checkPasswordStrength, generateUuid } from "usemods";
 import { createRoom } from "@musicall/api/room";
-import { Button, Card, Divider, Flex, Input, Stack } from "@mantine/core";
+import { Button, Card, Divider, Flex, Input, Stack, useMatches } from "@mantine/core";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const authSession = await getAuthSession(request);
@@ -104,11 +104,20 @@ export default function Join() {
     const redirectTo = searchParams.get("redirectTo") ?? undefined;
     const navigation = useNavigation();
     const disabled = isFormProcessing(navigation.state);
+    const mobileView = useMatches({
+        base: true,
+        lg: false,
+    });
 
     return (
-        <Form ref={zo.ref} method="post" replace>
-            <Flex w="100vw" justify="center" align="center">
-                <Card w="30%" withBorder shadow="sm" padding="lg">
+        <Form ref={zo.ref} method="post" replace style={{ height: "100%" }}>
+            <Flex h="100%" w="100vw" justify="center" align="center">
+                <Card
+                    w={{ base: " 100%", lg: "30%" }}
+                    withBorder={!mobileView}
+                    shadow={mobileView ? "" : "sm"}
+                    padding="lg"
+                >
                     <h1>Sign up</h1>
                     <Stack>
                         <Input.Wrapper required label="Email" error={zo.errors.email()?.message}>
@@ -132,9 +141,6 @@ export default function Join() {
                             Sign up
                         </Button>
                         <Link to="/login">Already have an account?</Link>
-                        <Card.Section>
-                            <Divider />
-                        </Card.Section>
 
                         <input name="redirectTo" id="redirectTo" type="hidden" value={redirectTo} />
                     </Stack>
