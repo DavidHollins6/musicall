@@ -2,7 +2,7 @@
 
 import { RemoteVideo } from "./RemoteVideo";
 import { LocalVideo } from "./LocalVideo";
-import { Card, SimpleGrid } from "@mantine/core";
+import { Card, SimpleGrid, useMatches } from "@mantine/core";
 import { usePeerStateMachine } from "../../machines/peerMachine";
 
 const cols = {
@@ -18,13 +18,17 @@ const cols = {
 
 export const VideoGrid = () => {
     const peerStateMachine = usePeerStateMachine();
+    const mobileView = useMatches({
+        base: true,
+        lg: false,
+    });
 
     // const totalParticipants = Object.keys(peers).length + 1;
     const totalParticipants = 5;
     const numberOfColumns = cols[totalParticipants];
     const numberOfRows = Math.ceil(totalParticipants / numberOfColumns);
 
-    const rowHeight = 100 / numberOfRows;
+    const rowHeight = 100 / (mobileView ? 2 : numberOfRows);
 
     return (
         <SimpleGrid
@@ -34,7 +38,7 @@ export const VideoGrid = () => {
             }}
             p={16}
             w="100%"
-            cols={cols[5]}
+            cols={mobileView ? 1 : cols[5]}
             spacing="md"
         >
             <Card p={4} radius="md" shadow="md" bg="black" pos="relative">
