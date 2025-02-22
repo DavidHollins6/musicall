@@ -1,0 +1,68 @@
+[
+    {
+        "id": "closedhihat",
+        "start": 0,
+        "end": 394,
+        "length": 394
+    },
+    {
+        "id": "crash1",
+        "start": 804,
+        "end": 5244,
+        "length": 4440
+    },
+    {
+        "id": "crash2",
+        "start": 5655,
+        "end": 11229,
+        "length": 5574
+    },
+    {
+        "id": "openhihat",
+        "start": 13374,
+        "end": 17319,
+        "length": 3945
+    },
+    {
+        "id": "ride",
+        "start": 17600,
+        "end": 21594,
+        "length": 3994
+    },
+    {
+        "id": "rim",
+        "start": 23529,
+        "end": 24109,
+        "length": 580
+    },
+    {
+        "id": "snare",
+        "start": 24404,
+        "end": 25004,
+        "length": 600
+    },
+    {
+        "id": "tom1",
+        "start": 25124,
+        "end": 26394,
+        "length": 1270
+    },
+    {
+        "id": "tom2",
+        "start": 26564,
+        "end": 27619,
+        "length": 1055
+    },
+    {
+        "id": "tom3",
+        "start": 27809,
+        "end": 29289,
+        "length": 1480
+    },
+    {
+        "id": "kick",
+        "start": 29494,
+        "end": 29929,
+        "length": 435
+    }
+]

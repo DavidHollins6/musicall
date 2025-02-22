@@ -53,7 +53,7 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                             instrument: e.currentTarget.value as Instrument,
                         });
                     }}
-                    defaultValue={midiStateMachine.context.instrument}
+                    defaultValue={"keyboard"}
                     label="Instrument"
                     data={[
                         { label: "Drums", value: "drums" },
