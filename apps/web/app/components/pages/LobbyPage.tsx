@@ -16,13 +16,14 @@ type Props = {
     roomId: string;
     allowedIntoRoom: boolean;
     roomOwner: User;
+    socketUrl?: string;
 };
 
 const MessageSchema = z.object({
     type: z.literal("allow-into-room"),
 });
 
-export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
+export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner, socketUrl }: Props) => {
     const [autoJoin, setAutoJoin] = useState(false);
     const [allowed, setAllowed] = useState(allowedIntoRoom);
     const [active, setActive] = useState(0);
@@ -45,7 +46,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
 
     const socket = usePartySocket({
         room: roomId,
-        host: process.env.NEXT_PUBLIC_SOCKET_URL,
+        host: socketUrl,
         onOpen() {
             socketStateMachine.send({
                 type: "socket.initialized",

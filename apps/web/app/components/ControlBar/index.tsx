@@ -18,7 +18,7 @@ import { SettingsPopover } from "./SettingsPopover";
 import { ParticipantsDrawer } from "./ParticipantsDrawer";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { useUserStore } from "../../store/userStore";
-import { useMidiStateMachine } from "../../machines/midiMachine";
+import { useMidiStateMachine } from "../../machines/midiMachine.client";
 import { useVideoStateMachine } from "../../machines/videoMachine";
 import { useVoiceStateMachine } from "../../machines/voiceMachine";
 import { useSocketStateMachine } from "../../machines/socketStateMachine";

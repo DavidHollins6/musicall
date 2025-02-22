@@ -5,7 +5,7 @@ import { Box, Flex, rem, useMantineTheme } from "@mantine/core";
 import { ControlBar } from "../ControlBar";
 import { FullWidthLoader } from "../Loader";
 import { Call } from "../Call";
-import { midiActor, useMidiStateMachine } from "../../machines/midiMachine";
+import { midiActor, useMidiStateMachine } from "../../machines/midiMachine.client";
 import { useEffect } from "react";
 import { useVoiceStateMachine, voiceActor } from "../../machines/voiceMachine";
 import { useVideoStateMachine, videoActor } from "../../machines/videoMachine";
@@ -16,9 +16,10 @@ import { socketActor } from "../../machines/socketStateMachine";
 
 type Props = {
     roomId: string;
+    socketUrl?: string;
 };
 
-export default function CallPage({ roomId }: Props) {
+export default function CallPage({ roomId, socketUrl }: Props) {
     const theme = useMantineTheme();
 
     const midiStateMachine = useMidiStateMachine();
@@ -30,7 +31,6 @@ export default function CallPage({ roomId }: Props) {
         streamActor.start();
         midiActor.start();
         midiStateMachine.send({ type: "midi.setType", newType: "peers" });
-        midiStateMachine.send({ type: "midi.setInstrument", instrument: "drums" });
         voiceActor.start();
         videoActor.start();
         peerActor.start();
@@ -56,7 +56,7 @@ export default function CallPage({ roomId }: Props) {
 
     return (
         <Flex direction="column" w="100%" h="100%">
-            <Call roomId={roomId}>
+            <Call socketUrl={socketUrl} roomId={roomId}>
                 <VideoGrid />
                 <Box
                     style={{ borderTop: `2px solid ${theme.colors.gray[2]}`, boxShadow: theme.shadows.lg }}

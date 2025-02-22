@@ -45,11 +45,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const allowList = await getRoomAllowList(roomId);
     const allowedIntoRoom = allowList.includes(userId);
 
-    return json({ userId, roomId, allowedIntoRoom, roomOwner, user });
+    return json({
+        userId,
+        roomId,
+        allowedIntoRoom,
+        roomOwner,
+        user,
+        ENV: {
+            SOCKET_URL: process.env.SOCKET_URL,
+        },
+    });
 }
 
 export default function Wait() {
-    const { roomId, userId, allowedIntoRoom, roomOwner, user } = useLoaderData<typeof loader>();
+    const { roomId, userId, allowedIntoRoom, roomOwner, user, ENV } = useLoaderData<typeof loader>();
     const store = useRef(createUserStore({ user, isOwner: false })).current;
 
     return (
@@ -61,6 +70,7 @@ export default function Wait() {
                         roomId={roomId}
                         userId={userId}
                         allowedIntoRoom={allowedIntoRoom}
+                        socketUrl={ENV.SOCKET_URL}
                     />
                 </UserContext.Provider>
             )}

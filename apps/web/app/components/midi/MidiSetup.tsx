@@ -1,5 +1,8 @@
+"use client";
+
 import { Box, Button, Group, LoadingOverlay, NativeSelect, useMatches } from "@mantine/core";
-import { midiActor, useMidiStateMachine } from "../../machines/midiMachine";
+import { Instrument } from "@musicall/types/Instrument";
+import { midiActor, useMidiStateMachine } from "../../machines/midiMachine.client";
 
 export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
     const midiStateMachine = useMidiStateMachine();
@@ -21,7 +24,6 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                             onClick={async () => {
                                 midiActor.start();
                                 midiStateMachine.send({ type: "midi.toggle", enabled: true });
-                                midiStateMachine.send({ type: "midi.setInstrument", instrument: "drums" });
                             }}
                         >
                             Request Access to Instruments
@@ -38,9 +40,24 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                             midiStateMachine.send({ type: "midi.selectMidiInput", selectedInput: newInput });
                         }
                     }}
-                    label="Instrument"
+                    label="MIDI"
                     value={midiStateMachine.context.selectedInput?.id}
                     data={midiStateMachine.context.inputs.map((m) => ({ label: m.name, value: m.id }))}
+                />
+                <NativeSelect
+                    size="sm"
+                    onChange={async (e) => {
+                        midiStateMachine.send({
+                            type: "midi.setInstrument",
+                            instrument: e.target.value as Instrument,
+                        });
+                    }}
+                    defaultValue={midiStateMachine.context.instrument}
+                    label="Instrument"
+                    data={[
+                        { label: "Drums", value: "drums" },
+                        { label: "Keyboard", value: "keyboard" },
+                    ]}
                 />
                 <Button onClick={onComplete}>Next</Button>
             </Group>

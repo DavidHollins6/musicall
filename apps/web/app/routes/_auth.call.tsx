@@ -34,18 +34,25 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect(`/lobby?roomId=${roomId}`);
     }
 
-    return json({ user, roomId, isOwner: ownsThisRoom });
+    return json({
+        user,
+        roomId,
+        isOwner: ownsThisRoom,
+        ENV: {
+            SOCKET_URL: process.env.SOCKET_URL,
+        },
+    });
 }
 
 export default function Call() {
-    const { roomId, user, isOwner } = useLoaderData<typeof loader>();
+    const { roomId, user, isOwner, ENV } = useLoaderData<typeof loader>();
     const store = useRef(createUserStore({ user, isOwner })).current;
 
     return (
         <ClientOnly>
             {() => (
                 <UserContext.Provider value={store}>
-                    <CallPage roomId={roomId} />
+                    <CallPage socketUrl={ENV.SOCKET_URL} roomId={roomId} />
                 </UserContext.Provider>
             )}
         </ClientOnly>
