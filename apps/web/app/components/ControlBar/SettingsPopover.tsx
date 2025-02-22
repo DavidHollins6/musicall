@@ -3,7 +3,8 @@
 import { ActionIcon, NativeSelect, Popover, Stack } from "@mantine/core";
 import { IconSettings } from "@tabler/icons-react";
 import { WebMidi } from "webmidi";
-import { useMidiStateMachine } from "../../machines/midiMachine";
+import { Instrument } from "@musicall/types/Instrument";
+import { useMidiStateMachine } from "../../machines/midiMachine.client";
 import { useVideoStateMachine } from "../../machines/videoMachine";
 import { useVoiceStateMachine } from "../../machines/voiceMachine";
 
@@ -11,6 +12,8 @@ export const SettingsPopover: React.FC = () => {
     const videoStateMachine = useVideoStateMachine();
     const voiceStateMachine = useVoiceStateMachine();
     const midiStateMachine = useMidiStateMachine();
+
+    console.log(midiStateMachine.context.instrument);
 
     return (
         <Popover width={300} position="top-start" withArrow shadow="md">
@@ -64,6 +67,21 @@ export const SettingsPopover: React.FC = () => {
                         }}
                         label="MIDI"
                         data={midiStateMachine.context.inputs.map((m) => ({ label: m.name, value: m.id }))}
+                    />
+                    <NativeSelect
+                        size="sm"
+                        onChange={async (e) => {
+                            midiStateMachine.send({
+                                type: "midi.setInstrument",
+                                instrument: e.target.value as Instrument,
+                            });
+                        }}
+                        defaultValue={midiStateMachine.context.instrument}
+                        label="Instrument"
+                        data={[
+                            { label: "Drums", value: "drums" },
+                            { label: "Keyboard", value: "keyboard" },
+                        ]}
                     />
                 </Stack>
             </Popover.Dropdown>

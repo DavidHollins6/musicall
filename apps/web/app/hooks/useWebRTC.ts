@@ -5,7 +5,7 @@ import Peer from "simple-peer";
 import { User } from "@musicall/storage";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { ClientMessageSchema } from "@musicall/types/clientMessage";
-import { useMidiStateMachine } from "../machines/midiMachine";
+import { useMidiStateMachine } from "../machines/midiMachine.client";
 import { useChatStateMachine } from "../machines/chatMachine";
 import { usePeerStateMachine } from "../machines/peerMachine";
 import { useVideoStateMachine } from "../machines/videoMachine";
@@ -39,9 +39,10 @@ const CONFIG = {
 type Props = {
     room: string;
     userId: string;
+    socketUrl?: string;
 };
 
-export const useWebRTC = ({ room, userId }: Props) => {
+export const useWebRTC = ({ room, userId, socketUrl }: Props) => {
     const chatStateMachine = useChatStateMachine();
     const peerStateMachine = usePeerStateMachine();
     const videoStateMachine = useVideoStateMachine();
@@ -52,7 +53,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
 
     const socket = usePartySocket({
         room: room,
-        host: process.env.NEXT_PUBLIC_SOCKET_URL,
+        host: socketUrl,
         onMessage(evt) {
             const result = ClientMessageSchema.safeParse(JSON.parse(String(evt.data)));
 
@@ -176,7 +177,11 @@ export const useWebRTC = ({ room, userId }: Props) => {
 
             switch (result.data.type) {
                 case "midi":
-                    midiStateMachine.send({ type: "midi.playSound", message: result.data.message });
+                    midiStateMachine.send({
+                        type: "midi.playSound",
+                        message: result.data.message.message,
+                        instrument: result.data.message.instrument,
+                    });
                     break;
             }
         });

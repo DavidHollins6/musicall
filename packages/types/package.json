@@ -6,9 +6,11 @@
     "main": "./index.ts",
     "types": "./index.ts",
     "exports": {
+        ".": "./src/index.ts",
         "./clientMessage": "./src/clientMessage.ts",
         "./serverMessage": "./src/serverMessage.ts",
-        "./dataMessage": "./src/dataMessage.ts"
+        "./dataMessage": "./src/dataMessage.ts",
+        "./Instrument": "./src/Instrument.ts"
     },
     "devDependencies": {
         "@musicall/typescript-config": "workspace:*",
