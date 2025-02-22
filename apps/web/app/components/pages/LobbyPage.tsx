@@ -45,7 +45,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
 
     const socket = usePartySocket({
         room: roomId,
-        host: "https://musicall.davidhollins6.partykit.dev",
+        host: process.env.NEXT_PUBLIC_SOCKET_URL,
         onOpen() {
             socketStateMachine.send({
                 type: "socket.initialized",

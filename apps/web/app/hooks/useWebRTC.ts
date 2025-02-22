@@ -52,7 +52,7 @@ export const useWebRTC = ({ room, userId }: Props) => {
 
     const socket = usePartySocket({
         room: room,
-        host: "https://musicall.davidhollins6.partykit.dev",
+        host: process.env.NEXT_PUBLIC_SOCKET_URL,
         onMessage(evt) {
             const result = ClientMessageSchema.safeParse(JSON.parse(String(evt.data)));
 
