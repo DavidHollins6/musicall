@@ -23,6 +23,7 @@
         "@stream-io/video-react-sdk": "^1.4.3",
         "@supabase/supabase-js": "^2.39.8",
         "@tabler/icons-react": "^3.14.0",
+        "@types/howler": "^2.2.12",
         "@types/simple-peer": "^9.11.8",
         "@uidotdev/usehooks": "^2.4.1",
         "@xstate/react": "^5.0.2",

@@ -36,6 +36,7 @@ export class DrumSoundManager implements ISoundManager {
                 tom3: [27809, 1480],
                 kick: [29494, 435],
             },
+            html5: true,
         });
     }
 
