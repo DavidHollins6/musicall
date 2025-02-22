@@ -18,7 +18,7 @@ import { DataMessage } from "@musicall/types/dataMessage";
 import { Instrument } from "@musicall/types/Instrument";
 import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager";
 import { ISoundManager } from "../utils/sound/ISoundManager";
-import { DrumSoundManager } from "../utils/sound/DrumSoundManager";
+import { DrumSoundManager } from "../utils/sound/DrumSoundManager.client";
 
 const soundManagers: Record<string, ISoundManager> = {
     drums: new DrumSoundManager(),
@@ -181,7 +181,9 @@ export const midiMachine = setup({
                 },
                 "midi.playSound": {
                     actions: enqueueActions(({ event }) => {
-                        soundManagers[event.instrument].handleMidiEvent(event.message);
+                        if (soundManagers[event.instrument]) {
+                            soundManagers[event.instrument].handleMidiEvent(event.message);
+                        }
                     }),
                 },
                 "midi.sendMessage": {

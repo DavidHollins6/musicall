@@ -13,8 +13,6 @@ export const SettingsPopover: React.FC = () => {
     const voiceStateMachine = useVoiceStateMachine();
     const midiStateMachine = useMidiStateMachine();
 
-    console.log(midiStateMachine.context.instrument);
-
     return (
         <Popover width={300} position="top-start" withArrow shadow="md">
             <Popover.Target>

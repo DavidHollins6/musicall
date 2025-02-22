@@ -177,6 +177,7 @@ export const useWebRTC = ({ room, userId, socketUrl }: Props) => {
 
             switch (result.data.type) {
                 case "midi":
+                    console.log("playing sound");
                     midiStateMachine.send({
                         type: "midi.playSound",
                         message: result.data.message.message,
