@@ -1,17 +1,14 @@
 import { Box, Button, Title } from "@mantine/core";
+import { useMidiStateMachine } from "../../machines/midiMachine.client";
 
 export function EnableAudioSplash({ onEnable }: { onEnable: () => void }) {
+    const midiStateMachine = useMidiStateMachine();
     return (
         <Box>
             <Title>Press this button to enable audio</Title>
             <Button
                 onClick={() => {
-                    const howl = new Howl({
-                        src: "./audio/applause.mp3",
-                        html5: true,
-                        preload: true,
-                    });
-                    howl.play();
+                    midiStateMachine.send({ type: "midi.enableManagers" });
                     onEnable();
                 }}
             >

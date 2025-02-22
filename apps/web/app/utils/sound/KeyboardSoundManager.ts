@@ -26,5 +26,7 @@ export class KeyboardSoundManager implements ISoundManager {
         }
     }
 
+    enable() {}
+
     changeMappings() {}
 }

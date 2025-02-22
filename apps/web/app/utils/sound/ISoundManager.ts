@@ -6,4 +6,5 @@ export interface ISoundManager {
     triggerTypes?: TriggerType[];
     changeMappings: (_mappings: Mapping[]) => void;
     handleMidiEvent: (event: Message) => void;
+    enable: () => void;
 }

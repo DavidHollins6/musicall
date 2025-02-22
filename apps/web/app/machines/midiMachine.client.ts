@@ -49,7 +49,8 @@ export const midiMachine = setup({
             | { type: "midi.toggle"; enabled: boolean }
             | { type: "midi.sendMessage"; event: MessageEvent }
             | { type: "midi.playSound"; message: MessageEvent["message"]; instrument: "drums" | "keyboard" }
-            | { type: "midi.setInstrument"; instrument: "drums" | "keyboard" };
+            | { type: "midi.setInstrument"; instrument: "drums" | "keyboard" }
+            | { type: "midi.enableManagers" };
     },
     actors: {
         enableWebMidi: fromPromise(async () => {
@@ -143,6 +144,11 @@ export const midiMachine = setup({
                         instrument: ({ event }) => event.instrument,
                     }),
                 },
+                "midi.enableManagers": {
+                    actions: () => {
+                        Object.keys(soundManagers).forEach((sm) => soundManagers[sm].enable());
+                    },
+                },
             },
         },
         initialized: {
@@ -212,6 +218,11 @@ export const midiMachine = setup({
                             });
                         }
                     }),
+                },
+                "midi.enableManagers": {
+                    actions: () => {
+                        Object.keys(soundManagers).forEach((sm) => soundManagers[sm].enable());
+                    },
                 },
             },
         },

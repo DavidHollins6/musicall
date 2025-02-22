@@ -52,5 +52,12 @@ export class DrumSoundManager implements ISoundManager {
         }
     }
 
+    enable() {
+        const currentVolume = this.howl.volume();
+        this.howl.volume(0);
+        this.howl.play("kick");
+        this.howl.volume(currentVolume);
+    }
+
     changeMappings() {}
 }
