@@ -47,9 +47,10 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                 <NativeSelect
                     size="sm"
                     onChange={async (e) => {
+                        localStorage.setItem("instrument", e.currentTarget.value);
                         midiStateMachine.send({
                             type: "midi.setInstrument",
-                            instrument: e.target.value as Instrument,
+                            instrument: e.currentTarget.value as Instrument,
                         });
                     }}
                     defaultValue={midiStateMachine.context.instrument}

@@ -98,7 +98,7 @@ export const midiMachine = setup({
         enabled: false,
         selectedInput: null,
         type: "local",
-        instrument: "keyboard",
+        instrument: localStorage.getItem("instrument") as Instrument | "keyboard",
     },
     initial: "initializing",
     states: {
