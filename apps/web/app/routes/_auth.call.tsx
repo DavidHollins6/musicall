@@ -8,6 +8,7 @@ import { requireAuthSession } from "../modules/auth/session.server";
 import { getOwnedRooms, getRoomAllowList } from "@musicall/api/room";
 import { getUser } from "@musicall/api/user";
 import { createUserStore, UserContext } from "../store/userStore";
+import { DeviceChecker } from "~/components/DeviceChecker";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
@@ -52,7 +53,9 @@ export default function Call() {
         <ClientOnly>
             {() => (
                 <UserContext.Provider value={store}>
-                    <CallPage socketUrl={ENV.SOCKET_URL} roomId={roomId} />
+                    <DeviceChecker>
+                        {(device) => <CallPage device={device} socketUrl={ENV.SOCKET_URL} roomId={roomId} />}
+                    </DeviceChecker>
                 </UserContext.Provider>
             )}
         </ClientOnly>

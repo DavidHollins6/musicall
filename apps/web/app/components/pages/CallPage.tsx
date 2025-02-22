@@ -6,21 +6,24 @@ import { ControlBar } from "../ControlBar";
 import { FullWidthLoader } from "../Loader";
 import { Call } from "../Call";
 import { midiActor, useMidiStateMachine } from "../../machines/midiMachine.client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useVoiceStateMachine, voiceActor } from "../../machines/voiceMachine";
 import { useVideoStateMachine, videoActor } from "../../machines/videoMachine";
 import { peerActor } from "../../machines/peerMachine";
 import { streamActor, useStreamStateMachine } from "../../machines/streamMachine";
 import { chatActor } from "../../machines/chatMachine";
 import { socketActor } from "../../machines/socketStateMachine";
+import { EnableAudioSplash } from "../audio/EnableAudioSplash";
 
 type Props = {
     roomId: string;
     socketUrl?: string;
+    device: "Mobile" | "Tablet" | "Desktop" | null;
 };
 
-export default function CallPage({ roomId, socketUrl }: Props) {
+export default function CallPage({ roomId, socketUrl, device }: Props) {
     const theme = useMantineTheme();
+    const [audioEnabled, setAudioEnabled] = useState(device !== "Mobile");
 
     const midiStateMachine = useMidiStateMachine();
     const voiceStateMachine = useVoiceStateMachine();
@@ -52,6 +55,10 @@ export default function CallPage({ roomId, socketUrl }: Props) {
 
     if (streamStateMachine.value === "disabled") {
         return <FullWidthLoader message="Creating Stream" />;
+    }
+
+    if (!audioEnabled) {
+        return <EnableAudioSplash onEnable={() => setAudioEnabled(true)} />;
     }
 
     return (
