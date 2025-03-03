@@ -1,12 +1,11 @@
 import { usePartySocket } from "partysocket/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { z } from "zod";
 import { Button, Stepper, Stack, Group, Card, useMatches, Switch, Title, Center } from "@mantine/core";
 import { User } from "@musicall/storage";
 import { MidiSetup } from "../midi/MidiSetup";
 import { VideoSetup } from "../Video/VideoSetup";
 import { MicrophoneSetup } from "../audio/MicrophoneSetup";
-import { useNavigate } from "@remix-run/react";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { useUserStore } from "../../store/userStore";
 import { useSocketStateMachine } from "../../machines/socketStateMachine";
@@ -27,7 +26,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner, socketUrl }: Pro
     const [autoJoin, setAutoJoin] = useState(false);
     const [allowed, setAllowed] = useState(allowedIntoRoom);
     const [active, setActive] = useState(0);
-    const navigate = useNavigate();
+    const linkRef = useRef<HTMLAnchorElement | null>(null);
     const { user } = useUserStore();
     const socketStateMachine = useSocketStateMachine();
     const cardBorder = useMatches({
@@ -69,8 +68,8 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner, socketUrl }: Pro
             }
 
             if (result.data.type === "allow-into-room") {
-                if (autoJoin) {
-                    navigate(`/call?roomId=${roomId}`);
+                if (autoJoin && linkRef.current) {
+                    linkRef.current.click();
                 } else {
                     setAllowed(true);
                 }
@@ -136,13 +135,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner, socketUrl }: Pro
                     checked={autoJoin}
                     onChange={(event) => setAutoJoin(event.currentTarget.checked)}
                 />
-                <Button
-                    disabled={!allowed}
-                    m={20}
-                    onClick={() => {
-                        navigate(`/call?roomId=${roomId}`);
-                    }}
-                >
+                <Button ref={linkRef} component="a" href={`/call?roomId=${roomId}`} disabled={!allowed} m={20}>
                     Enter Room
                 </Button>
             </Group>
