@@ -52,7 +52,6 @@ export class DrumSoundManager implements ISoundManager {
     }
 
     enable() {
-        console.log(this.howl._audioUnlocked);
         const currentVolume = this.howl.volume();
         this.howl.volume(0);
         this.howl.play("kick");
