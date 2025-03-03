@@ -37,6 +37,7 @@ export class DrumSoundManager implements ISoundManager {
                 kick: [29494, 435],
             },
             html5: true,
+            onunlock: () => console.log("UNLOCKED AUDIO DRUM MANAGER"),
         });
     }
 
