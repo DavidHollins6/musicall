@@ -14,8 +14,8 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@musicall/storage": "workspace:*",
-        "@musicall/typescript-config": "workspace:*",
+        "@musicall/storage": "*",
+        "@musicall/typescript-config": "*",
         "@types/swagger-ui-express": "^4.1.6",
         "browserify-middleware": "^8.1.1",
         "cors": "^2.8.5",

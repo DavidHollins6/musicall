@@ -9,11 +9,11 @@
     "./room": "./src/room.ts"
   },
   "devDependencies": {
-    "@musicall/typescript-config": "workspace:*",
+    "@musicall/typescript-config": "*",
     "typescript": "latest"
   },
   "dependencies": {
-    "@musicall/storage": "workspace:*",
+    "@musicall/storage": "*",
     "ky": "^1.7.5"
   }
 }

@@ -6,7 +6,7 @@
     "main": "./index.ts",
     "types": "./index.ts",
     "devDependencies": {
-        "@musicall/typescript-config": "workspace:*",
+        "@musicall/typescript-config": "*",
         "typescript": "latest"
     },
     "dependencies": {

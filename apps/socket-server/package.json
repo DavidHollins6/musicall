@@ -15,9 +15,9 @@
         "simple-peer": "^9.11.1",
         "y-partykit": "^0.0.28",
         "zod": "^3.22.4",
-        "@musicall/api": "workspace:*",
-        "@musicall/types": "workspace:*",
-        "@musicall/storage": "workspace:*",
-        "@musicall/typescript-config": "workspace:*"
+        "@musicall/api": "*",
+        "@musicall/types": "*",
+        "@musicall/storage": "*",
+        "@musicall/typescript-config": "*"
     }
 }
