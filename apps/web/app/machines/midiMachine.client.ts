@@ -16,7 +16,7 @@ import {
 import { peerActor } from "./peerMachine";
 import { DataMessage } from "@musicall/types/dataMessage";
 import { Instrument } from "@musicall/types/Instrument";
-import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager";
+import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager.client";
 import { ISoundManager } from "../utils/sound/ISoundManager";
 import { DrumSoundManager } from "../utils/sound/DrumSoundManager.client";
 

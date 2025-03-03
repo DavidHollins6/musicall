@@ -18,23 +18,9 @@ const generalMidiStandardMappings: Record<number, string> = {
 };
 
 export class DrumSoundManager implements ISoundManager {
-    howl?: Howl;
+    howl: Howl;
 
-    constructor() {}
-
-    handleMidiEvent(event: Message) {
-        const message = midimessage(event);
-
-        if (message.messageType === "noteon") {
-            const padName = generalMidiStandardMappings[message.key];
-            console.log(padName);
-            if (padName && this.howl) {
-                this.howl.play(padName);
-            }
-        }
-    }
-
-    enable() {
+    constructor() {
         this.howl = new Howl({
             src: ["./audio/drums/drums.mp3"],
             sprite: {
@@ -52,6 +38,22 @@ export class DrumSoundManager implements ISoundManager {
             },
             html5: true,
         });
+    }
+
+    handleMidiEvent(event: Message) {
+        const message = midimessage(event);
+
+        if (message.messageType === "noteon") {
+            const padName = generalMidiStandardMappings[message.key];
+            console.log(padName);
+            if (padName && this.howl) {
+                this.howl.play(padName);
+            }
+        }
+    }
+
+    enable() {
+        console.log(this.howl._audioUnlocked);
         const currentVolume = this.howl.volume();
         this.howl.volume(0);
         this.howl.play("kick");
