@@ -7,11 +7,13 @@ import { Instrument } from "@musicall/types/Instrument";
 import { useMidiStateMachine } from "../../machines/midiMachine.client";
 import { useVideoStateMachine } from "../../machines/videoMachine";
 import { useVoiceStateMachine } from "../../machines/voiceMachine";
+import { useSoundStateMachine } from "../../machines/soundMachine.client";
 
 export const SettingsPopover: React.FC = () => {
     const videoStateMachine = useVideoStateMachine();
     const voiceStateMachine = useVoiceStateMachine();
     const midiStateMachine = useMidiStateMachine();
+    const soundStateMachine = useSoundStateMachine();
 
     return (
         <Popover width={300} position="top-start" withArrow shadow="md">
@@ -69,8 +71,8 @@ export const SettingsPopover: React.FC = () => {
                     <NativeSelect
                         size="sm"
                         onChange={async (e) => {
-                            midiStateMachine.send({
-                                type: "midi.setInstrument",
+                            soundStateMachine.send({
+                                type: "sound.setInstrument",
                                 instrument: e.target.value as Instrument,
                             });
                         }}

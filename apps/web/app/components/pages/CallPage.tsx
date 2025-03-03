@@ -14,6 +14,7 @@ import { streamActor, useStreamStateMachine } from "../../machines/streamMachine
 import { chatActor } from "../../machines/chatMachine";
 import { socketActor } from "../../machines/socketStateMachine";
 import { EnableAudioSplash } from "../audio/EnableAudioSplash";
+import { soundActor } from "../../machines/soundMachine.client";
 
 type Props = {
     roomId: string;
@@ -33,6 +34,7 @@ export default function CallPage({ roomId, socketUrl, device }: Props) {
     useEffect(() => {
         streamActor.start();
         midiActor.start();
+        soundActor.start();
         midiStateMachine.send({ type: "midi.setType", newType: "peers" });
         voiceActor.start();
         videoActor.start();

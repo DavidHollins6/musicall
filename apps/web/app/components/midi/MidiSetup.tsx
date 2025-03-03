@@ -3,9 +3,11 @@
 import { Box, Button, Group, LoadingOverlay, NativeSelect, useMatches } from "@mantine/core";
 import { Instrument } from "@musicall/types/Instrument";
 import { midiActor, useMidiStateMachine } from "../../machines/midiMachine.client";
+import { soundActor, useSoundStateMachine } from "../../machines/soundMachine.client";
 
 export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
     const midiStateMachine = useMidiStateMachine();
+    const soundStateMachine = useSoundStateMachine();
     const inputsGrow = useMatches({
         base: true,
         lg: false,
@@ -22,6 +24,7 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                     children: (
                         <Button
                             onClick={async () => {
+                                soundActor.start();
                                 midiActor.start();
                                 midiStateMachine.send({ type: "midi.toggle", enabled: true });
                             }}
@@ -48,8 +51,8 @@ export const MidiSetup = ({ onComplete }: { onComplete: () => void }) => {
                     size="sm"
                     onChange={async (e) => {
                         localStorage.setItem("instrument", e.currentTarget.value);
-                        midiStateMachine.send({
-                            type: "midi.setInstrument",
+                        soundStateMachine.send({
+                            type: "sound.setInstrument",
                             instrument: e.currentTarget.value as Instrument,
                         });
                     }}

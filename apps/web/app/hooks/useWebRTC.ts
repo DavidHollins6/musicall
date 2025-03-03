@@ -13,6 +13,7 @@ import { useVoiceStateMachine } from "../machines/voiceMachine";
 import { useSocketStateMachine } from "../machines/socketStateMachine";
 import { useStreamStateMachine } from "../machines/streamMachine";
 import { DataMessageSchema } from "@musicall/types/dataMessage";
+import { useSoundStateMachine } from "../machines/soundMachine.client";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -49,6 +50,7 @@ export const useWebRTC = ({ room, userId, socketUrl }: Props) => {
     const voiceStateMachine = useVoiceStateMachine();
     const socketStateMachine = useSocketStateMachine();
     const midiStateMachine = useMidiStateMachine();
+    const soundStateMachine = useSoundStateMachine();
     const streamStateMachine = useStreamStateMachine();
 
     const socket = usePartySocket({
@@ -177,9 +179,8 @@ export const useWebRTC = ({ room, userId, socketUrl }: Props) => {
 
             switch (result.data.type) {
                 case "midi":
-                    console.log("playing sound");
-                    midiStateMachine.send({
-                        type: "midi.playSound",
+                    soundStateMachine.send({
+                        type: "sound.playSound",
                         message: result.data.message.message,
                         instrument: result.data.message.instrument,
                     });

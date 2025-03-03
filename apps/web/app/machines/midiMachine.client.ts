@@ -16,14 +16,7 @@ import {
 import { peerActor } from "./peerMachine";
 import { DataMessage } from "@musicall/types/dataMessage";
 import { Instrument } from "@musicall/types/Instrument";
-import { KeyboardSoundManager } from "../utils/sound/KeyboardSoundManager.client";
-import { ISoundManager } from "../utils/sound/ISoundManager";
-import { DrumSoundManager } from "../utils/sound/DrumSoundManager.client";
-
-const soundManagers: Record<string, ISoundManager> = {
-    drums: new DrumSoundManager(),
-    keyboard: new KeyboardSoundManager(),
-};
+import { soundActor } from "./soundMachine.client";
 
 export const midiMachine = setup({
     types: {} as {
@@ -47,10 +40,7 @@ export const midiMachine = setup({
                   newType: "local" | "peers";
               }
             | { type: "midi.toggle"; enabled: boolean }
-            | { type: "midi.sendMessage"; event: MessageEvent }
-            | { type: "midi.playSound"; message: MessageEvent["message"]; instrument: "drums" | "keyboard" }
-            | { type: "midi.setInstrument"; instrument: "drums" | "keyboard" }
-            | { type: "midi.enableManagers" };
+            | { type: "midi.sendMessage"; event: MessageEvent };
     },
     actors: {
         enableWebMidi: fromPromise(async () => {
@@ -139,16 +129,6 @@ export const midiMachine = setup({
                         type: ({ event }) => event.newType,
                     }),
                 },
-                "midi.setInstrument": {
-                    actions: assign({
-                        instrument: ({ event }) => event.instrument,
-                    }),
-                },
-                "midi.enableManagers": {
-                    actions: () => {
-                        Object.keys(soundManagers).forEach((sm) => soundManagers[sm].enable());
-                    },
-                },
             },
         },
         initialized: {
@@ -162,11 +142,6 @@ export const midiMachine = setup({
                 },
             },
             on: {
-                "midi.setInstrument": {
-                    actions: assign({
-                        instrument: ({ event }) => event.instrument,
-                    }),
-                },
                 "midi.scanInputs": {
                     actions: assign({
                         inputs: WebMidi.inputs,
@@ -184,13 +159,6 @@ export const midiMachine = setup({
                         }),
                         ({ event }) => sendTo("addEventListener", { type: "switchInput", device: event.selectedInput }),
                     ],
-                },
-                "midi.playSound": {
-                    actions: enqueueActions(({ event }) => {
-                        if (soundManagers[event.instrument]) {
-                            soundManagers[event.instrument].handleMidiEvent(event.message);
-                        }
-                    }),
                 },
                 "midi.sendMessage": {
                     guard: ({ context }) => context.enabled,
@@ -211,18 +179,13 @@ export const midiMachine = setup({
                         }
 
                         if (context.type === "local") {
-                            enqueue.raise({
-                                type: "midi.playSound",
+                            enqueue.sendTo(soundActor, {
+                                type: "sound.playSound",
                                 message: event.event.message,
                                 instrument: context.instrument,
                             });
                         }
                     }),
-                },
-                "midi.enableManagers": {
-                    actions: () => {
-                        Object.keys(soundManagers).forEach((sm) => soundManagers[sm].enable());
-                    },
                 },
             },
         },
