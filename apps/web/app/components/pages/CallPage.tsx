@@ -18,11 +18,11 @@ import { soundActor } from "../../machines/soundMachine.client";
 
 type Props = {
     roomId: string;
-    socketUrl?: string;
     device: "Mobile" | "Tablet" | "Desktop" | null;
+    isOwner: boolean;
 };
 
-export default function CallPage({ roomId, socketUrl, device }: Props) {
+export default function CallPage({ roomId, device, isOwner }: Props) {
     const theme = useMantineTheme();
     const [audioEnabled, setAudioEnabled] = useState(device !== "Mobile");
 
@@ -65,7 +65,7 @@ export default function CallPage({ roomId, socketUrl, device }: Props) {
 
     return (
         <Flex direction="column" w="100%" h="100%">
-            <Call socketUrl={socketUrl} roomId={roomId}>
+            <Call roomId={roomId} isOwner={isOwner}>
                 <VideoGrid />
                 <Box
                     style={{ borderTop: `2px solid ${theme.colors.gray[2]}`, boxShadow: theme.shadows.lg }}

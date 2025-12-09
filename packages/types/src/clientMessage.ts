@@ -14,9 +14,9 @@ export type ClientPeer = {
     peerId: string;
     initiator: boolean;
     user: User;
-    voice: boolean;
-    video: boolean;
-    midi: boolean;
+    voice?: boolean;
+    video?: boolean;
+    midi?: boolean;
 };
 
 export type ClientWaitingRoomUpdated = {
@@ -41,6 +41,8 @@ export type ClientUpdateDeviceStatus = {
 
 export type ClientAllowIntoRoom = {
     type: "allow-into-room";
+    userId: string;
+    roomId: string;
 };
 
 export type ClientLeft = {
@@ -67,5 +69,5 @@ export type ClientMessages =
     | ClientLeft;
 
 export const createClientMessage = (message: ClientMessages) => {
-    return JSON.stringify(message);
+    return message;
 };

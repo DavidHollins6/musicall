@@ -7,6 +7,7 @@ export type ServerSignalMessage = {
     signal: SignalData;
     peerId: string;
     userId: string;
+    roomId: string;
 };
 
 export type ServerJoinRoomMessage = {
@@ -15,17 +16,20 @@ export type ServerJoinRoomMessage = {
     voice: boolean;
     video: boolean;
     midi: boolean;
+    roomId: string;
 };
 
 export type ServerAllowIntoRoomMessage = {
     type: "allow-into-room";
     userId: string;
+    roomId: string;
 };
 
 export type ServerJoinWaitingRoomMessage = {
     type: "join-lobby";
     userId: string;
     name: string;
+    roomId: string;
 };
 
 export type ServerChatMessage = {
@@ -33,6 +37,12 @@ export type ServerChatMessage = {
     message: string;
     from: User;
     timestamp: number;
+    roomId: string;
+};
+
+export type ServerJoinOwnersRoom = {
+    type: "join-owners-room";
+    userId: string;
 };
 
 export type ServerUpdateDeviceStatusMessage = {
@@ -40,6 +50,7 @@ export type ServerUpdateDeviceStatusMessage = {
     voice: boolean;
     video: boolean;
     midi: boolean;
+    roomId: string;
 };
 
 export const ServerMessageSchema = z
@@ -56,8 +67,9 @@ export type ServerMessages =
     | ServerAllowIntoRoomMessage
     | ServerJoinWaitingRoomMessage
     | ServerChatMessage
-    | ServerUpdateDeviceStatusMessage;
+    | ServerUpdateDeviceStatusMessage
+    | ServerJoinOwnersRoom;
 
 export const createServerMessage = (message: ServerMessages) => {
-    return JSON.stringify(message);
+    return message;
 };

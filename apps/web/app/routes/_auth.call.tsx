@@ -8,7 +8,7 @@ import { requireAuthSession } from "../modules/auth/session.server";
 import { getOwnedRooms, getRoomAllowList } from "@musicall/api/room";
 import { getUser } from "@musicall/api/user";
 import { createUserStore, UserContext } from "../store/userStore";
-import { DeviceChecker } from "~/components/DeviceChecker";
+import { DeviceChecker } from "../components/DeviceChecker";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { userId } = await requireAuthSession(request);
@@ -39,14 +39,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
         user,
         roomId,
         isOwner: ownsThisRoom,
-        ENV: {
-            SOCKET_URL: process.env.SOCKET_URL,
-        },
     });
 }
 
 export default function Call() {
-    const { roomId, user, isOwner, ENV } = useLoaderData<typeof loader>();
+    const { roomId, user, isOwner } = useLoaderData<typeof loader>();
     const store = useRef(createUserStore({ user, isOwner })).current;
 
     return (
@@ -54,7 +51,7 @@ export default function Call() {
             {() => (
                 <UserContext.Provider value={store}>
                     <DeviceChecker>
-                        {(device) => <CallPage device={device} socketUrl={ENV.SOCKET_URL} roomId={roomId} />}
+                        {(device) => <CallPage device={device} roomId={roomId} isOwner={isOwner} />}
                     </DeviceChecker>
                 </UserContext.Provider>
             )}

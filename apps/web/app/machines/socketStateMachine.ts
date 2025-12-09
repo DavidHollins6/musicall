@@ -1,46 +1,41 @@
 import { useSelector } from "@xstate/react";
-import PartySocket from "partysocket";
-import { assign, createActor, setup } from "xstate";
+import { createActor, setup } from "xstate";
+import type { ServerMessages } from "@musicall/types/serverMessage";
+import { socket } from "../utils/socket/socket";
 
 export const socketMachine = setup({
     types: {} as {
-        context: {
-            socket?: PartySocket;
-        };
         events:
             | {
-                  type: "socket.setSocket";
-                  socket: PartySocket;
-              }
-            | {
-                  type: "socket.initialized";
-                  socket: PartySocket;
+                  type: "socket.connect";
               }
             | {
                   type: "socket.sendMessage";
-                  message: string;
+                  message: ServerMessages;
               };
     },
 }).createMachine({
     id: "socket",
-    context: {},
-    initial: "initializing",
+    context: {
+        socket: null,
+    },
+    initial: "disconnected",
     states: {
-        initializing: {
+        disconnected: {
             on: {
-                "socket.initialized": {
-                    target: "#socket.initialized",
-                    actions: assign({
-                        socket: ({ event }) => event.socket,
-                    }),
+                "socket.connect": {
+                    target: "#socket.connected",
+                    actions: () => {
+                        socket.connect();
+                    },
                 },
             },
         },
-        initialized: {
+        connected: {
             on: {
                 "socket.sendMessage": {
-                    actions: ({ event, context }) => {
-                        context.socket?.send(event.message);
+                    actions: ({ event }) => {
+                        socket.emit(event.type, event);
                     },
                 },
             },

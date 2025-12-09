@@ -10,10 +10,8 @@
         "typescript": "latest"
     },
     "dependencies": {
-        "@redis/client": "^1.6.0",
         "drizzle-orm": "^0.39.3",
         "pg": "^8.13.3",
-        "postgres": "^3.4.3",
-        "redis": "^4.7.0"
+        "postgres": "^3.4.3"
     }
 }

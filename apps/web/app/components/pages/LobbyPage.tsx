@@ -1,34 +1,34 @@
-import { usePartySocket } from "partysocket/react";
 import { useRef, useState } from "react";
-import { z } from "zod";
 import { Button, Stepper, Stack, Group, Card, useMatches, Switch, Title, Center } from "@mantine/core";
 import { User } from "@musicall/storage";
 import { MidiSetup } from "../midi/MidiSetup";
 import { VideoSetup } from "../Video/VideoSetup";
 import { MicrophoneSetup } from "../audio/MicrophoneSetup";
-import { createServerMessage } from "@musicall/types/serverMessage";
 import { useUserStore } from "../../store/userStore";
-import { useSocketStateMachine } from "../../machines/socketStateMachine";
+import { useLobbySocket } from "../../hooks/useLobbySocket";
 
 type Props = {
     userId: string;
     roomId: string;
     allowedIntoRoom: boolean;
     roomOwner: User;
-    socketUrl?: string;
 };
 
-const MessageSchema = z.object({
-    type: z.literal("allow-into-room"),
-});
-
-export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner, socketUrl }: Props) => {
+export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
     const [autoJoin, setAutoJoin] = useState(false);
     const [allowed, setAllowed] = useState(allowedIntoRoom);
     const [active, setActive] = useState(0);
     const linkRef = useRef<HTMLAnchorElement | null>(null);
     const { user } = useUserStore();
-    const socketStateMachine = useSocketStateMachine();
+
+    useLobbySocket(roomId, user.id, user.name, () => {
+        if (autoJoin && linkRef.current) {
+            linkRef.current.click();
+        } else {
+            setAllowed(true);
+        }
+    });
+
     const cardBorder = useMatches({
         sm: false,
         lg: true,
@@ -41,40 +41,6 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner, socketUrl }: Pro
     const mobileView = useMatches({
         base: true,
         lg: false,
-    });
-
-    const socket = usePartySocket({
-        room: roomId,
-        host: socketUrl,
-        onOpen() {
-            socketStateMachine.send({
-                type: "socket.initialized",
-                socket,
-            });
-
-            const message = createServerMessage({
-                type: "join-lobby",
-                userId: user.id,
-                name: user.name,
-            });
-            socket.send(message);
-        },
-        onMessage(evt) {
-            const result = MessageSchema.safeParse(JSON.parse(String(evt.data)));
-
-            if (!result.success) {
-                console.error("could not parse", result);
-                return;
-            }
-
-            if (result.data.type === "allow-into-room") {
-                if (autoJoin && linkRef.current) {
-                    linkRef.current.click();
-                } else {
-                    setAllowed(true);
-                }
-            }
-        },
     });
 
     return (

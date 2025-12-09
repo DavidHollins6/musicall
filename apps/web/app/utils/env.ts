@@ -18,7 +18,6 @@ declare global {
             SERVER_URL: string;
             SUPABASE_ANON_PUBLIC: string;
             SESSION_SECRET: string;
-            REDIS_URL: string;
         }
     }
 }
@@ -48,7 +47,6 @@ export const SERVER_URL = getEnv("SERVER_URL");
 export const SUPABASE_SERVICE_ROLE = getEnv("SUPABASE_SERVICE_ROLE");
 export const SESSION_SECRET = getEnv("SESSION_SECRET");
 export const DATABASE_URL = getEnv("DATABASE_URL");
-export const REDIS_URL = getEnv("REDIS_URL");
 
 /**
  * Shared envs
