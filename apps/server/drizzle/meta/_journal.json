@@ -8,6 +8,27 @@
       "when": 1739539647787,
       "tag": "0000_odd_jigsaw",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1758644547742,
+      "tag": "0001_solid_doorman",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1758645198584,
+      "tag": "0002_sticky_warbound",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1759681564451,
+      "tag": "0003_long_spacker_dave",
+      "breakpoints": true
     }
   ]
 }

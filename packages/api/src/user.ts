@@ -40,3 +40,14 @@ export const createUser = async (userId: string, email: string, name: string): P
     console.error("Error creating user: ", response.status);
     return null;
 };
+
+export const getStudentsForTeacher = async (teacherId: string): Promise<Array<User>> => {
+    const response = await fetch(`${process.env.API_URL}/user/students/${teacherId}`);
+    if (response.ok) {
+        const user = (await response.json()) as Array<User>;
+        return user;
+    }
+
+    console.error("Error getting user by email: ", response.status);
+    return [];
+};

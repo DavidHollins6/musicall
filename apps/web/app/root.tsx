@@ -6,7 +6,7 @@ import { ColorSchemeScript, createTheme, MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 
 const theme = createTheme({
-    primaryColor: "lime",
+    primaryColor: "indigo",
 });
 
 export function Layout({ children }: { children: React.ReactNode }) {

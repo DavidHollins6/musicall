@@ -1,5 +1,5 @@
 import type { Express, Request } from "express";
-import { users } from "@musicall/storage";
+import { teacherStudents, users } from "@musicall/storage";
 import { eq } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
 
@@ -26,14 +26,25 @@ export const userHandlers = (app: Express, db: NodePgDatabase) => {
         res.status(404).send();
     });
 
-    app.post(
-        "/user/create/:id",
-        async (req: Request<{ id: string }, unknown, { email: string; name: string }>, res) => {
-            const { email, name } = req.body;
+    app.get("/user/students/:userId", async (req, res) => {
+        const result = await db
+            .select()
+            .from(teacherStudents)
+            .innerJoin(users, eq(users.id, teacherStudents.studentId))
+            .where(eq(teacherStudents.teacherId, req.params.userId));
 
-            const result = await db.insert(users).values({ email, id: req.params.id, name }).returning();
+        res.send(result.map((r) => r.users));
+        return;
+    });
 
-            res.status(200).send(result);
-        },
-    );
+    // app.post(
+    //     "/user/create/:id",
+    //     async (req: Request<{ id: string }, unknown, { email: string; name: string }>, res) => {
+    //         const { email, name } = req.body;
+
+    //         const result = await db.insert(users).values({ email, id: req.params.id, name }).returning();
+
+    //         res.status(200).send(result);
+    //     },
+    // );
 };

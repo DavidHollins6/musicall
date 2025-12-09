@@ -5,6 +5,7 @@ import express from "express";
 import { roomHandlers } from "./handlers/room";
 import { createCache, createDb } from "@musicall/storage";
 import { userHandlers } from "./handlers/user";
+import { sessionHandlers } from "./handlers/session";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -28,6 +29,7 @@ app.use(express.json());
 
 roomHandlers(app, db, redis);
 userHandlers(app, db);
+sessionHandlers(app, db);
 
 app.get("/", (req, res) => {
     res.send("Hello World!");
