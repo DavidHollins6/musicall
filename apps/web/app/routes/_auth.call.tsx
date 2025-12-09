@@ -4,14 +4,18 @@ import { json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import CallPage from "../components/pages/CallPage";
 import { ClientOnly } from "remix-utils/client-only";
-import { requireAuthSession } from "../modules/auth/session.server";
 import { getOwnedRooms, getRoomAllowList } from "@musicall/api/room";
 import { getUser } from "@musicall/api/user";
 import { createUserStore, UserContext } from "../store/userStore";
 import { DeviceChecker } from "../components/DeviceChecker";
+import { getAuth } from "@clerk/remix/ssr.server";
 
-export async function loader({ request }: LoaderFunctionArgs) {
-    const { userId } = await requireAuthSession(request);
+export async function loader(args: LoaderFunctionArgs) {
+    const { isAuthenticated, userId } = await getAuth(args);
+
+    if (!isAuthenticated) {
+        return redirect("/sign-in");
+    }
 
     const user = await getUser(userId);
 
@@ -19,7 +23,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         return redirect("/");
     }
 
-    const url = new URL(request.url);
+    const url = new URL(args.request.url);
     const roomId = url.searchParams.get("roomId");
 
     if (!roomId) {

@@ -1,14 +1,12 @@
-import type { Express, Request } from "express";
-import { users } from "@musicall/storage";
-import { eq } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { Express } from "express";
+import { ClerkClient } from "@clerk/backend";
 
-export const userHandlers = (app: Express, db: NodePgDatabase) => {
+export const userHandlers = (app: Express, clerk: ClerkClient) => {
     app.get("/user/:id", async (req, res) => {
-        const result = await db.select().from(users).where(eq(users.id, req.params.id));
+        const user = clerk.users.getUser(req.params.id);
 
-        if (result.length === 1) {
-            res.send(result[0]);
+        if (user) {
+            res.send(user);
             return;
         }
 
@@ -16,24 +14,12 @@ export const userHandlers = (app: Express, db: NodePgDatabase) => {
     });
 
     app.get("/user/email/:email", async (req, res) => {
-        const result = await db.select().from(users).where(eq(users.email, req.params.email));
-
-        if (result.length === 1) {
-            res.send(result[0]);
+        const user = clerk.emailAddresses.getEmailAddress(req.params.email);
+        if (user) {
+            res.send(user);
             return;
         }
 
         res.status(404).send();
     });
-
-    app.post(
-        "/user/create/:id",
-        async (req: Request<{ id: string }, unknown, { email: string; name: string }>, res) => {
-            const { email, name } = req.body;
-
-            const result = await db.insert(users).values({ email, id: req.params.id, name }).returning();
-
-            res.status(200).send(result);
-        },
-    );
 };

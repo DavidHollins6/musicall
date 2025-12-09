@@ -8,6 +8,7 @@ import { createDb } from "@musicall/storage";
 import { userHandlers } from "./handlers/user";
 import { Server } from "socket.io";
 import NodeCache from "node-cache";
+import { createClerkClient } from "@clerk/backend";
 import { socketHandlers } from "./handlers/socket";
 
 const app = express();
@@ -17,8 +18,15 @@ if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is not defined");
 }
 
+if (!process.env.CLERK_SECRET_KEY) {
+    throw new Error("CLERK_SECRET_KEY is not defined");
+}
+
 const db = createDb(process.env.DATABASE_URL);
 const cache = new NodeCache();
+const clerk = createClerkClient({
+    secretKey: process.env.CLERK_SECRET_KEY || "",
+});
 
 const server = createServer(app);
 const io = new Server(server, {
@@ -30,7 +38,7 @@ const io = new Server(server, {
 app.use(express.json());
 
 roomHandlers(app, db, cache);
-userHandlers(app, db);
+userHandlers(app, clerk);
 socketHandlers(io, cache);
 
 app.get("/", (req, res) => {

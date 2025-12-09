@@ -1,11 +1,9 @@
 import { User } from "@musicall/storage";
 import { createContext, useContext } from "react";
 import { createStore, useStore } from "zustand";
-import { AuthSession } from "../modules/auth/types";
 
 interface SessionState {
     user?: User;
-    session?: AuthSession;
 }
 
 type UserStore = ReturnType<typeof createSessionStore>;
