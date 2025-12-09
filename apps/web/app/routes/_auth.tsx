@@ -1,26 +1,30 @@
 import { Outlet, useLoaderData } from "@remix-run/react";
 import { Header } from "../components/Header/header";
 import { getUser } from "@musicall/api/user";
-import { requireAuthSession } from "../modules/auth/session.server";
 import { json, LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { createSessionStore, SessionContext } from "../store/sessionStore";
 import { useRef } from "react";
+import { getAuth } from "@clerk/remix/ssr.server";
 
-export async function loader({ request }: LoaderFunctionArgs) {
-    const session = await requireAuthSession(request);
+export async function loader(args: LoaderFunctionArgs) {
+    const { isAuthenticated, userId } = await getAuth(args);
 
-    const user = await getUser(session.userId);
+    if (!isAuthenticated) {
+        return redirect("/sign-in");
+    }
+
+    const user = await getUser(userId);
 
     if (!user) {
         return redirect("/");
     }
 
-    return json({ user, session });
+    return json({ user });
 }
 
 export default function AuthPage() {
-    const { session, user } = useLoaderData<typeof loader>();
-    const store = useRef(createSessionStore({ user, session })).current;
+    const { user } = useLoaderData<typeof loader>();
+    const store = useRef(createSessionStore({ user })).current;
 
     return (
         <SessionContext.Provider value={store}>

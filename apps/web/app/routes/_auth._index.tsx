@@ -1,16 +1,20 @@
 import { type LinksFunction, type LoaderFunctionArgs, json } from "@remix-run/node";
 
 import styles from "../styles/global.css?url";
-import { requireAuthSession } from "../modules/auth/session.server";
 import { getOwnedRooms } from "@musicall/api/room";
+import { redirect } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { ActionIcon, Box, Card, Center, Group, Stack, Title, Tooltip } from "@mantine/core";
 import { useSessionStore } from "../store/sessionStore";
 import { IconCopy, IconDoor } from "@tabler/icons-react";
+import { getAuth } from "@clerk/remix/ssr.server";
 
-export async function loader({ request }: LoaderFunctionArgs) {
-    const { userId } = await requireAuthSession(request);
+export async function loader(args: LoaderFunctionArgs) {
+    const { isAuthenticated, userId } = await getAuth(args);
 
+    if (!isAuthenticated) {
+        return redirect("/sign-in");
+    }
     const rooms = await getOwnedRooms(userId);
 
     return json({ rooms });
@@ -29,7 +33,7 @@ export default function Index() {
                     <Center h="100%">
                         <Stack>
                             <Box>
-                                <Title order={2}>{user?.name}&#39;s Room</Title>
+                                <Title order={2}>{user?.firstName}&#39;s Room</Title>
                             </Box>
                             <Center>
                                 <Group justify="flex-end">
