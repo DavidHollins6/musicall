@@ -3,15 +3,15 @@ import { useUserStore } from "../store/userStore";
 
 export const Call = ({
     roomId,
-    socketUrl,
     children,
+    isOwner,
 }: {
     roomId: string;
     children: React.ReactNode;
-    socketUrl?: string;
+    isOwner: boolean;
 }) => {
     const { user } = useUserStore();
 
-    useWebRTC({ room: roomId, userId: user.id, socketUrl });
+    useWebRTC({ roomId: roomId, userId: user.id, isOwner });
     return children;
 };

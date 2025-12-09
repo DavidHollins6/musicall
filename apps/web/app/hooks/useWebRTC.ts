@@ -1,10 +1,8 @@
 "use client";
 
-import { usePartySocket } from "partysocket/react";
-import Peer from "simple-peer";
+import Peer, { SignalData } from "simple-peer";
 import { User } from "@musicall/storage";
 import { createServerMessage } from "@musicall/types/serverMessage";
-import { ClientMessageSchema } from "@musicall/types/clientMessage";
 import { useMidiStateMachine } from "../machines/midiMachine.client";
 import { useChatStateMachine } from "../machines/chatMachine";
 import { usePeerStateMachine } from "../machines/peerMachine";
@@ -14,6 +12,8 @@ import { useSocketStateMachine } from "../machines/socketStateMachine";
 import { useStreamStateMachine } from "../machines/streamMachine";
 import { DataMessageSchema } from "@musicall/types/dataMessage";
 import { useSoundStateMachine } from "../machines/soundMachine.client";
+import { useEffect } from "react";
+import { socket } from "../utils/socket/socket";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -38,12 +38,12 @@ const CONFIG = {
 };
 
 type Props = {
-    room: string;
+    roomId: string;
     userId: string;
-    socketUrl?: string;
+    isOwner: boolean;
 };
 
-export const useWebRTC = ({ room, userId, socketUrl }: Props) => {
+export const useWebRTC = ({ roomId, userId, isOwner }: Props) => {
     const chatStateMachine = useChatStateMachine();
     const peerStateMachine = usePeerStateMachine();
     const videoStateMachine = useVideoStateMachine();
@@ -52,57 +52,10 @@ export const useWebRTC = ({ room, userId, socketUrl }: Props) => {
     const midiStateMachine = useMidiStateMachine();
     const soundStateMachine = useSoundStateMachine();
     const streamStateMachine = useStreamStateMachine();
+    const isSocketConnected = socketStateMachine.matches("connected");
 
-    const socket = usePartySocket({
-        room: room,
-        host: socketUrl,
-        onMessage(evt) {
-            const result = ClientMessageSchema.safeParse(JSON.parse(String(evt.data)));
-
-            if (!result.success) {
-                console.error("could not parse", result);
-                return;
-            }
-
-            switch (result.data.type) {
-                case "peer":
-                    addPeer(
-                        result.data.peerId,
-                        result.data.initiator,
-                        result.data.user,
-                        result.data.voice,
-                        result.data.video,
-                        result.data.midi,
-                    );
-                    break;
-                case "signal":
-                    peerStateMachine.context.peers[result.data.peerId].peerConnection.signal(result.data.signal);
-                    break;
-                case "lobby-updated":
-                    peerStateMachine.send({ type: "peer.setWaitingList", waitingList: result.data.waiters });
-                    break;
-                case "chat":
-                    chatStateMachine.send({ type: "chat.sendMessage", message: result.data });
-                    break;
-                case "update-device-status":
-                    peerStateMachine.send({
-                        type: "peer.setDeviceStatus",
-                        cameraEnabled: result.data.video,
-                        microphoneEnabled: result.data.voice,
-                        midiEnabled: result.data.midi,
-                        peerId: result.data.peerId,
-                    });
-                    break;
-                case "client-left":
-                    console.log("someone left");
-                    break;
-            }
-        },
-        onOpen() {
-            socketStateMachine.send({
-                type: "socket.initialized",
-                socket,
-            });
+    useEffect(() => {
+        if (isSocketConnected) {
             videoStateMachine.send({ type: "video.scanAvailableDevices" });
             voiceStateMachine.send({ type: "voice.scanAvailableDevices" });
             midiStateMachine.send({ type: "midi.scanInputs" });
@@ -112,12 +65,70 @@ export const useWebRTC = ({ room, userId, socketUrl }: Props) => {
                 voice: voiceStateMachine.context.enabled,
                 video: videoStateMachine.context.enabled,
                 midi: midiStateMachine.context.enabled,
+                roomId,
             });
             socketStateMachine.send({ type: "socket.sendMessage", message });
-        },
-    });
 
-    const addPeer = (peerId: string, initiator: boolean, user: User, voice: boolean, video: boolean, midi: boolean) => {
+            if (isOwner) {
+                socketStateMachine.send({
+                    type: "socket.sendMessage",
+                    message: createServerMessage({
+                        type: "join-owners-room",
+                        userId,
+                    }),
+                });
+            }
+
+            socket.on(
+                "peer",
+                (data: {
+                    peerId: string;
+                    initiator: boolean;
+                    user: User;
+                    voice: boolean;
+                    video: boolean;
+                    midi: boolean;
+                }) => {
+                    addPeer(data.peerId, data.initiator, data.user, data.voice, data.video, data.midi, roomId);
+                },
+            );
+
+            socket.on("signal", (data: { peerId: string; signal: SignalData }) => {
+                peerStateMachine.context.peers[data.peerId].peerConnection.signal(data.signal);
+            });
+
+            socket.on("lobby-updated", (data: { waiters: Array<{ userId: string; name: string }> }) => {
+                peerStateMachine.send({ type: "peer.setWaitingList", waitingList: data.waiters });
+            });
+
+            socket.on("chat", (data: { message: string; from: User; timestamp: number; roomId: string }) => {
+                chatStateMachine.send({ type: "chat.sendMessage", message: data });
+            });
+
+            socket.on(
+                "update-device-status",
+                (data: { peerId: string; voice: boolean; video: boolean; midi: boolean }) => {
+                    peerStateMachine.send({
+                        type: "peer.setDeviceStatus",
+                        cameraEnabled: data.video,
+                        microphoneEnabled: data.voice,
+                        midiEnabled: data.midi,
+                        peerId: data.peerId,
+                    });
+                },
+            );
+        }
+    }, [isSocketConnected]);
+
+    const addPeer = (
+        peerId: string,
+        initiator: boolean,
+        user: User,
+        voice: boolean,
+        video: boolean,
+        midi: boolean,
+        roomId: string,
+    ) => {
         const peerConnection = new Peer({
             initiator: initiator,
             config: CONFIG,
@@ -131,6 +142,7 @@ export const useWebRTC = ({ room, userId, socketUrl }: Props) => {
                 signal: data,
                 peerId,
                 userId: userId,
+                roomId,
             });
             socketStateMachine.send({ type: "socket.sendMessage", message });
         });

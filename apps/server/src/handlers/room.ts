@@ -1,9 +1,10 @@
 import type { Express, Request } from "express";
-import { rooms, RedisCache } from "@musicall/storage";
+import { rooms } from "@musicall/storage";
 import { eq } from "drizzle-orm";
 import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import NodeCache from "node-cache";
 
-export const roomHandlers = (app: Express, db: NodePgDatabase, redis: RedisCache) => {
+export const roomHandlers = (app: Express, db: NodePgDatabase, cache: NodeCache) => {
     app.get("/room/:id", async (req, res) => {
         const roomsResult = await db.select().from(rooms).where(eq(rooms.id, req.params.id));
 
@@ -15,19 +16,10 @@ export const roomHandlers = (app: Express, db: NodePgDatabase, redis: RedisCache
         res.status(404).send();
     });
 
-    app.post("/room/:id/allow", async (req: Request<{ id: string }, unknown, { userId: string }>, res) => {
-        await redis.set(`allow-list|${req.body.userId}|${req.params.id}`, "", {
-            EX: 30 * 60,
-        });
-
-        res.status(200).send();
-    });
-
     app.get("/room/:id/allow-list", async (req, res) => {
-        const keys = await redis.keys(`allow-list|*${req.params.id}*`);
-        const userIds = keys.map((key) => key.split("|")[2]);
+        const allowedPeople = cache.get<Array<string>>(`allowed-${req.params.id}`) || [];
 
-        res.status(200).send(userIds);
+        res.status(200).send(allowedPeople);
     });
 
     app.get("/room/owned/:id", async (req, res) => {

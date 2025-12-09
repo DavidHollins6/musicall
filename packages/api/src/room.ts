@@ -48,15 +48,3 @@ export const createRoom = async (room: Room): Promise<Room | null> => {
     console.error("Error creating room: ", response.status);
     return null;
 };
-
-export const allowUserIntoRoom = async (id: string, userId: string): Promise<boolean> => {
-    const response = await fetch(`${process.env.API_URL}/room/${id}/allow`, {
-        method: "POST",
-        body: JSON.stringify({
-            userId,
-        }),
-        headers: { "Content-Type": "application/json" },
-    });
-
-    return response.ok;
-};

@@ -1,6 +1,0 @@
-{
-  "extends": "@musicall/typescript-config/base.json",
-  "compilerOptions": {
-    "outDir": "./build"
-  }
-}
