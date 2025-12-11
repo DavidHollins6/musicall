@@ -1,5 +1,5 @@
 # ---------- BASE IMAGE FOR PRUNING ----------
-FROM node:18-slim AS base
+FROM node:22-slim AS base
 WORKDIR /repo
 COPY . .
 
@@ -10,7 +10,7 @@ FROM base AS pruner
 RUN turbo prune --scope=web --docker
 
 # ---------- INSTALL DEPENDENCIES ----------
-FROM node:18-slim AS installer
+FROM node:22-slim AS installer
 WORKDIR /repo
 
 # Copy pruned JSON files
@@ -25,7 +25,7 @@ RUN npm install
 RUN npm run build --workspace=@musicall/web
 
 # ---------- RUNTIME ----------
-FROM node:18-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 # Copy application runtime files

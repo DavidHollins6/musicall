@@ -1,5 +1,5 @@
 # ---------- BASE IMAGE FOR PRUNING ----------
-FROM node:18-slim AS base
+FROM node:22-slim AS base
 WORKDIR /repo
 COPY . .
 
@@ -10,7 +10,7 @@ FROM base AS pruner
 RUN turbo prune --scope=server --docker
 
 # ---------- INSTALL DEPENDENCIES ----------
-FROM node:18-slim AS installer
+FROM node:22-slim AS installer
 WORKDIR /repo
 
 COPY --from=pruner /repo/out/json/ ./
@@ -22,7 +22,7 @@ RUN npm install
 RUN npm run build --workspace=@musicall/server || echo "No build step"
 
 # ---------- RUNTIME ----------
-FROM node:18-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 COPY --from=installer /repo/apps/server/ ./
