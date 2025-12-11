@@ -44,7 +44,7 @@ jobs:
                   image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/musicall/remix:latest
                   region: ${{ env.REGION }}
 
-    deploy-socket:
+    deploy-server:
         runs-on: ubuntu-latest
 
         steps:
@@ -64,16 +64,16 @@ jobs:
             - name: Configure Docker
               run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-            - name: Build Socket image
-              run: docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/socket:latest -f apps/server/Dockerfile .
+            - name: Build Server image
+              run: docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/server:latest -f apps/server/Dockerfile .
 
-            - name: Push Socket image
+            - name: Push Server image
               run: |
-                  docker push $REGION-docker.pkg.dev/$PROJECT_ID/musicall/socket:latest
+                  docker push $REGION-docker.pkg.dev/$PROJECT_ID/musicall/server:latest
 
-            - name: Deploy Socket
+            - name: Deploy Server
               uses: google-github-actions/deploy-cloudrun@v2
               with:
-                  service: socket-server
-                  image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/musicall/socket:latest
+                  service: server
+                  image: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/musicall/server:latest
                   region: ${{ env.REGION }}
