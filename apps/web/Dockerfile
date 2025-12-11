@@ -31,7 +31,7 @@ WORKDIR /app
 # Copy application runtime files
 COPY --from=installer /repo/apps/web/ ./
 
-ENV PORT=3000
-EXPOSE 3000
+ENV PORT=5173
+EXPOSE 5173
 
 CMD ["npm", "run", "start"]
