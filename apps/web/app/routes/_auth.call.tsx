@@ -30,8 +30,8 @@ export async function loader(args: LoaderFunctionArgs) {
         return redirect("/");
     }
 
-    const rooms = await getOwnedRooms(userId);
-    const ownsThisRoom = rooms.findIndex((r) => r.id === roomId) >= 0;
+    const ownedRooms = await getOwnedRooms(userId);
+    const ownsThisRoom = ownedRooms.findIndex((r) => r.id === roomId) >= 0;
     const allowList = await getRoomAllowList(roomId);
     const isInAllowList = allowList.includes(userId);
 

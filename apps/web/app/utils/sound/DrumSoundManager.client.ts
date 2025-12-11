@@ -57,6 +57,4 @@ export class DrumSoundManager implements ISoundManager {
         this.howl.play("kick");
         this.howl.volume(currentVolume);
     }
-
-    changeMappings() {}
 }

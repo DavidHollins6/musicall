@@ -38,7 +38,7 @@ export const RemoteVideo: React.FC<Props> = ({ peerId }) => {
                 bg="linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, .65) 40%)"
             >
                 {!peer.microphoneEnabled ? <IconMicrophoneOff size={16} color="red" /> : null}
-                <Text color="white">{peer.user.name}</Text>
+                <Text color="white">{peer.user.firstName}</Text>
             </Group>
         </Flex>
     );

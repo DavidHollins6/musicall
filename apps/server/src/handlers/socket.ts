@@ -4,26 +4,40 @@ import { getUser } from "@musicall/api/user";
 import { User } from "@musicall/storage";
 import { Server } from "socket.io";
 
+type Waiter = {
+    userId: string;
+    name: string;
+    allowed: boolean;
+    socketId: string;
+};
+
 export const socketHandlers = (io: Server, cache: NodeCache) => {
     io.on("connection", (socket) => {
         console.log("a user connected");
 
         socket.on("allow-into-room", (payload: { userId: string; roomId: string }) => {
-            const waiters = cache.get<Array<{ userId: string; name: string }>>(`waiters-${payload.roomId}`);
-            const newWaiters = (waiters || []).filter((w) => w.userId !== payload.userId);
-            cache.set(`waiters-${payload.roomId}`, newWaiters);
+            console.log("Allowing user into room:", payload);
+            const waiters = cache.get<Array<Waiter>>(`waiters-${payload.roomId}`);
+            const waiter = waiters?.find((w) => w.userId === payload.userId);
+            if (!waiter) {
+                console.log("No such waiter found");
+                return;
+            }
 
-            const allowedPeople = cache.get<Array<string>>(`allowed-${payload.roomId}`) || [];
-            allowedPeople.push(payload.userId);
-            cache.set(`allowed-${payload.roomId}`, allowedPeople);
+            const newWaiters: Array<Waiter> = [
+                ...(waiters?.filter((w) => w.userId !== payload.userId) || []),
+                { userId: payload.userId, name: waiter.name, allowed: true, socketId: waiter.socketId },
+            ];
+
+            cache.set(`waiters-${payload.roomId}`, newWaiters);
 
             const message = createClientMessage({
                 type: "lobby-updated",
                 waiters: newWaiters,
             });
 
-            socket.broadcast.to(`owner-${payload.roomId}`).emit("lobby-updated", message);
-            socket.broadcast
+            io.to(`owner-${payload.roomId}`).emit("lobby-updated", message);
+            socket
                 .to(`lobby-${payload.roomId}`)
                 .emit("allow-into-room", { userId: payload.userId, roomId: payload.roomId });
         });
@@ -33,8 +47,17 @@ export const socketHandlers = (io: Server, cache: NodeCache) => {
         });
 
         socket.on("join-lobby", ({ userId, name, roomId }: { userId: string; name: string; roomId: string }) => {
-            const waiters = cache.get<Array<{ userId: string; name: string }>>(`waiters-${roomId}`);
-            const newWaiters = [...(waiters || []), { userId, name }];
+            const allowedPeople = cache.get<Array<string>>(`allowed-${roomId}`) || [];
+            if (allowedPeople.includes(userId)) {
+                // User is allowed, do not add to waiters
+                return;
+            }
+
+            const waiters = cache.get<Array<Waiter>>(`waiters-${roomId}`);
+            const existingWaiters = waiters || [];
+            const newWaiters = existingWaiters.some((w) => w.userId === userId)
+                ? existingWaiters
+                : [...existingWaiters, { userId, name, allowed: false, socketId: socket.id }];
             cache.set(`waiters-${roomId}`, newWaiters);
             socket.join(`lobby-${roomId}`);
 
@@ -43,7 +66,7 @@ export const socketHandlers = (io: Server, cache: NodeCache) => {
                 waiters: newWaiters,
             });
 
-            socket.broadcast.to(`owner-${roomId}`).emit("lobby-updated", message);
+            socket.to(`owner-${roomId}`).emit("lobby-updated", message);
         });
 
         socket.on(
@@ -71,6 +94,9 @@ export const socketHandlers = (io: Server, cache: NodeCache) => {
                 const otherSocketIds = io.sockets.adapter.rooms.get(roomName) || new Set();
 
                 otherSocketIds.forEach((otherSocketId) => {
+                    if (otherSocketId === socket.id) {
+                        return;
+                    }
                     const participantData = cache.get<{ user: User; socketId: string }>(otherSocketId);
                     if (participantData) {
                         const message = createClientMessage({
@@ -101,8 +127,16 @@ export const socketHandlers = (io: Server, cache: NodeCache) => {
             },
         );
 
-        socket.on("join-room-owner", async ({ roomId }: { roomId: string }) => {
+        socket.on("join-owners-room", async ({ roomId }: { roomId: string }) => {
+            const waiters = cache.get<Array<Waiter>>(`waiters-${roomId}`);
+
             socket.join(`owner-${roomId}`);
+            const message = createClientMessage({
+                type: "lobby-updated",
+                waiters: waiters || [],
+            });
+
+            io.in(`owner-${roomId}`).emit("lobby-updated", message);
         });
 
         socket.on("signal", ({ signal, roomId, userId }) => {
@@ -113,7 +147,7 @@ export const socketHandlers = (io: Server, cache: NodeCache) => {
                 userId: userId,
             });
 
-            socket.broadcast.to(`room-${roomId}`).emit("signal", message);
+            socket.to(`room-${roomId}`).emit("signal", message);
         });
 
         socket.on(
@@ -129,7 +163,7 @@ export const socketHandlers = (io: Server, cache: NodeCache) => {
                 from: User;
                 timestamp: number;
             }) => {
-                socket.broadcast
+                socket
                     .to(`room-${roomId}`)
                     .emit("chat", createClientMessage({ type: "chat", message: message, from, timestamp }));
             },
@@ -146,7 +180,7 @@ export const socketHandlers = (io: Server, cache: NodeCache) => {
                     midi,
                 });
 
-                socket.broadcast.to(`room-${roomId}`).emit("update-device-status", message);
+                socket.to(`room-${roomId}`).emit("update-device-status", message);
             },
         );
 

@@ -8,12 +8,13 @@ import { useChatStateMachine } from "../machines/chatMachine";
 import { usePeerStateMachine } from "../machines/peerMachine";
 import { useVideoStateMachine } from "../machines/videoMachine";
 import { useVoiceStateMachine } from "../machines/voiceMachine";
-import { useSocketStateMachine } from "../machines/socketStateMachine";
+import { useSocketStateMachine } from "../machines/socketStateMachine.client";
 import { useStreamStateMachine } from "../machines/streamMachine";
 import { DataMessageSchema } from "@musicall/types/dataMessage";
 import { useSoundStateMachine } from "../machines/soundMachine.client";
 import { useEffect } from "react";
 import { socket } from "../utils/socket/socket";
+import { useEffectEvent } from "./useEffectEvent";
 
 const USE_TRICKLE = true;
 const CONFIG = {
@@ -52,73 +53,41 @@ export const useWebRTC = ({ roomId, userId, isOwner }: Props) => {
     const midiStateMachine = useMidiStateMachine();
     const soundStateMachine = useSoundStateMachine();
     const streamStateMachine = useStreamStateMachine();
-    const isSocketConnected = socketStateMachine.matches("connected");
 
-    useEffect(() => {
-        if (isSocketConnected) {
-            videoStateMachine.send({ type: "video.scanAvailableDevices" });
-            voiceStateMachine.send({ type: "voice.scanAvailableDevices" });
-            midiStateMachine.send({ type: "midi.scanInputs" });
-            const message = createServerMessage({
-                type: "join-room",
-                userId,
-                voice: voiceStateMachine.context.enabled,
-                video: videoStateMachine.context.enabled,
-                midi: midiStateMachine.context.enabled,
-                roomId,
+    console.log("outside", peerStateMachine.context.peers);
+
+    const onSignal = useEffectEvent((data: { peerId: string; signal: SignalData }) => {
+        console.log("inside", peerStateMachine.context.peers);
+        peerStateMachine.context.peers[data.peerId].peerConnection.signal(data.signal);
+    });
+
+    const onPeer = useEffectEvent(
+        (data: { peerId: string; initiator: boolean; user: User; voice: boolean; video: boolean; midi: boolean }) => {
+            addPeer(data.peerId, data.initiator, data.user, data.voice, data.video, data.midi, roomId);
+        },
+    );
+
+    const onLobbyUpdated = useEffectEvent(
+        (data: { waiters: Array<{ userId: string; name: string; allowed: boolean }> }) => {
+            peerStateMachine.send({ type: "peer.setWaitingList", waitingList: data.waiters });
+        },
+    );
+
+    const onChat = useEffectEvent((data: { message: string; from: User; timestamp: number; roomId: string }) => {
+        chatStateMachine.send({ type: "chat.sendMessage", message: data });
+    });
+
+    const onUpdateDeviceStatus = useEffectEvent(
+        (data: { peerId: string; voice: boolean; video: boolean; midi: boolean }) => {
+            peerStateMachine.send({
+                type: "peer.setDeviceStatus",
+                cameraEnabled: data.video,
+                microphoneEnabled: data.voice,
+                midiEnabled: data.midi,
+                peerId: data.peerId,
             });
-            socketStateMachine.send({ type: "socket.sendMessage", message });
-
-            if (isOwner) {
-                socketStateMachine.send({
-                    type: "socket.sendMessage",
-                    message: createServerMessage({
-                        type: "join-owners-room",
-                        userId,
-                    }),
-                });
-            }
-
-            socket.on(
-                "peer",
-                (data: {
-                    peerId: string;
-                    initiator: boolean;
-                    user: User;
-                    voice: boolean;
-                    video: boolean;
-                    midi: boolean;
-                }) => {
-                    addPeer(data.peerId, data.initiator, data.user, data.voice, data.video, data.midi, roomId);
-                },
-            );
-
-            socket.on("signal", (data: { peerId: string; signal: SignalData }) => {
-                peerStateMachine.context.peers[data.peerId].peerConnection.signal(data.signal);
-            });
-
-            socket.on("lobby-updated", (data: { waiters: Array<{ userId: string; name: string }> }) => {
-                peerStateMachine.send({ type: "peer.setWaitingList", waitingList: data.waiters });
-            });
-
-            socket.on("chat", (data: { message: string; from: User; timestamp: number; roomId: string }) => {
-                chatStateMachine.send({ type: "chat.sendMessage", message: data });
-            });
-
-            socket.on(
-                "update-device-status",
-                (data: { peerId: string; voice: boolean; video: boolean; midi: boolean }) => {
-                    peerStateMachine.send({
-                        type: "peer.setDeviceStatus",
-                        cameraEnabled: data.video,
-                        microphoneEnabled: data.voice,
-                        midiEnabled: data.midi,
-                        peerId: data.peerId,
-                    });
-                },
-            );
-        }
-    }, [isSocketConnected]);
+        },
+    );
 
     const addPeer = (
         peerId: string,
@@ -217,4 +186,48 @@ export const useWebRTC = ({ roomId, userId, isOwner }: Props) => {
             },
         });
     };
+
+    useEffect(() => {
+        const onConnect = () => {
+            videoStateMachine.send({ type: "video.scanAvailableDevices" });
+            voiceStateMachine.send({ type: "voice.scanAvailableDevices" });
+            midiStateMachine.send({ type: "midi.scanInputs" });
+
+            const message = createServerMessage({
+                type: "join-room",
+                userId,
+                voice: voiceStateMachine.context.enabled,
+                video: videoStateMachine.context.enabled,
+                midi: midiStateMachine.context.enabled,
+                roomId,
+            });
+            socketStateMachine.send({ type: "socket.sendMessage", message });
+
+            if (isOwner) {
+                socketStateMachine.send({
+                    type: "socket.sendMessage",
+                    message: createServerMessage({
+                        type: "join-owners-room",
+                        roomId: roomId,
+                    }),
+                });
+            }
+        };
+
+        socket.on("connect", onConnect);
+        socket.on("peer", onPeer);
+        socket.on("signal", onSignal);
+        socket.on("lobby-updated", onLobbyUpdated);
+        socket.on("chat", onChat);
+        socket.on("update-device-status", onUpdateDeviceStatus);
+
+        return () => {
+            socket.off("lobby-updated", onLobbyUpdated);
+            socket.off("peer", onPeer);
+            socket.off("signal", onSignal);
+            socket.off("chat", onChat);
+            socket.off("update-device-status", onUpdateDeviceStatus);
+            socket.off("connect", onConnect);
+        };
+    }, []);
 };

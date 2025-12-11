@@ -21,7 +21,7 @@ export type ClientPeer = {
 
 export type ClientWaitingRoomUpdated = {
     type: "lobby-updated";
-    waiters: Array<{ userId: string; name: string }>;
+    waiters: Array<{ userId: string; name: string; allowed: boolean }>;
 };
 
 export type ClientChat = {

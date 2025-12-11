@@ -12,7 +12,6 @@ import { useVideoStateMachine, videoActor } from "../../machines/videoMachine";
 import { peerActor } from "../../machines/peerMachine";
 import { streamActor, useStreamStateMachine } from "../../machines/streamMachine";
 import { chatActor } from "../../machines/chatMachine";
-import { socketActor } from "../../machines/socketStateMachine";
 import { EnableAudioSplash } from "../audio/EnableAudioSplash";
 import { soundActor } from "../../machines/soundMachine.client";
 
@@ -40,7 +39,6 @@ export default function CallPage({ roomId, device, isOwner }: Props) {
         videoActor.start();
         peerActor.start();
         chatActor.start();
-        socketActor.start();
     }, []);
 
     if (midiStateMachine.value === "initializing") {
@@ -72,7 +70,7 @@ export default function CallPage({ roomId, device, isOwner }: Props) {
                     px={16}
                     h={rem("64px")}
                 >
-                    <ControlBar />
+                    <ControlBar roomId={roomId} />
                 </Box>
             </Call>
         </Flex>

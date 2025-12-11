@@ -42,7 +42,7 @@ export type ServerChatMessage = {
 
 export type ServerJoinOwnersRoom = {
     type: "join-owners-room";
-    userId: string;
+    roomId: string;
 };
 
 export type ServerUpdateDeviceStatusMessage = {

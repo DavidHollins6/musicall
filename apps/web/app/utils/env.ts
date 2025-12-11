@@ -33,7 +33,6 @@ function getEnv(name: string, { isRequired, isSecret }: EnvOptions = { isSecret:
  */
 export const SERVER_URL = getEnv("SERVER_URL");
 export const SESSION_SECRET = getEnv("SESSION_SECRET");
-export const DATABASE_URL = getEnv("DATABASE_URL");
 
 /**
  * Shared envs

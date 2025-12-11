@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { socketActor, useSocketStateMachine } from "../machines/socketStateMachine";
+import { socketActor, useSocketStateMachine } from "../machines/socketStateMachine.client";
 import { socket } from "../utils/socket/socket";
 
 export function useLobbySocket(roomId: string, userId: string, userName: string, onAllowed?: () => void) {
@@ -8,7 +8,6 @@ export function useLobbySocket(roomId: string, userId: string, userName: string,
 
     useEffect(() => {
         socketActor.start();
-        socketStateMachine.send({ type: "socket.connect" });
     }, []);
 
     useEffect(() => {

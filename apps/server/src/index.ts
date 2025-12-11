@@ -4,7 +4,7 @@ dotenv.config();
 import express from "express";
 import { createServer } from "node:http";
 import { roomHandlers } from "./handlers/room";
-import { createDb } from "@musicall/storage";
+import admin from "firebase-admin";
 import { userHandlers } from "./handlers/user";
 import { Server } from "socket.io";
 import NodeCache from "node-cache";
@@ -14,15 +14,19 @@ import { socketHandlers } from "./handlers/socket";
 const app = express();
 const port = process.env.PORT || 3000;
 
-if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is not defined");
-}
-
 if (!process.env.CLERK_SECRET_KEY) {
     throw new Error("CLERK_SECRET_KEY is not defined");
 }
 
-const db = createDb(process.env.DATABASE_URL);
+admin.initializeApp({
+    credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    }),
+});
+
+const db = admin.firestore();
 const cache = new NodeCache();
 const clerk = createClerkClient({
     secretKey: process.env.CLERK_SECRET_KEY || "",
@@ -43,6 +47,16 @@ socketHandlers(io, cache);
 
 app.get("/", (req, res) => {
     res.send("Hello World!");
+});
+app.get("/socket-health", (req, res) => {
+    const response = {
+        connectedSockets: io.sockets.sockets.size,
+        waitingList: cache
+            .keys()
+            .filter((key) => key.startsWith("waiters-"))
+            .flatMap((key) => cache.get(key)),
+    };
+    res.send(response);
 });
 
 server.listen(port, () => {

@@ -21,7 +21,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
     const linkRef = useRef<HTMLAnchorElement | null>(null);
     const { user } = useUserStore();
 
-    useLobbySocket(roomId, user.id, user.name, () => {
+    useLobbySocket(roomId, user.id, user.firstName, () => {
         if (autoJoin && linkRef.current) {
             linkRef.current.click();
         } else {
@@ -45,7 +45,7 @@ export const LobbyPage = ({ roomId, allowedIntoRoom, roomOwner }: Props) => {
 
     return (
         <Stack h="100%">
-            <Title m="20px">{roomOwner.name}&#39;s Waiting Room</Title>
+            <Title m="20px">{roomOwner.firstName}&#39;s Waiting Room</Title>
             <Card
                 shadow={cardShadow}
                 withBorder={cardBorder}
