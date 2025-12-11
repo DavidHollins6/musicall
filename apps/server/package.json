@@ -14,6 +14,7 @@
     "dependencies": {
         "@clerk/backend": "^2.26.0",
         "@musicall/storage": "*",
+        "@musicall/types": "*",
         "@musicall/typescript-config": "*",
         "@types/swagger-ui-express": "^4.1.6",
         "browserify-middleware": "^8.1.1",

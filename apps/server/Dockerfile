@@ -32,6 +32,9 @@ COPY --from=installer /repo/apps/server/package.json ./package.json
 # Copy node_modules from the installer stage
 COPY --from=installer /repo/node_modules/ ./node_modules/
 
+# Copy monorepo packages that are needed at runtime
+COPY --from=installer /repo/packages/ ./packages/
+
 ENV PORT=3000
 EXPOSE 3000
 
