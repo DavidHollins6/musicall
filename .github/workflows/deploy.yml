@@ -28,7 +28,7 @@ jobs:
 
             - name: Build Remix image
               run: |
-                  docker build -t $IMAGE_TAG -f apps/web/Dockerfile .
+                  docker build -f apps/web/Dockerfile -t $IMAGE_TAG .
 
             - name: Push Remix image
               run: |
@@ -59,7 +59,7 @@ jobs:
 
             - name: Build Socket image
               run: |
-                  docker build -t $IMAGE_TAG -f apps/server/Dockerfile .
+                  docker build -f apps/server/Dockerfile -t $IMAGE_TAG .
 
             - name: Push Socket image
               run: |
