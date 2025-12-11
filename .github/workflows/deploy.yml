@@ -31,12 +31,13 @@ jobs:
               run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
             - name: Build Remix image
-              run: docker build \
-                  --build-arg CLERK_SECRET_KEY="${{ secrets.CLERK_SECRET_KEY }}" \
-                  --build-arg FIREBASE_PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}" \
-                  --build-arg FIREBASE_CLIENT_EMAIL="${{ secrets.FIREBASE_CLIENT_EMAIL }}" \
-                  --build-arg FIREBASE_PRIVATE_KEY="${{ secrets.FIREBASE_PRIVATE_KEY }}" \
-                  -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/remix:latest -f apps/web/Dockerfile .
+              run: |
+                  docker build \
+                    --build-arg CLERK_SECRET_KEY="${{ secrets.CLERK_SECRET_KEY }}" \
+                    --build-arg FIREBASE_PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}" \
+                    --build-arg FIREBASE_CLIENT_EMAIL="${{ secrets.FIREBASE_CLIENT_EMAIL }}" \
+                    --build-arg FIREBASE_PRIVATE_KEY="${{ secrets.FIREBASE_PRIVATE_KEY }}" \
+                    -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/remix:latest -f apps/web/Dockerfile .
 
             - name: Push Remix image
               run: |
@@ -70,12 +71,13 @@ jobs:
               run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
             - name: Build Server image
-              run: docker build \
-                  --build-arg CLERK_SECRET_KEY="${{ secrets.CLERK_SECRET_KEY }}" \
-                  --build-arg FIREBASE_PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}" \
-                  --build-arg FIREBASE_CLIENT_EMAIL="${{ secrets.FIREBASE_CLIENT_EMAIL }}" \
-                  --build-arg FIREBASE_PRIVATE_KEY="${{ secrets.FIREBASE_PRIVATE_KEY }}" \
-                  -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/server:latest -f apps/server/Dockerfile .
+              run: |
+                  docker build \
+                    --build-arg CLERK_SECRET_KEY="${{ secrets.CLERK_SECRET_KEY }}" \
+                    --build-arg FIREBASE_PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}" \
+                    --build-arg FIREBASE_CLIENT_EMAIL="${{ secrets.FIREBASE_CLIENT_EMAIL }}" \
+                    --build-arg FIREBASE_PRIVATE_KEY="${{ secrets.FIREBASE_PRIVATE_KEY }}" \
+                    -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/server:latest -f apps/server/Dockerfile .
 
             - name: Push Server image
               run: |
