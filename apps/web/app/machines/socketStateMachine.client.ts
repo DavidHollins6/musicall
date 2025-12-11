@@ -10,6 +10,9 @@ export const socketMachine = setup({
                   type: "socket.connect";
               }
             | {
+                  type: "socket.connected";
+              }
+            | {
                   type: "socket.sendMessage";
                   message: ServerMessages;
               };
@@ -19,15 +22,27 @@ export const socketMachine = setup({
     context: {
         socket: null,
     },
-    initial: "disconnected",
+    initial: "connecting",
     states: {
+        connecting: {
+            entry: () => {
+                // Listen for the actual socket connection event
+                socket.on("connect", () => {
+                    socketActor.send({ type: "socket.connected" });
+                });
+
+                socket.connect();
+            },
+            on: {
+                "socket.connected": {
+                    target: "connected",
+                },
+            },
+        },
         disconnected: {
             on: {
                 "socket.connect": {
-                    target: "#socket.connected",
-                    actions: () => {
-                        socket.connect();
-                    },
+                    target: "connecting",
                 },
             },
         },
@@ -35,7 +50,8 @@ export const socketMachine = setup({
             on: {
                 "socket.sendMessage": {
                     actions: ({ event }) => {
-                        socket.emit(event.type, event);
+                        console.log("sending event", event.message.type);
+                        socket.emit(event.message.type, event.message);
                     },
                 },
             },

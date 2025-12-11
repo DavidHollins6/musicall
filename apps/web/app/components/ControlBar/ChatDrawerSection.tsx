@@ -5,7 +5,7 @@ import { useState } from "react";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { useUserStore } from "../../store/userStore";
 import { useChatStateMachine } from "../../machines/chatMachine";
-import { useSocketStateMachine } from "../../machines/socketStateMachine";
+import { useSocketStateMachine } from "../../machines/socketStateMachine.client";
 
 export const ChatDrawerSection: React.FC = () => {
     const chatStateMachine = useChatStateMachine();

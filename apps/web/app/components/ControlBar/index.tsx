@@ -21,11 +21,11 @@ import { useUserStore } from "../../store/userStore";
 import { useMidiStateMachine } from "../../machines/midiMachine.client";
 import { useVideoStateMachine } from "../../machines/videoMachine";
 import { useVoiceStateMachine } from "../../machines/voiceMachine";
-import { useSocketStateMachine } from "../../machines/socketStateMachine";
+import { useSocketStateMachine } from "../../machines/socketStateMachine.client";
 import { usePeerStateMachine } from "../../machines/peerMachine";
 import { useStreamStateMachine } from "../../machines/streamMachine";
 
-export const ControlBar: React.FC = () => {
+export const ControlBar: React.FC<{ roomId: string }> = ({ roomId }) => {
     const [chatOpened, { open: openChatDrawer, close: closeChatDrawer }] = useDisclosure(false);
     const [participantsOpened, { open: openParticipantsDrawer, close: closeParticipantsDrawer }] = useDisclosure(false);
     const { isOwner } = useUserStore();
@@ -54,7 +54,7 @@ export const ControlBar: React.FC = () => {
                 onClose={closeParticipantsDrawer}
                 position="right"
             >
-                <ParticipantsDrawer />
+                <ParticipantsDrawer roomId={roomId} />
             </Drawer>
             <Group h="100%" w="100%" align="center" justify="space-between">
                 <Group gap={24}>
@@ -67,6 +67,7 @@ export const ControlBar: React.FC = () => {
                                     midi: midiStateMachine.context.enabled,
                                     voice: !voiceStateMachine.context.enabled,
                                     video: videoStateMachine.context.enabled,
+                                    roomId,
                                 });
                                 socketStateMachine.send({ type: "socket.sendMessage", message });
 
@@ -99,6 +100,7 @@ export const ControlBar: React.FC = () => {
                                     midi: midiStateMachine.context.enabled,
                                     voice: voiceStateMachine.context.enabled,
                                     video: !videoStateMachine.context.enabled,
+                                    roomId,
                                 });
                                 socketStateMachine.send({ type: "socket.sendMessage", message });
 
@@ -132,6 +134,7 @@ export const ControlBar: React.FC = () => {
                                     midi: !midiStateMachine.context.enabled,
                                     voice: voiceStateMachine.context.enabled,
                                     video: videoStateMachine.context.enabled,
+                                    roomId,
                                 });
 
                                 socketStateMachine.send({ type: "socket.sendMessage", message });

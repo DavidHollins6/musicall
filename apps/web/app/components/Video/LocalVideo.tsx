@@ -17,15 +17,7 @@ export const LocalVideo: React.FC = () => {
     const streamMachine = useStreamStateMachine();
 
     return (
-        <Flex
-            w="100%"
-            h="100%"
-            pos="relative"
-            justify="center"
-            align="center"
-            // className={audioLevel > 30 ? classes.talking : ""}
-        >
-            {/* <Avatar w="100%" h="100%" radius="xl" /> */}
+        <Flex w="100%" h="100%" pos="relative" justify="center" align="center">
             {videoStateMachine.context.enabled ? <Video muted stream={streamMachine.context.stream} /> : null}
             <Group
                 gap={4}
@@ -37,7 +29,7 @@ export const LocalVideo: React.FC = () => {
                 bg="linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, .65) 40%)"
             >
                 {voiceStateMachine.context.enabled ? null : <IconMicrophoneOff size={16} color="red" />}
-                <Text color="white">{user.name} (You)</Text>
+                <Text color="white">{user.firstName} (You)</Text>
             </Group>
         </Flex>
     );

@@ -16,6 +16,7 @@ export default defineConfig({
     resolve: {
         alias: {
             "simple-peer": "simple-peer/simplepeer.min.js",
+            "@tabler/icons-react": "@tabler/icons-react/dist/esm/icons/index.mjs",
         },
     },
 });

@@ -4,9 +4,9 @@ import { Avatar, Button, Card, Divider, Group, Stack, Text, Title } from "@manti
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { useUserStore } from "../../store/userStore";
 import { usePeerStateMachine } from "../../machines/peerMachine";
-import { useSocketStateMachine } from "../../machines/socketStateMachine";
+import { useSocketStateMachine } from "../../machines/socketStateMachine.client";
 
-export const ParticipantsDrawer = () => {
+export const ParticipantsDrawer = ({ roomId }: { roomId: string }) => {
     const peerStateMachine = usePeerStateMachine();
     const { user } = useUserStore();
 
@@ -21,14 +21,22 @@ export const ParticipantsDrawer = () => {
                         <Group>
                             <Avatar />
                             <Text>{w.name}</Text>
-                            <Button
-                                onClick={() => {
-                                    const message = createServerMessage({ type: "allow-into-room", userId: w.userId });
-                                    socketStateMachine.send({ type: "socket.sendMessage", message });
-                                }}
-                            >
-                                Allow into room
-                            </Button>
+                            {w.allowed ? (
+                                "Person allowed"
+                            ) : (
+                                <Button
+                                    onClick={() => {
+                                        const message = createServerMessage({
+                                            type: "allow-into-room",
+                                            userId: w.userId,
+                                            roomId,
+                                        });
+                                        socketStateMachine.send({ type: "socket.sendMessage", message });
+                                    }}
+                                >
+                                    Allow into room
+                                </Button>
+                            )}
                         </Group>
                     </Card>
                 ))}
@@ -39,7 +47,7 @@ export const ParticipantsDrawer = () => {
                 <Card>
                     <Group>
                         <Avatar />
-                        <Text>{user.name} (You)</Text>
+                        <Text>{user.firstName} (You)</Text>
                     </Group>
                 </Card>
                 {Object.keys(peerStateMachine.context.peers).map((p) => {
@@ -48,7 +56,7 @@ export const ParticipantsDrawer = () => {
                         <Card key={p}>
                             <Group>
                                 <Avatar />
-                                <Text>{peer.user.name}</Text>
+                                <Text>{peer.user.firstName}</Text>
                             </Group>
                         </Card>
                     );

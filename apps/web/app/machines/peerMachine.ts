@@ -7,7 +7,7 @@ export const peerMachine = setup({
     types: {} as {
         context: {
             peers: Record<string, PeerData>;
-            waitingList: Array<{ name: string; userId: string }>;
+            waitingList: Array<{ name: string; userId: string; allowed: boolean }>;
         };
         events:
             | {
@@ -20,7 +20,7 @@ export const peerMachine = setup({
             | { type: "peer.toggleAudio"; enabled: boolean; localStream: MediaStream }
             | { type: "peer.sendData"; peerId: string; message: DataMessage }
             | { type: "peer.sendDataToAll"; message: DataMessage; exclude?: Array<string> }
-            | { type: "peer.setWaitingList"; waitingList: Array<{ name: string; userId: string }> }
+            | { type: "peer.setWaitingList"; waitingList: Array<{ name: string; userId: string; allowed: boolean }> }
             | {
                   type: "peer.setDeviceStatus";
                   peerId: string;

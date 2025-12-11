@@ -24,6 +24,7 @@ export const getRoomAllowList = async (id: string): Promise<Array<string>> => {
 
 export const getOwnedRooms = async (id: string): Promise<Array<Room>> => {
     const response = await fetch(`${process.env.API_URL}/room/owned/${id}`);
+
     if (response.ok) {
         const allowList = (await response.json()) as Array<Room>;
         return allowList;
@@ -33,18 +34,12 @@ export const getOwnedRooms = async (id: string): Promise<Array<Room>> => {
     return [];
 };
 
-export const createRoom = async (room: Room): Promise<Room | null> => {
+export const createRoom = async (room: Room): Promise<boolean> => {
     const response = await fetch(`${process.env.API_URL}/room/create/${room.id}`, {
         method: "POST",
         body: JSON.stringify(room),
         headers: { "Content-Type": "application/json" },
     });
 
-    if (response.ok) {
-        const user = (await response.json()) as Room;
-        return user;
-    }
-
-    console.error("Error creating room: ", response.status);
-    return null;
+    return response.ok;
 };

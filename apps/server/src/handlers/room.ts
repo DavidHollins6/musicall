@@ -1,32 +1,40 @@
 import type { Express, Request } from "express";
-import { rooms } from "@musicall/storage";
-import { eq } from "drizzle-orm";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
 import NodeCache from "node-cache";
+import { Firestore, FirestoreDataConverter } from "firebase-admin/firestore";
+import { Room } from "@musicall/storage";
 
-export const roomHandlers = (app: Express, db: NodePgDatabase, cache: NodeCache) => {
+export const roomHandlers = (app: Express, db: Firestore, cache: NodeCache) => {
     app.get("/room/:id", async (req, res) => {
-        const roomsResult = await db.select().from(rooms).where(eq(rooms.id, req.params.id));
+        const roomRef = db.collection("rooms").withConverter(roomConverter).doc(req.params.id);
 
-        if (roomsResult.length === 1) {
-            res.send(roomsResult[0]);
-            return;
+        const snapshot = await roomRef.get();
+
+        if (!snapshot.exists) {
+            return res.status(404).send("User not found");
         }
 
-        res.status(404).send();
+        return res.json(snapshot.data());
     });
 
     app.get("/room/:id/allow-list", async (req, res) => {
-        const allowedPeople = cache.get<Array<string>>(`allowed-${req.params.id}`) || [];
+        const waiters =
+            cache.get<Array<{ userId: string; name: string; allowed: boolean }>>(`waiters-${req.params.id}`) || [];
+        const allowedPeople = waiters.filter((w) => w.allowed).map((w) => w.userId);
 
         res.status(200).send(allowedPeople);
     });
 
     app.get("/room/owned/:id", async (req, res) => {
-        const result = await db.select().from(rooms).where(eq(rooms.ownerId, req.params.id));
+        const ownedRoomsRef = await db
+            .collection("rooms")
+            .where("ownerId", "==", req.params.id)
+            .withConverter(roomConverter)
+            .get();
 
-        if (result.length > 0) {
-            res.send(result);
+        const ownedRooms = ownedRoomsRef.docs.map((doc) => doc.data());
+
+        if (ownedRooms.length > 0) {
+            res.send(ownedRooms);
             return;
         }
 
@@ -39,9 +47,29 @@ export const roomHandlers = (app: Express, db: NodePgDatabase, cache: NodeCache)
             const { ownerId, name } = req.body;
             const { id } = req.params;
 
-            const result = await db.insert(rooms).values({ id, ownerId, name }).returning();
+            await db.collection("rooms").doc(id).set({
+                ownerId,
+                name,
+            });
 
-            res.status(200).send(result);
+            res.status(201).send({});
         },
     );
+};
+
+export const roomConverter: FirestoreDataConverter<Room> = {
+    toFirestore(item: Room) {
+        return {
+            name: item.name,
+            ownerId: item.ownerId,
+        };
+    },
+    fromFirestore(snapshot) {
+        const data = snapshot.data();
+        return {
+            id: snapshot.id,
+            name: data.name,
+            ownerId: data.ownerId,
+        };
+    },
 };
