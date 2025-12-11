@@ -28,8 +28,13 @@ RUN npm run build --workspace=web
 FROM node:22-slim AS runner
 WORKDIR /app
 
-# Copy application runtime files
-COPY --from=installer /repo/apps/web/ ./
+# Copy the built application
+COPY --from=installer /repo/apps/web/build/ ./build/
+COPY --from=installer /repo/apps/web/package.json ./package.json
+COPY --from=installer /repo/apps/web/public/ ./public/
+
+# Copy node_modules from the installer stage
+COPY --from=installer /repo/node_modules/ ./node_modules/
 
 ENV PORT=5173
 EXPOSE 5173

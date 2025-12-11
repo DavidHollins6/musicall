@@ -25,7 +25,12 @@ RUN npm run build --workspace=server || echo "No build step"
 FROM node:22-slim AS runner
 WORKDIR /app
 
-COPY --from=installer /repo/apps/server/ ./
+# Copy the built application
+COPY --from=installer /repo/apps/server/dist/ ./dist/
+COPY --from=installer /repo/apps/server/package.json ./package.json
+
+# Copy node_modules from the installer stage
+COPY --from=installer /repo/node_modules/ ./node_modules/
 
 ENV PORT=3000
 EXPOSE 3000
