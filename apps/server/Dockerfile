@@ -14,12 +14,11 @@ FROM node:18-slim AS installer
 WORKDIR /repo
 
 COPY --from=pruner /repo/out/json/ ./
-COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=pruner /repo/out/full/ ./
 
 RUN npm install
 
-# Build server if you have TS
+# Build server (if using TypeScript)
 RUN npm run build --workspace=@musicall/server || echo "No build step"
 
 # ---------- RUNTIME ----------

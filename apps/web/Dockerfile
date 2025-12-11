@@ -3,7 +3,6 @@ FROM node:18-slim AS base
 WORKDIR /repo
 COPY . .
 
-# Install turbo globally
 RUN npm install -g turbo
 
 # ---------- PRUNE WORKSPACE ----------
@@ -14,25 +13,24 @@ RUN turbo prune --scope=web --docker
 FROM node:18-slim AS installer
 WORKDIR /repo
 
-# Copy pruned files
+# Copy pruned JSON files
 COPY --from=pruner /repo/out/json/ ./
-COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
+# Copy minified workspace
 COPY --from=pruner /repo/out/full/ ./
 
-# Install dependencies
+# Install dependencies (npm)
 RUN npm install
 
-# Build Remix app
+# Build Remix (update workspace name if needed)
 RUN npm run build --workspace=@musicall/web
 
-# ---------- RUNTIME IMAGE ----------
+# ---------- RUNTIME ----------
 FROM node:18-slim AS runner
 WORKDIR /app
 
-# Copy the built app
+# Copy application runtime files
 COPY --from=installer /repo/apps/web/ ./
 
-# Cloud Run expects the server to listen on PORT
 ENV PORT=3000
 EXPOSE 3000
 
