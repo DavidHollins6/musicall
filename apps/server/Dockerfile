@@ -19,7 +19,7 @@ COPY --from=pruner /repo/out/full/ ./
 RUN npm install
 
 # Build server (if using TypeScript)
-RUN npm run build --workspace=@musicall/server || echo "No build step"
+RUN npm run build --workspace=server || echo "No build step"
 
 # ---------- RUNTIME ----------
 FROM node:22-slim AS runner

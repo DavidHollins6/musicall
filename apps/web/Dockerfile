@@ -22,7 +22,7 @@ COPY --from=pruner /repo/out/full/ ./
 RUN npm install
 
 # Build Remix (update workspace name if needed)
-RUN npm run build --workspace=@musicall/web
+RUN npm run build --workspace=web
 
 # ---------- RUNTIME ----------
 FROM node:22-slim AS runner
