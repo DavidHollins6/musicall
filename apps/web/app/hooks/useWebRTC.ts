@@ -1,6 +1,6 @@
 "use client";
 
-import Peer, { SignalData } from "simple-peer";
+import Peer, type { SignalData } from "simple-peer";
 import { User } from "@musicall/storage";
 import { createServerMessage } from "@musicall/types/serverMessage";
 import { useMidiStateMachine } from "../machines/midiMachine.client";

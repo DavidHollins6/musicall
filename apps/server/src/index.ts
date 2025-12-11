@@ -43,7 +43,7 @@ app.use(express.json());
 
 roomHandlers(app, db, cache);
 userHandlers(app, clerk);
-socketHandlers(io, cache);
+socketHandlers(io, cache, clerk);
 
 app.get("/", (req, res) => {
     res.send("Hello World!");

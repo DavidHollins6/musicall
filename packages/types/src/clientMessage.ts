@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { SignalData } from "simple-peer";
-import { User } from "@musicall/storage";
+import type { SignalData } from "simple-peer";
+import type { User } from "@clerk/backend";
 
 export type ClientSignal = {
     type: "signal";

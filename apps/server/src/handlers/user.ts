@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { ClerkClient } from "@clerk/backend";
+import type { ClerkClient } from "@clerk/backend";
 
 export const userHandlers = (app: Express, clerk: ClerkClient) => {
     app.get("/user/:id", async (req, res) => {

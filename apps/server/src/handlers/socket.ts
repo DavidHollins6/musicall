@@ -1,8 +1,7 @@
 import NodeCache from "node-cache";
 import { createClientMessage } from "@musicall/types/clientMessage";
-import { getUser } from "@musicall/api/user";
-import { User } from "@musicall/storage";
 import { Server } from "socket.io";
+import type { ClerkClient, User } from "@clerk/backend";
 
 type Waiter = {
     userId: string;
@@ -11,7 +10,7 @@ type Waiter = {
     socketId: string;
 };
 
-export const socketHandlers = (io: Server, cache: NodeCache) => {
+export const socketHandlers = (io: Server, cache: NodeCache, clerk: ClerkClient) => {
     io.on("connection", (socket) => {
         console.log("a user connected");
 
@@ -84,7 +83,7 @@ export const socketHandlers = (io: Server, cache: NodeCache) => {
                 video: boolean;
                 midi: boolean;
             }) => {
-                const user = await getUser(userId);
+                const user = await clerk.users.getUser(userId);
 
                 if (!user) {
                     return;

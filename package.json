@@ -8,7 +8,8 @@
         "migrate": "turbo migrate",
         "generate": "turbo generate",
         "deploy": "turbo deploy",
-        "format": "prettier --write \"**/*.{ts,tsx,md}\""
+        "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+        "turbo": "turbo"
     },
     "devDependencies": {
         "prettier": "^3.2.5",

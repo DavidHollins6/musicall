@@ -14,9 +14,11 @@
     },
     "devDependencies": {
         "@musicall/typescript-config": "*",
+        "@types/simple-peer": "^9.11.9",
         "typescript": "latest"
     },
     "dependencies": {
+        "@clerk/backend": "^2.27.0",
         "@musicall/storage": "*",
         "simple-peer": "^9.11.1",
         "webmidi": "^3.1.8",
