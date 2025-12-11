@@ -18,6 +18,9 @@ COPY --from=pruner /repo/out/full/ ./
 
 RUN npm install
 
+# Build all packages using turbo (this builds the entire monorepo including dependencies)
+RUN npm run build
+
 # Build server (if using TypeScript)
 RUN npm run build --workspace=server || echo "No build step"
 
