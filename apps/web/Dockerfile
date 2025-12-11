@@ -23,7 +23,7 @@ COPY --from=pruner /repo/out/json/ ./
 COPY --from=pruner /repo/out/full/ ./
 
 # Install dependencies (npm)
-RUN npm ci --only=production
+RUN npm ci
 
 # Build Remix (update workspace name if needed)
 RUN npm run build --workspace=web
