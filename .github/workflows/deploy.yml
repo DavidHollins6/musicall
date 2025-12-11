@@ -28,7 +28,7 @@ jobs:
 
             - name: Build Remix image
               run: |
-                  docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/remix:latest ./remix-app
+                  docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/remix:latest ./apps/web
 
             - name: Push Remix image
               run: |
@@ -59,7 +59,7 @@ jobs:
 
             - name: Build Socket image
               run: |
-                  docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/socket:latest ./socket-server
+                  docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/socket:latest ./apps/server
 
             - name: Push Socket image
               run: |
