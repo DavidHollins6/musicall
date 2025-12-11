@@ -27,8 +27,8 @@ jobs:
               run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
             - name: Build Remix image
-              run: |
-                  docker build -f apps/web/Dockerfile -t $IMAGE_TAG .
+              run: docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/remix:latest \
+                  -f apps/web/Dockerfile .
 
             - name: Push Remix image
               run: |
@@ -58,8 +58,8 @@ jobs:
               run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
             - name: Build Socket image
-              run: |
-                  docker build -f apps/server/Dockerfile -t $IMAGE_TAG .
+              run: docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/socket:latest \
+                  -f apps/server/Dockerfile .
 
             - name: Push Socket image
               run: |
