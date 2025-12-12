@@ -16,6 +16,23 @@ RUN turbo prune web --docker
  
 # ---
 FROM base AS builder
+
+# Accept build arguments from GitHub Actions at build time
+ARG CLERK_PUBLISHABLE_KEY
+ARG CLERK_SECRET_KEY
+ARG CLERK_SIGN_IN_URL
+ARG CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
+ARG CLERK_SIGN_UP_FALLBACK_REDIRECT_URL
+ARG API_URL
+
+# Set environment variables for build time
+ENV CLERK_PUBLISHABLE_KEY=$CLERK_PUBLISHABLE_KEY
+ENV CLERK_SECRET_KEY=$CLERK_SECRET_KEY
+ENV CLERK_SIGN_IN_URL=$CLERK_SIGN_IN_URL
+ENV CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=$CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
+ENV CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=$CLERK_SIGN_UP_FALLBACK_REDIRECT_URL
+ENV API_URL=$API_URL
+
 # First install the dependencies (as they change less often)
 COPY --from=prepare /app/out/json/ .
 RUN npm install
@@ -31,15 +48,6 @@ FROM base AS runner
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
-# Accept build arguments from GitHub Actions
-ARG CLERK_PUBLISHABLE_KEY
-ARG CLERK_SECRET_KEY
-ARG CLERK_SIGN_IN_URL
-ARG CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
-ARG CLERK_SIGN_UP_FALLBACK_REDIRECT_URL
-ARG API_URL
-# Add more ARG instructions for each environment variable you need
-
 # Copy files with proper ownership before switching user
 COPY --from=builder --chown=nodejs:nodejs /app/apps/web/build ./
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
@@ -48,14 +56,6 @@ COPY --from=builder --chown=nodejs:nodejs /app/packages ./packages
 USER nodejs
 
 ENV NODE_ENV=production
-
-ENV CLERK_PUBLISHABLE_KEY=$CLERK_PUBLISHABLE_KEY
-ENV CLERK_SECRET_KEY=$CLERK_SECRET_KEY
-ENV CLERK_SIGN_IN_URL=$CLERK_SIGN_IN_URL
-ENV CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=$CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
-ENV CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=$CLERK_SIGN_UP_FALLBACK_REDIRECT_URL
-ENV API_URL=$API_URL
-# Add more ENV instructions for each variable
 
 EXPOSE 5173
 
