@@ -49,7 +49,8 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 
 # Copy files with proper ownership before switching user
-COPY --from=builder --chown=nodejs:nodejs /app/apps/web/build ./
+COPY --from=builder --chown=nodejs:nodejs /app/apps/web/package.json ./
+COPY --from=builder --chown=nodejs:nodejs /app/apps/web/build ./build
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/packages ./packages
 
@@ -57,6 +58,6 @@ USER nodejs
 
 ENV NODE_ENV=production
 
-EXPOSE 5173
+EXPOSE 3000
 
-CMD node server/index.js
+CMD npm start
