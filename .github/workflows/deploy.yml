@@ -35,10 +35,10 @@ jobs:
                   docker build \
                     --build-arg CLERK_SECRET_KEY="${{ secrets.CLERK_SECRET_KEY }}" \
                     --build-arg CLERK_PUBLISHABLE_KEY="${{ secrets.CLERK_PUBLISHABLE_KEY }}" \
-                    --build-arg CLERK_SIGN_IN_URL="${{ env.CLERK_SIGN_IN_URL }}" \
-                    --build-arg CLERK_SIGN_IN_FALLBACK_REDIRECT_URL="${{ env.CLERK_SIGN_IN_FALLBACK_REDIRECT_URL }}" \
-                    --build-arg CLERK_SIGN_UP_FALLBACK_REDIRECT_URL="${{ env.CLERK_SIGN_UP_FALLBACK_REDIRECT_URL }}" \
-                    --build-arg API_URL="${{ env.API_URL }}" \
+                    --build-arg CLERK_SIGN_IN_URL="${{ vars.CLERK_SIGN_IN_URL }}" \
+                    --build-arg CLERK_SIGN_IN_FALLBACK_REDIRECT_URL="${{ vars.CLERK_SIGN_IN_FALLBACK_REDIRECT_URL }}" \
+                    --build-arg CLERK_SIGN_UP_FALLBACK_REDIRECT_URL="${{ vars.CLERK_SIGN_UP_FALLBACK_REDIRECT_URL }}" \
+                    --build-arg API_URL="${{ vars.API_URL }}" \
                     -t $REGION-docker.pkg.dev/$PROJECT_ID/musicall/remix:latest -f apps/web/Dockerfile .
 
             - name: Push Remix image
