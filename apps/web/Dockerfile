@@ -1,58 +1,62 @@
-# ---------- BASE IMAGE FOR PRUNING ----------
-FROM node:22-slim AS base
-WORKDIR /repo
-COPY . .
-
-RUN npm install -g turbo
-
-# ---------- PRUNE WORKSPACE ----------
-FROM base AS pruner
-RUN turbo prune --scope=web --docker
-
-# ---------- INSTALL DEPENDENCIES ----------
-FROM node:22-slim AS installer
-WORKDIR /repo
-
-# Install dependencies for better caching
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy pruned JSON files
-COPY --from=pruner /repo/out/json/ ./
-# Copy minified workspace
-COPY --from=pruner /repo/out/full/ ./
-
-# Install dependencies (npm)
-RUN npm ci
-
-# Build Remix (update workspace name if needed)
-RUN npm run build --workspace=web
-
-# ---------- RUNTIME ----------
-FROM node:22-slim AS runner
+FROM node:22-alpine AS base
+RUN apk update
+RUN apk add --no-cache libc6-compat
+# Set working directory
 WORKDIR /app
+ 
+# ---
+FROM base AS prepare
+# Replace <your-major-version> with the major version installed in your repository. For example:
+RUN npm install -g turbo@^2
+COPY . .
+# Add lockfile and package.json's of isolated subworkspace
+# Generate a partial monorepo with a pruned lockfile for a target workspace.
+# Assuming "web" is the name entered in the project's package.json: { name: "web" }
+RUN turbo prune web --docker
+ 
+# ---
+FROM base AS builder
+# First install the dependencies (as they change less often)
+COPY --from=prepare /app/out/json/ .
+RUN npm install
+# Build the project
+COPY --from=prepare /app/out/full/ .
 
-# Create non-root user for security
-RUN groupadd --gid 1001 --system nodejs && \
-    useradd --uid 1001 --system --gid nodejs --shell /bin/bash nodejs
+ 
+RUN npm run turbo build
+ 
+# ---
+FROM base AS runner
+# Don't run production as root for security reasons
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nodejs
 
-# Copy the built application with correct ownership
-COPY --from=installer --chown=nodejs:nodejs /repo/apps/web/build/ ./build/
-COPY --from=installer --chown=nodejs:nodejs /repo/apps/web/public/ ./public/
-COPY --from=installer --chown=nodejs:nodejs /repo/apps/web/package.json ./package.json
+# Accept build arguments from GitHub Actions
+ARG CLERK_PUBLISHABLE_KEY
+ARG CLERK_SECRET_KEY
+ARG CLERK_SIGN_IN_URL
+ARG CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
+ARG CLERK_SIGN_UP_FALLBACK_REDIRECT_URL
+ARG API_URL
+# Add more ARG instructions for each environment variable you need
 
-# Copy all node_modules including monorepo packages
-COPY --from=installer --chown=nodejs:nodejs /repo/node_modules/ ./node_modules/
+# Copy files with proper ownership before switching user
+COPY --from=builder --chown=nodejs:nodejs /app/apps/web/build ./
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/packages ./packages
 
-# Copy monorepo packages that are needed at runtime
-COPY --from=installer --chown=nodejs:nodejs /repo/packages/ ./packages/
-
-# Switch to non-root user
 USER nodejs
 
 ENV NODE_ENV=production
-ENV PORT=3000
-EXPOSE 3000
 
-# Use exec form for better signal handling
-CMD ["npm", "start"]
+ENV CLERK_PUBLISHABLE_KEY=$CLERK_PUBLISHABLE_KEY
+ENV CLERK_SECRET_KEY=$CLERK_SECRET_KEY
+ENV CLERK_SIGN_IN_URL=$CLERK_SIGN_IN_URL
+ENV CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=$CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
+ENV CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=$CLERK_SIGN_UP_FALLBACK_REDIRECT_URL
+ENV API_URL=$API_URL
+# Add more ENV instructions for each variable
+
+EXPOSE 5173
+
+CMD node server/index.js

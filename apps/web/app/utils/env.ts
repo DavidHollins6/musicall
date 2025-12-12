@@ -3,10 +3,7 @@ import { isBrowser } from "./isBrowser";
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace NodeJS {
-        interface ProcessEnv {
-            SERVER_URL: string;
-            SESSION_SECRET: string;
-        }
+        interface ProcessEnv {}
     }
 }
 
@@ -31,8 +28,6 @@ function getEnv(name: string, { isRequired, isSecret }: EnvOptions = { isSecret:
 /**
  * Server env
  */
-export const SERVER_URL = getEnv("SERVER_URL");
-export const SESSION_SECRET = getEnv("SESSION_SECRET");
 
 /**
  * Shared envs
